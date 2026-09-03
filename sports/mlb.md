@@ -6,7 +6,7 @@ MLB is a high-variance, correlation-heavy sport. The engine should prioritize co
 
 ### MLB Strategic Doctrine: Art Backed by Math
 
-For MLB tournaments, math is the foundation but not the final answer. Sim Savant projections, ownership, simulations, betting markets, park/weather data, and matchup metrics define what is plausible. The DFS Engine uses logic, game scripts, game theory, stack interaction, and portfolio construction to decide how to exploit that information.
+For MLB tournaments, math is the foundation but not the final answer. Market-derived projections, Sim Savant/source baselines, ownership, simulations, betting markets, park/weather data, and matchup metrics define what is plausible. The DFS Engine uses logic, game scripts, game theory, stack interaction, and portfolio construction to decide how to exploit that information.
 
 The goal is not to build the lineup that looks best in a spreadsheet. The goal is to build lineups that are strategically positioned to win when specific slate stories occur.
 
@@ -19,6 +19,114 @@ Every serious MLB build should ask:
 - Which team can outscore its ownership because the field is underestimating a matchup, bullpen path, lineup structure, or power ceiling?
 - Which cheap bats are not just values, but connective pieces that make an entire game-script lineup work?
 - Which lineups are telling the same underlying story even if the players differ?
+
+## MLB Market-Derived Projection Layer
+
+The cross-sport framework lives in `core/MARKET_PROJECTIONS.md`. For MLB, the preferred projection architecture is:
+
+**multi-book player props + game markets -> de-vigged fair probabilities -> expected MLB stat components -> DraftKings fantasy points -> confidence-weighted DFS Engine projection -> ownership/game theory/correlation -> GPT portfolio construction.**
+
+Action Network is the preferred market aggregator when available because it centralizes multi-book player props, alternate markets, odds movement, game totals, and moneylines. It is a preferred source, not an authoritative source.
+
+### Hitter Prop Families
+
+Collect as many of these as are available:
+
+- hits
+- alternate hits
+- total bases
+- alternate total bases
+- home runs
+- runs scored
+- RBI
+- runs + RBI when useful for cross-checking
+- walks
+- HBP if directly available
+- stolen bases
+- alternate/ladders for relevant counting stats
+- team total and game total
+- moneyline / implied team scoring environment
+
+Do not double-count overlapping markets. Hits, total bases, home runs, and alternate ladders should be reconciled into a coherent hit-type distribution rather than added independently.
+
+Infer expected singles, doubles, triples, home runs, runs, RBI, BB+HBP, and stolen bases when the market supports those estimates.
+
+For DraftKings classic MLB hitters, market-derived expected fantasy points should use the applicable DK scoring rules from the current slate/site rules. The standard structure is:
+
+`DK hitter points = 3*E(1B) + 5*E(2B) + 8*E(3B) + 10*E(HR) + 2*E(RBI) + 2*E(R) + 2*E(BB+HBP) + 5*E(SB)`
+
+Always verify scoring if DraftKings changes its rules or the contest uses a different format.
+
+### Pitcher Prop Families
+
+Collect as many of these as are available:
+
+- strikeouts
+- alternate strikeouts
+- outs recorded
+- innings pitched where outs are unavailable
+- hits allowed
+- walks allowed
+- earned runs / runs allowed
+- WHIP-related markets when useful as a fallback
+- moneyline / team win probability
+- opponent implied runs
+- pitcher-specific win-related context when available
+
+Infer expected strikeouts, outs, hits allowed, walks/HBP allowed, earned runs, and pitcher win probability when evidence supports it.
+
+For DraftKings classic MLB pitchers, use the current DK scoring rules. The base event structure is:
+
+`DK pitcher points = 0.75*E(outs) + 2*E(K) - 0.6*E(H allowed + BB/HBP allowed) - 2*E(ER) + 4*P(win) + expected bonus contribution`
+
+Complete-game, complete-game shutout, and no-hitter bonuses should be included only when modeled with defensible probabilities. Do not manufacture bonus probability just to complete the formula.
+
+### De-vigging and Multi-Book Consensus
+
+- Remove vig from paired/two-sided markets when feasible before converting odds to probabilities.
+- Prefer robust multi-book consensus, typically median or trimmed consensus, over one sportsbook.
+- Use alternate/ladder markets to estimate tail probabilities and expected counts when coverage is sufficient.
+- Flag stale or isolated lines rather than letting them dominate the projection.
+- Record market observation count and coverage quality where possible.
+
+### Coverage and Prior Blending
+
+Each player receives a market-coverage grade:
+
+- High: several independent books and multiple relevant prop families; market projection may dominate the final Engine projection.
+- Medium: useful prop coverage but meaningful missing components; blend market projection with the prior.
+- Low: sparse/noisy props; shrink heavily toward the prior and use the market mainly for environment/context.
+
+The prior may use Sim Savant, broader industry projection consensus, confirmed batting order/role, matchup, park, and weather.
+
+Do not mechanically average market and vendor projections. Weighting should depend on market coverage, liquidity, internal consistency, freshness, and role certainty.
+
+### Team/Game Markets
+
+Game totals, team totals, and moneylines are essential context even when player props are available. Use them to:
+
+- cross-check whether the sum of player expectations is coherent with the team environment
+- inform runs/RBI opportunities
+- inform pitcher win and run-prevention expectations
+- detect stale or inconsistent individual props
+
+Do not simply multiply a player's vendor projection by an implied-team-total ratio when richer player props exist.
+
+### Projection Output Contract
+
+For every relevant MLB player preserve:
+
+- source/vendor projection
+- market-derived DK projection
+- market coverage grade
+- major market inputs / observation count when available
+- final DFS Engine projection
+- projection difference vs source
+- source projected ownership
+- DFS Engine expected ownership
+- final DFS Engine exposure
+
+The market-derived projection is a projection input. Ownership and final exposure remain separate decisions.
 
 ### Default GPP Priorities
 
@@ -46,6 +154,7 @@ If the optimal portfolio naturally produces 70% of one pitcher, 0% of another, o
 
 Every MLB slate build uses the full core agent team plus these specialized passes:
 
+- Market-Derived Projection Agent
 - Simulation / Outcome Distribution Agent
 - Stack Architecture Agent
 - Pitcher Failure / Opposing Stack Agent
@@ -54,27 +163,29 @@ Every MLB slate build uses the full core agent team plus these specialized passe
 
 Default MLB handoff chain:
 
-Slate Intake -> Projection Audit -> News & Role -> Market Environment -> Simulation / Outcome Distribution -> Ownership & Leverage -> Stack Architecture -> Pitcher Failure / Opposing Stack -> Correlation / Game Script -> Portfolio Builder -> Duplication / Lineup Uniqueness -> Portfolio Risk Manager -> Exposure Auditor -> Post-Slate Learning.
+Slate Intake -> Projection/Market Intake -> News & Role -> Market-Derived Projection -> Engine Ownership Estimate -> Simulation / Outcome Distribution -> Ownership & Leverage -> Stack Architecture -> Pitcher Failure / Opposing Stack -> Correlation / Game Script -> Candidate Generation -> GPT Portfolio Review -> Portfolio Builder -> Duplication / Lineup Uniqueness -> Portfolio Risk Manager -> Exposure Auditor -> Final News/Market Pass -> Post-Slate Learning.
 
 These passes are mandatory reasoning stages for MLB, even when implemented within one chat session rather than as autonomous background processes.
 
 ## Required Cross-Checks
 
-Sim Savant or any baseline source must be checked against broader industry information. At minimum evaluate:
+At minimum evaluate:
 
+- market-derived player projections / prop coverage
 - implied team totals / run environment
 - opposing pitcher quality and handedness
 - park factors
 - weather where material
 - official starting batting orders
-- projected ownership
+- broader industry projections where available
+- projected ownership / broader industry ownership
 - meaningful injury/rest/scratch news
 
-No one projection source is authoritative.
+No one projection or market source is authoritative.
 
 ## Simulation / Outcome Distribution
 
-Do not evaluate MLB only from median projections. Assess ceiling and failure distributions for hitters, pitchers, stacks, and game environments. Use Sim Savant simulations when available, then adjust confidence for current lineup, market, weather, matchup, and ownership context.
+Do not evaluate MLB only from median projections. Assess ceiling and failure distributions for hitters, pitchers, stacks, and game environments. Use market-derived stat distributions, alternate props, Sim Savant simulations, and other defensible distribution inputs when available.
 
 The goal is not to predict one exact outcome; it is to identify which outcome families have enough probability and enough payoff to deserve portfolio exposure.
 
@@ -90,13 +201,14 @@ Re-evaluate projection and exposure when:
 - a projected starter is scratched
 - a team rests multiple regulars
 
-A lineup-position change should influence plate-appearance expectation, stack connectivity, and ownership, not just raw player projection.
+A lineup-position change should influence plate-appearance expectation, stack connectivity, prop interpretation, and ownership, not just raw player projection.
 
 ## Stack Evaluation
 
 For each team, evaluate:
 
 - implied scoring environment
+- market-derived player ceilings / distributions
 - top-to-bottom lineup quality
 - home-run and extra-base-hit ceiling
 - matchup platoon advantages
@@ -114,7 +226,7 @@ The goal is to identify combinations where team ceiling is under-owned relative 
 
 Popular pitcher exposure must be evaluated together with the opposing offense. When a chalk pitcher has a realistic failure path, the Engine should consider whether the opposing stack offers asymmetric leverage.
 
-Pitcher fades should never be mechanical. They must be supported by matchup, contact quality, platoon, park/weather, pitch-count/role, bullpen, ownership, or other evidence.
+Pitcher fades should never be mechanical. They must be supported by prop-derived failure risk, matchup, contact quality, platoon, park/weather, pitch-count/role, bullpen, ownership, or other evidence.
 
 The strongest leverage spots often come from linked decisions: underweighting a fragile chalk pitcher while overweighting the offense that directly benefits if the pitcher fails.
 
@@ -177,14 +289,17 @@ A portfolio containing many different lineups can still represent the same under
 
 ## Exposure Audit
 
-Every MLB lineup set must include Sim Savant/source projected ownership vs DFS Engine final exposure with percentage-point difference.
+Every MLB lineup set must include source projected ownership, DFS Engine expected ownership, and DFS Engine final exposure with percentage-point differences.
 
-Large differences should have a stated reason such as stack concentration, lineup-order value, ownership leverage, pitching ceiling, uniqueness, game-script coverage, or reduced confidence in the source projection.
+Large differences should have a stated reason such as market-derived projection edge, stack concentration, lineup-order value, ownership leverage, pitching ceiling, uniqueness, game-script coverage, or reduced confidence in the source projection.
 
 ## Post-Slate Learning
 
 Review not only which stack won but also:
 
+- market-derived projection vs vendor projection vs actual DK score
+- Engine expected ownership vs actual field ownership
+- whether market coverage/confidence predicted projection reliability
 - whether the engine owned the winning primary stack
 - whether secondary-stack choices separated winners from near-misses
 - whether SP1/SP2 construction was correct
@@ -199,9 +314,9 @@ Review not only which stack won but also:
 
 Post-slate analysis must ask what would have happened if one decision changed while others stayed fixed. Examples:
 
-- if our primary stack hit, would our pitcher construction still have failed?
-- if our pitcher call was correct, was the secondary stack the real problem?
-- if our leverage thesis was correct, did we simply lack enough exposure?
+- if the primary stack hit, would our pitcher construction still have failed?
+- if the pitcher call was correct, was the secondary stack the real problem?
+- if the leverage thesis was correct, did we simply lack enough exposure?
 - if chalk failed as expected, did we choose the right alternative path?
 
 Do not conclude that a stack rule is correct merely because one winning lineup used it. Separate process quality from ordinary baseball variance.
