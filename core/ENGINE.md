@@ -27,14 +27,15 @@ Default hierarchy:
 1. Sim Savant baseline projections / ownership / sims
 2. Data validation and official news checks
 3. Broader industry and market cross-checks
-4. Sport-specific role, matchup, environment, and correlation analysis
-5. Contest-specific ownership, leverage, and duplication analysis
-6. Game-theory and game-script thesis generation
-7. Portfolio construction around those theses
-8. Exposure audit versus Savant/source ownership
-9. Post-slate review and durable learning
+4. Native cross-sport simulation / outcome-distribution layer
+5. Sport-specific role, matchup, environment, and correlation analysis
+6. Contest-specific ownership, leverage, and duplication analysis
+7. Game-theory and game-script thesis generation
+8. Portfolio construction around those theses
+9. Exposure audit versus Savant/source ownership
+10. Post-slate review and durable learning
 
-No agent should override the baseline casually. Any meaningful deviation from Savant should have an explicit reason tied to data, context, leverage, correlation, contest structure, game theory, or portfolio coverage.
+No agent should override the baseline casually. Any meaningful deviation from Savant should have an explicit reason tied to data, context, leverage, correlation, contest structure, game theory, simulation evidence, or portfolio coverage.
 
 ## Slate Workflow
 
@@ -47,31 +48,38 @@ Check names, teams, positions, salaries, game inclusion, injuries/availability, 
 ### 3. Cross-check the market
 Do not anchor to a single source. Compare baseline projections and ownership against broader industry information, betting markets, team totals, matchup context, injuries/news, role changes, and relevant environmental factors.
 
-### 4. Build slate theses
+### 4. Simulate outcome distributions
+Run or ingest a sport-appropriate slate simulation before final portfolio construction when inputs are sufficient. Use empirical or calibrated volatility, non-normal distributions where appropriate, and meaningful player/team/game correlations.
+
+The shared framework is defined in `core/SIMULATION.md`. Sport modules must supply their own variance, distribution, and correlation assumptions rather than using one generic standard deviation model across all sports.
+
+Simulation output should inform ceiling, failure probability, top-tail outcomes, game-script likelihood, and portfolio overlap. It should not replace news validation, ownership analysis, or strategic judgment.
+
+### 5. Build slate theses
 Identify the most plausible ways the slate can be won. Each thesis should describe what must happen, which players/teams benefit, which popular constructions fail, where leverage appears, and what the field is likely assuming.
 
 Theses should be causal, not merely descriptive. A strong thesis connects events: if X happens, Y players/teams become stronger together while Z chalk or construction loses value.
 
-### 5. Construct portfolios
+### 6. Construct portfolios
 Build lineups as a coordinated portfolio rather than isolated top-projection lineups. Coverage should represent distinct plausible game scripts while preserving enough concentration to benefit when a thesis is right.
 
-Optimizer output is a tool, not the strategy. Lineups should be accepted, rejected, or reshaped based on thesis coherence, game theory, correlation, duplication, and portfolio fit.
+Optimizer output is a tool, not the strategy. Lineups should be accepted, rejected, or reshaped based on thesis coherence, game theory, correlation, duplication, simulation tail metrics, and portfolio fit.
 
-### 6. Audit exposures
+### 7. Audit exposures
 For every delivered lineup set, report source projected ownership versus DFS Engine exposure with percentage-point difference. Investigate large deviations and ensure they are intentional.
 
-### 7. Final news pass
-Re-check official lineups, injuries, scratches, batting order/starting roles, weather where relevant, and late market movement. Re-optimize when role changes materially alter projection, correlation, ownership, or a game-script thesis.
+### 8. Final news pass
+Re-check official lineups, injuries, scratches, batting order/starting roles, weather where relevant, and late market movement. Re-simulate or re-optimize when role changes materially alter projection, variance, correlation, ownership, or a game-script thesis.
 
-### 8. Post-slate learning
-Review what won, what the engine captured, what it missed, and whether the failure came from projections, ownership, game theory, correlation, portfolio construction, or variance. Promote only durable lessons into the brain.
+### 9. Post-slate learning
+Review what won, what the engine captured, what it missed, and whether the failure came from projections, simulation calibration, ownership, game theory, correlation, portfolio construction, or ordinary variance. Promote only durable lessons into the brain.
 
 ## Portfolio Philosophy
 
 The engine should not merely maximize raw projected points. It should balance:
 
 - projection
-- ceiling
+- simulated ceiling / tail probability
 - ownership/leverage
 - correlation
 - lineup duplication risk
@@ -86,7 +94,7 @@ The success metric is long-term expected value and contest-winning upside across
 
 ## Exposure Rules
 
-Exposure is a decision output, not an input copied from projected ownership. A player may be over the field because of superior ceiling, role, correlation, game-script importance, or mispriced ownership. A player may be under the field because the market is overconfident, the projection is fragile, the chalk is strategically vulnerable, or the portfolio already captures the same outcome through correlated alternatives.
+Exposure is a decision output, not an input copied from projected ownership. A player may be over the field because of superior ceiling, role, correlation, simulated top-tail value, game-script importance, or mispriced ownership. A player may be under the field because the market is overconfident, the projection is fragile, the chalk is strategically vulnerable, or the portfolio already captures the same outcome through correlated alternatives.
 
 Never make a large exposure deviation without an explicit reason.
 
@@ -101,7 +109,7 @@ When Sim Savant ownership is available, it is the default source column. Sort or
 
 ## Anti-Hallucination Rules
 
-- Never invent a player, salary, projection, ownership figure, lineup slot, injury, betting line, or contest rule.
+- Never invent a player, salary, projection, ownership figure, lineup slot, injury, betting line, contest rule, standard deviation, or correlation coefficient.
 - If an input is missing, label it missing rather than fabricating it.
 - Distinguish verified facts from model assumptions.
 - When current information matters, verify it before using it.
