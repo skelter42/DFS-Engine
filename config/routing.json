@@ -1,0 +1,52 @@
+{
+  "version": "0.1.0",
+  "default_interface": "chat",
+  "routes": [
+    {
+      "intent": "run_engine",
+      "triggers": ["run the dfs engine", "run engine", "build lineups", "build the lineups"],
+      "pipeline": ["load_brain", "ingest", "validate", "cross_check", "sport_analysis", "contest_analysis", "portfolio_build", "exposure_audit", "deliver"]
+    },
+    {
+      "intent": "industry_compare",
+      "triggers": ["full industry compare", "cross check industry", "compare across industry"],
+      "pipeline": ["load_brain", "cross_check", "projection_consensus", "ownership_consensus", "market_context", "thesis_update"]
+    },
+    {
+      "intent": "exposure_report",
+      "triggers": ["exposures side by side", "send exposures", "ownership vs exposure"],
+      "pipeline": ["exposure_audit", "exposure_delta_report"]
+    },
+    {
+      "intent": "what_if",
+      "triggers": ["what if", "run a what-if", "rebuild assuming"],
+      "pipeline": ["snapshot_baseline", "apply_assumption", "rerun_affected_stages", "compare_outputs"]
+    },
+    {
+      "intent": "post_slate",
+      "triggers": ["what did we learn", "review results", "post slate", "analyze results"],
+      "pipeline": ["result_ingest", "diagnose", "classify_errors", "extract_durable_lessons", "persist_learning"]
+    },
+    {
+      "intent": "update_engine",
+      "triggers": ["update the engine", "store this logic", "save this rule"],
+      "pipeline": ["validate_durability", "select_brain_target", "persist_versioned_change"]
+    }
+  ],
+  "sport_routing": {
+    "mlb": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/mlb.md"],
+    "ncaaf": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/ncaaf.md"],
+    "nfl": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/nfl.md"],
+    "nba": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/nba.md"],
+    "nhl": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/nhl.md"],
+    "tennis": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/tennis.md"]
+  },
+  "rules": {
+    "user_must_name_agents": false,
+    "user_must_run_code": false,
+    "auto_load_relevant_brain": true,
+    "auto_persist_durable_learning": true,
+    "persist_raw_chat": false,
+    "persist_single_slate_noise": false
+  }
+}
