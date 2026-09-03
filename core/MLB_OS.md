@@ -12,6 +12,56 @@ The DFS Engine is AI-led. Math, projections, simulations, betting markets, and d
 
 Each state has required inputs, transformations, gates, and outputs. No state may silently skip its gates.
 
+## Primary Tournament Objective: Bink Coverage
+
+The Engine's tournament objective is not to maximize the median score of the portfolio. It is to maximize the number and quality of distinct first-place paths the portfolio meaningfully owns while avoiding wasteful duplication of the same underlying bet.
+
+A **first-place path** is a coherent combination of conditions that could plausibly produce a tournament-winning lineup. Each path should identify:
+
+- primary offense/stack condition
+- secondary offense or one-off condition
+- SP1/SP2 condition
+- chalk success/failure dependency
+- leverage event or field mistake
+- salary/roster construction implications
+- likely ownership/duplication profile
+
+Examples:
+
+- chalk ace succeeds + chalk offense succeeds + low-owned secondary stack separates
+- chalk ace succeeds + premium chalk offense fails + mid-owned stack wins
+- popular pitcher fails + opposing 5-man stack breaks slate + alternative SP2 succeeds
+- cheap pitcher succeeds + expensive low-owned offense becomes optimal
+- two popular high-total games disappoint + overlooked mid-total offense erupts
+- same popular primary stack succeeds, but wraparound/secondary-stack branch wins instead of common 1-5 construction
+
+### Meaningful Coverage vs Cosmetic Diversity
+
+Two lineups are not meaningfully different merely because one or two players change. If they depend on the same pitcher pair, same primary stack, same chalk conditions, and same salary structure, they are substantially the same first-place path.
+
+The AI Portfolio Builder must identify **dead overlap**: lineups that appear unique by player count but are highly correlated in what must happen for them to win.
+
+Portfolio diversity should therefore be evaluated at two levels:
+
+1. **Within-path variation** — multiple credible lineup branches that capitalize on one thesis if it hits.
+2. **Across-path coverage** — exposure to materially different slate outcomes that do not all fail together.
+
+The Engine should concentrate enough lineups inside strong paths to benefit when a thesis is correct, but not spend most of the portfolio repeatedly purchasing the same outcome unless evidence strongly justifies that concentration.
+
+### Bink Coverage Audit
+
+Before PRELOCK and FINAL portfolio approval, the AI must answer:
+
+- What are the strongest first-place paths on this slate?
+- Which paths have zero exposure?
+- Which paths are overrepresented relative to evidence and payoff?
+- How many lineups are genuinely independent bets versus cosmetic variants?
+- Which lineups die together if one pitcher, stack, or game environment fails?
+- Does every lineup have a clear reason it improves first-place coverage?
+- Are we spreading too thin across weak scenarios, or concentrating too heavily on one fragile assumption?
+
+There is no fixed rule that more paths are always better. Bink Coverage is probability-weighted and payoff-aware. A weak path should not receive a lineup merely to increase a path count. A strong asymmetric path may deserve several coordinated bullets.
+
 ## 1. INTAKE
 
 Required actions:
@@ -157,24 +207,32 @@ Evaluate viable stacks using the full information set:
 
 The objective is not to rank teams by one formula. The AI should identify which stacks are best for which slate stories and why.
 
-### 3.4 Scenario Board
+### 3.4 Scenario and First-Place Path Board
 
-Create 2-8 scenarios depending on contest preset. Every scenario must state:
+Create 2-8 major scenario families depending on contest preset, then branch each meaningful scenario into distinct first-place paths when different pitcher, secondary-stack, salary, leverage, or duplication conditions materially change how the lineup wins.
+
+Every scenario/path must state:
 
 - trigger
 - evidence supporting the scenario
+- primary win condition
+- secondary win condition
+- pitcher condition
+- chalk dependency
+- leverage event
 - beneficiaries
 - field assumption that fails or holds
 - confidence
-- recommended portfolio allocation
+- recommended portfolio allocation/bullet count
 - stack/pitcher implications
 - duplication/ownership implications
+- failure linkage to other paths
 
-Scenario allocations across a contest group must sum to 1.00. Allocations are AI strategic decisions informed by evidence, not formula outputs.
+Scenario allocations across a contest group should reflect AI judgment and can be converted into target lineup counts. Allocations are evidence-informed strategic decisions, not formula outputs.
 
 ### 3.5 AI Lineup Construction
 
-Construct candidates from scenario constraints rather than from projection alone. Default DK tournament construction strongly prefers a 5-man primary stack when slate size supports it.
+Construct candidates from first-place path constraints rather than from projection alone. Default DK tournament construction strongly prefers a 5-man primary stack when slate size supports it.
 
 The AI Portfolio Builder decides how to combine:
 
@@ -184,7 +242,10 @@ The AI Portfolio Builder decides how to combine:
 - game-script coherence
 - salary structure
 - uniqueness
-- portfolio coverage
+- first-place path fit
+- bink coverage contribution
+
+Every lineup must be able to answer: **what has to happen for this lineup to win, and what first-place path does it own that justifies its portfolio slot?**
 
 A material projection sacrifice is allowed only when it buys a named strategic edge.
 
@@ -201,9 +262,14 @@ Portfolio selection must audit concentration by:
 - pitcher pair
 - game environment
 - scenario
+- first-place path
+- chalk dependency
+- leverage event
 - salary bucket
 
-Different lineups that express the same scenario count as correlated portfolio risk.
+Different lineups that express the same first-place path count as correlated portfolio risk even if several players differ.
+
+The AI should remove or replace redundant lineups when another candidate adds materially more first-place coverage without sacrificing too much quality.
 
 ### 3.7 Deterministic Validation Layer
 
@@ -214,20 +280,39 @@ After AI constructs the portfolio, code/deterministic checks validate rather tha
 - duplicate lineups
 - required uniques
 - player/team exposure arithmetic
-- scenario allocation arithmetic
+- scenario/path allocation arithmetic
 - contest assignment
 - prohibited pitcher-vs-hitter conflicts when applicable
 - exposure limits or explicit exceptions
 
 Any failed validation returns the lineup to the AI Portfolio Builder for repair without silently replacing the strategic thesis.
 
-### 3.8 PRELOCK Output
+### 3.8 Bink Coverage Review
+
+Before PRELOCK approval, produce a Bink Coverage table containing at minimum:
+
+| Path | Core Win Condition | Pitcher Condition | Chalk Dependency | Leverage Event | Lineups | Portfolio % | Failure Linkage | AI Rationale |
+|---|---|---|---|---|---:|---:|---|---|
+
+Also summarize:
+
+- number of meaningful first-place paths owned
+- paths intentionally faded and why
+- largest dead-overlap cluster
+- most fragile shared dependency
+- strongest asymmetric leverage path
+- whether portfolio concentration is intentional
+
+The point of this audit is not to maximize the raw number of paths. It is to ensure every portfolio slot purchases a credible chance at first place instead of accidentally duplicating an existing thesis.
+
+### 3.9 PRELOCK Output
 
 A PRELOCK slate package contains:
 
 - Industry Consensus Board
 - major source disagreements and AI interpretations
-- scenario board with allocations
+- scenario/first-place path board with allocations
+- Bink Coverage audit
 - stack theses
 - pitcher theses
 - candidate/final prelock portfolio by contest group
@@ -248,11 +333,12 @@ Mandatory refresh when material changes occur:
 3. AI Projection Audit
 4. Stack Architecture
 5. Pitcher Analysis
-6. Scenario Board confidence/allocation
+6. Scenario/First-Place Path Board confidence/allocation
 7. Portfolio construction for affected contest groups
 8. Deterministic Validation
-9. Portfolio Risk Audit
-10. Exposure Audit
+9. Bink Coverage Audit
+10. Portfolio Risk Audit
+11. Exposure Audit
 
 Finalization gates are defined in `config/mlb.json`. Every gate must be true before status may become `FINAL`.
 
@@ -260,7 +346,8 @@ Required FINAL output:
 
 - upload-ready lineups
 - contest assignment
-- scenario assignment per lineup
+- scenario and first-place path assignment per lineup
+- Bink Coverage table
 - player/stack/pitcher exposure tables
 - Savant/source projected ownership vs source prebuild exposure vs DFS Engine final exposure
 - percentage-point differences
@@ -274,7 +361,19 @@ Required FINAL output:
 
 Join contest results to the saved FINAL slate state. Validate contest field size before calculating top-1%, top-10%, or top-20% tiers.
 
-### 5.2 Error Attribution
+### 5.2 First-Place Path Review
+
+Identify the actual winning/top-1% outcome family and compare it with the pre-slate path board:
+
+- Was the winning path modeled?
+- Did we own it?
+- If yes, did we allocate enough bullets?
+- Did our lineup branches correctly express the path?
+- If the path was modeled but our lineups failed, which secondary/pitcher/player choice prevented the bink?
+- If the path was not modeled, was the omission a research/interpretation error or ordinary variance?
+- Did dead overlap waste portfolio slots that could have covered the winning path?
+
+### 5.3 Error Attribution
 
 Classify portfolio misses using one or more categories:
 
@@ -288,6 +387,9 @@ Classify portfolio misses using one or more categories:
 - market_environment
 - ownership_leverage
 - duplication_uniqueness
+- missing_first_place_path
+- underallocated_first_place_path
+- dead_overlap
 - scenario_allocation
 - portfolio_concentration
 - projection_error
@@ -295,13 +397,13 @@ Classify portfolio misses using one or more categories:
 
 Do not assign a structural lesson solely from the winning lineup.
 
-### 5.3 Counterfactual Review
+### 5.4 Counterfactual Review
 
 For the highest-value missed lineups, alter one decision at a time and measure whether the result materially changes. Separate a correct thesis with poor implementation from a bad thesis.
 
 Also ask whether the Industry Research Agent correctly identified the material pre-slate signals and whether the AI interpreted them appropriately.
 
-### 5.4 Learning Promotion
+### 5.5 Learning Promotion
 
 New findings begin as slate notes/hypotheses. Promote to `learning/REGISTRY.md` only when they satisfy the durable-learning standard in `core/LEARNING.md`.
 
@@ -318,11 +420,11 @@ Source prebuild exposure may be null if unavailable, but source ownership and DF
 
 AI judgment is the final authority for MLB tournament portfolio construction. No fixed formula, optimizer rank, or composite score may automatically determine exposure. Quantitative models summarize evidence and enforce consistency; AI agents decide how that evidence changes the slate thesis and portfolio.
 
-All material discretionary decisions must be auditable: record the evidence, interpretation, scenario, and reason for the exposure decision.
+All material discretionary decisions must be auditable: record the evidence, interpretation, scenario/path, and reason for the exposure decision.
 
 ## Repeatability Rule
 
-Repeatability means the same evidence and canonical rules should produce materially consistent reasoning, scenarios, and portfolio intent. It does not mean replacing AI judgment with deterministic optimization. Any major change in thesis or exposure should be traceable to changed evidence or an explicitly recorded strategic judgment.
+Repeatability means the same evidence and canonical rules should produce materially consistent reasoning, scenarios, first-place paths, and portfolio intent. It does not mean replacing AI judgment with deterministic optimization. Any major change in thesis or exposure should be traceable to changed evidence or an explicitly recorded strategic judgment.
 
 ## Calibration Rule
 
