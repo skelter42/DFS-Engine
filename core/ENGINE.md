@@ -1,112 +1,122 @@
 # Core DFS Engine
 
-## Decision Hierarchy
+## Operating Principle
 
-Sim Savant is the default baseline input layer for projections, ownership, and simulation context when available. It is the starting point, not the final answer.
+The DFS Engine is an AI-led tournament decision system. Projections, ownership, simulations, betting markets, news, role data, and deterministic code are evidence and guardrails; they do not mechanically choose the portfolio.
 
-The DFS Engine sits on top of that baseline and uses multiple cooperating analysis roles to challenge, validate, adjust, and portfolio-build around it. The objective is long-term profitable decision quality and first-place equity, not blind agreement with any one source.
+No single projection or ownership source is authoritative. Sim Savant is a valuable source when available, especially for simulation context and source-prebuild comparison, but it must be evaluated alongside independent industry projections, independent ownership projections, markets, news, and sport-specific context.
 
-### Core Philosophy: Art Backed by Math
+The objective is long-term profitable decision quality and first-place equity against a sharp field.
 
-Math defines the plausible decision space. Logic, game scripts, game theory, correlation, and portfolio construction decide how we attack it.
+## Core Philosophy: Art Backed by Math
 
-The Engine should never confuse the highest median projection with the best tournament lineup. Projections, simulations, ownership, betting markets, and other quantitative inputs are evidence. They are not the final decision-maker.
+Math defines the plausible decision space. AI reasoning, game theory, correlation, first-place-path selection, and portfolio construction decide how to attack it.
 
-The cornerstone of lineup construction is answering strategic questions such as:
+The Engine should never confuse the highest median projection with the best tournament lineup. It should ask:
 
 - How can this slate realistically be won?
-- What assumptions is the field making?
-- Which popular constructions become fragile if one key assumption fails?
-- Which players or stacks benefit together when a specific game script occurs?
+- What is the sharp field likely to build?
+- Which field constructions are strong and should be accepted?
+- Which popular constructions are fragile if one key assumption fails?
 - Which combinations create asymmetric payoff relative to ownership?
-- Where can we be different without sacrificing too much underlying quality?
-- How should multiple lineups work together as a portfolio rather than as isolated optimizer outputs?
+- Which first-place paths are worth owning, and with how many bullets?
+- Which lineups look different but actually die together?
 
-Default hierarchy:
+Chalk is not bad because it is popular. Contrarianism is not an edge by itself. A meaningful fade or overweight must have a causal, game-theory reason.
 
-1. Sim Savant baseline projections / ownership / sims
-2. Data validation and official news checks
-3. Broader industry and market cross-checks
-4. Sport-specific role, matchup, environment, and correlation analysis
-5. Contest-specific ownership, leverage, and duplication analysis
-6. Game-theory and game-script thesis generation
-7. Portfolio construction around those theses
-8. Exposure audit versus Savant/source ownership
-9. Post-slate review and durable learning
+## Canonical Decision Flow
 
-No agent should override the baseline casually. Any meaningful deviation from Savant should have an explicit reason tied to data, context, leverage, correlation, contest structure, game theory, or portfolio coverage.
+1. Slate intake and data validation
+2. Industry research, projections, ownership, markets, news, and role audit
+3. Sharp-field construction and game-theory analysis
+4. Sport-specific architecture analysis
+5. Scenario and first-place-path generation
+6. Contest-specific AI portfolio construction and risk management
+7. Exposure and deterministic final validation
+8. Post-slate learning and calibration
+
+The detailed responsibility boundaries live in `core/AGENTS.md`. Sport-specific logic lives in `sports/`.
 
 ## Slate Workflow
 
-### 1. Ingest
-Collect the site player pool/contest file, baseline projections, projected ownership, salaries, positions, and any available ceiling/floor or simulation outputs.
+### 1. Ingest and Validate
+Collect the site player pool/contest file, salaries, positions, IDs, available projections, projected ownership, ceilings/floors/sim outputs, and contest attributes. Determine the true number of entries and flag missing or malformed inputs.
 
-### 2. Validate
-Check names, teams, positions, salaries, game inclusion, injuries/availability, projected starters, and obvious data mismatches before optimization.
+### 2. Build the Evidence Layer
+Search current independent industry projections and ownership when accessible. Add betting markets, implied totals, relevant props, weather/park, official news, starting roles, injuries/scratches, and sport-specific context.
 
-### 3. Cross-check the market
-Do not anchor to a single source. Compare baseline projections and ownership against broader industry information, betting markets, team totals, matchup context, injuries/news, role changes, and relevant environmental factors.
+Record source freshness and independence when practical. If industry consensus is thin, label it thin rather than manufacturing certainty.
 
-### 4. Build slate theses
-Identify the most plausible ways the slate can be won. Each thesis should describe what must happen, which players/teams benefit, which popular constructions fail, where leverage appears, and what the field is likely assuming.
+### 3. Model the Sharp Field
+Estimate what the field is likely to build at the lineup level, not only who it will roster. Consider common combinations, correlations, value clusters, salary structures, duplication pressure, and constructions that fail together.
 
-Theses should be causal, not merely descriptive. A strong thesis connects events: if X happens, Y players/teams become stronger together while Z chalk or construction loses value.
+### 4. Build First-Place Paths
+Create causal slate theses describing what must happen for a lineup to win, which players/teams benefit together, which field assumptions succeed or fail, and where conditional leverage appears.
 
-### 5. Construct portfolios
-Build lineups as a coordinated portfolio rather than isolated top-projection lineups. Coverage should represent distinct plausible game scripts while preserving enough concentration to benefit when a thesis is right.
+Do not maximize raw path count. Favor probability-weighted, payoff-aware Bink Coverage.
 
-Optimizer output is a tool, not the strategy. Lineups should be accepted, rejected, or reshaped based on thesis coherence, game theory, correlation, duplication, and portfolio fit.
+### 5. Construct the Portfolio
+The AI Portfolio Builder creates contest-specific lineups around first-place paths. It decides the appropriate balance between concentration and coverage based on actual contest structure.
 
-### 6. Audit exposures
-For every delivered lineup set, report source projected ownership versus DFS Engine exposure with percentage-point difference. Investigate large deviations and ensure they are intentional.
+Optimizer output or composite scoring may support the process but never determines exposure automatically.
 
-### 7. Final news pass
-Re-check official lineups, injuries, scratches, batting order/starting roles, weather where relevant, and late market movement. Re-optimize when role changes materially alter projection, correlation, ownership, or a game-script thesis.
+### 6. Audit and Validate
+Audit player, team, stack, pitcher/QB, game, salary, and path concentration. Detect dead overlap. Run deterministic checks for legality, salary, positions, IDs, duplicates, uniques, contest assignment, and exposure arithmetic.
 
-### 8. Post-slate learning
-Review what won, what the engine captured, what it missed, and whether the failure came from projections, ownership, game theory, correlation, portfolio construction, or variance. Promote only durable lessons into the brain.
+If validation fails, repair the lineup without silently replacing its strategic thesis.
+
+### 7. Final Refresh
+Re-check material late news, lineups/roles, weather, markets, and source changes. Revisit only the affected evidence, first-place paths, and portfolio decisions rather than rebuilding blindly.
+
+### 8. Post-Slate Learning
+Compare the saved pre-slate evidence and theses against actual ownership, winning/top-tier construction when valid, and Engine results. Separate source errors, field-model errors, strategic errors, implementation errors, and ordinary variance.
+
+Promote only durable lessons into the canonical brain.
 
 ## Portfolio Philosophy
 
-The engine should not merely maximize raw projected points. It should balance:
+The Engine balances:
 
-- projection
-- ceiling
-- ownership/leverage
+- projection and ceiling
+- ownership and conditional leverage
 - correlation
-- lineup duplication risk
+- field construction and duplication risk
 - uncertainty
-- contest payout structure
-- game-script coverage
-- strategic asymmetry versus the field
+- contest structure and payout shape
+- first-place-path coverage
+- strategic asymmetry
+- shared failure / dead overlap
 
-Large-field GPP portfolios should accept individual-lineup volatility in exchange for stronger first-place equity. Small-field or flatter-payout contests may justify less leverage and more median projection.
+The goal is not maximum diversification. The goal is to own enough distinct high-quality winning paths while concentrating enough bullets inside the best paths to benefit when the thesis is correct.
 
-The success metric is long-term expected value and contest-winning upside across repeated slates, not whether every individual slate cashes.
+## Exposure Contract
 
-## Exposure Rules
+Every delivered lineup set must include, when available:
 
-Exposure is a decision output, not an input copied from projected ownership. A player may be over the field because of superior ceiling, role, correlation, game-script importance, or mispriced ownership. A player may be under the field because the market is overconfident, the projection is fragile, the chalk is strategically vulnerable, or the portfolio already captures the same outcome through correlated alternatives.
+| Player | Savant/Source Own% | Industry Own Range/Consensus | Source Prebuild% | DFS Engine% | vs Source pp | vs Industry pp | Reason |
+|---|---:|---:|---:|---:|---:|---:|---|
 
-Never make a large exposure deviation without an explicit reason.
+Source prebuild exposure is not projected ownership and must remain a separate signal.
 
-## Source Comparison Requirement
-
-Every final lineup set must include a table with at least:
-
-| Player | Source Projected Ownership | DFS Engine Exposure | Difference (pp) |
-|---|---:|---:|---:|
-
-When Sim Savant ownership is available, it is the default source column. Sort or highlight the largest positive and negative deviations.
+Material exposure deviations require a stated strategic reason.
 
 ## Anti-Hallucination Rules
 
-- Never invent a player, salary, projection, ownership figure, lineup slot, injury, betting line, or contest rule.
-- If an input is missing, label it missing rather than fabricating it.
-- Distinguish verified facts from model assumptions.
-- When current information matters, verify it before using it.
-- Preserve source data separately from derived DFS Engine adjustments.
+- Never invent a player, salary, projection, ownership figure, lineup slot, injury, betting line, contest rule, or source value.
+- If an input is missing, label it missing.
+- Distinguish verified facts from AI interpretation.
+- Verify current information before using it when freshness matters.
+- Preserve source data separately from Engine-derived conclusions.
+- Do not call one external source an industry consensus.
 
-## Versioning
+## Code Boundary
 
-Durable changes to logic belong in this repository. Slate-specific opinions belong in dated slate notes or results files, not in core rules unless they generalize across multiple slates.
+AI is the portfolio manager. Deterministic code handles repetitive, auditable work such as parsing, joins, legality, IDs, salary, duplicates, uniques, exposure arithmetic, result joins, storage, and upload-ready CSV creation.
+
+Code must not silently replace AI game-theory decisions.
+
+## Versioning and Streamlining
+
+GitHub stores canonical rules, sport brains, schemas, validated learnings, and execution helpers. It should not become a dump of slate-specific thoughts.
+
+Do not add a rule, agent, metric, or threshold merely because it sounds sophisticated. It must improve a decision, prevent a recurring error, enforce a required output, or support durable learning. Remove or merge logic that becomes redundant, unused, or unsupported by evidence.
