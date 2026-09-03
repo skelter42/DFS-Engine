@@ -2,9 +2,11 @@
 
 ## Decision Hierarchy
 
-Sim Savant and other vendor sources are baseline inputs, not the final projection authority.
+The DFS Engine is Vegas-first for player performance projections whenever sufficiently liquid player props and game markets exist.
 
-The DFS Engine sits on top of raw source data and uses market-derived projections, ownership estimates, simulations, industry/market context, and GPT/AI portfolio judgment to build tournament lineups. The objective is long-term profitable decision quality and first-place equity, not blind agreement with any one source.
+Market-derived projections are the primary performance estimate. Sim Savant and other trusted vendor projections are fallback priors used when Vegas signals are weak, incomplete, stale, internally inconsistent, or unavailable. Broader industry projections are primarily sanity checks and secondary fallback evidence.
+
+The objective is long-term profitable decision quality and first-place equity, not blind agreement with any one source.
 
 ### Core Philosophy: Art Backed by Math
 
@@ -16,19 +18,19 @@ Quantitative models, optimizers, projections, ownership estimates, simulations, 
 
 The final portfolio must receive an explicit GPT/AI strategic review after mathematical candidate generation. That review must evaluate whether proposed lineups express coherent, differentiated paths to first place and whether repeated mathematical solutions create hidden concentration, accidental salary plugs, duplicated scripts, or excessive dependence on one player, team, stack, game, or construction archetype.
 
-GPT/AI judgment must remain grounded in market-derived projections, vendor/source baselines, verified news, industry/market information, ownership, correlation, contest structure, and uncertainty.
+GPT/AI judgment must remain grounded in market-derived projections, fallback priors, verified news, industry/market information, ownership, correlation, contest structure, and uncertainty.
 
 The intended hierarchy is:
 
-**Raw source/vendor data -> market-derived DFS projection -> DFS Engine final projection and expected ownership -> simulation/candidate generation -> GPT/AI game-script and portfolio judgment.**
+**Raw slate/site data -> Vegas/market-derived projection -> confidence-weighted fallback prior only where needed -> DFS Engine projection + expected ownership -> simulation/candidate generation -> GPT/AI game-script and portfolio judgment.**
 
-If the mathematical solution and GPT/AI review disagree materially, resolve the disagreement explicitly before final delivery.
+If mathematical output and GPT/AI review disagree materially, resolve the disagreement explicitly before final delivery.
 
-## Mandatory Market-Derived Projection Layer
+## Mandatory Vegas-First Projection Layer
 
 The shared framework is defined in `core/MARKET_PROJECTIONS.md`.
 
-For every sport where sufficiently liquid player props exist, the Engine should derive fantasy projections from betting markets before final lineup construction. Preferred inputs include multi-book player props, alternate/ladder markets, game totals, team totals, moneylines, and relevant role/context information.
+For every sport where sufficiently liquid player props exist, derive fantasy projections from betting markets before final lineup construction. Preferred inputs include multi-book player props, alternate/ladder markets, game totals, team totals, moneylines, and relevant role/context information.
 
 Market-derived projections should:
 
@@ -37,7 +39,7 @@ Market-derived projections should:
 - translate fair event probabilities into expected stat components
 - convert expected stat components into site-specific fantasy scoring
 - track market coverage/confidence
-- shrink toward vendor/industry priors when prop coverage is sparse
+- use Savant/vendor projections only as fallback priors when market evidence is not strong enough
 
 Action Network is a preferred market aggregator when available, but no one market source is authoritative.
 
@@ -49,19 +51,19 @@ For every serious slate build, the DFS Engine must create and preserve its own p
 
 For each player preserve at minimum:
 
-- source/vendor projection
+- Savant/vendor fallback projection
 - market-derived fantasy projection
 - market coverage/confidence
-- DFS Engine final projection
-- projection difference vs source
+- final DFS Engine projection
+- projection difference vs fallback source
 - source projected ownership
 - DFS Engine expected ownership
 - ownership difference vs source
 - major drivers of meaningful adjustments
 
-The final Engine projection should normally anchor to the market-derived projection when market coverage is strong. When market coverage is medium or low, blend/shrink toward vendor/industry priors, role, matchup, and environment.
+The final Engine projection should normally equal or closely track the market-derived projection when market coverage is High. As coverage deteriorates to Medium or Low, progressively shrink toward the Savant/vendor prior. With no usable market, the fallback prior may become the Engine projection and must be labeled fallback-driven.
 
-Do not mechanically average sources. Weighting depends on market coverage, freshness, liquidity, internal consistency, and role certainty.
+Do not use a fixed universal blend. Weighting depends on market coverage, freshness, liquidity, cross-book agreement, internal consistency, and role certainty.
 
 DFS Engine expected ownership is a separate estimate informed by broader industry ownership, salary, Engine projection/value, contest type, roster construction, field tendencies, obvious chalk combinations, and late-news behavior.
 
@@ -71,9 +73,9 @@ These Engine-owned estimates are used for downstream simulation, leverage analys
 
 Every serious DFS Engine build must include:
 
-1. Raw source/vendor data and site roster inputs.
-2. Market-derived projection layer when usable player props exist.
-3. Broader industry/market intelligence and current news/role context.
+1. Raw slate/site data and fallback vendor inputs.
+2. Vegas/market-derived projection layer when usable player props exist.
+3. Current news/role validation and broader industry sanity checks.
 4. DFS Engine expected ownership.
 5. Sport-appropriate simulation/outcome distributions.
 6. GPT/AI game-script judgment and portfolio review.
@@ -82,27 +84,29 @@ If market or industry data is unavailable, label the gap explicitly rather than 
 
 ## Canonical Slate Workflow
 
-1. Ingest site player pool, vendor/source projections/ownership, salaries, positions, and simulation inputs.
+1. Ingest site player pool, salaries, positions, entries, vendor/source projections/ownership, and available simulation inputs.
 2. Validate names, teams, roster positions, availability, and slate membership.
 3. Verify current news/roles/lineups and material weather/context.
 4. Collect multi-book player props and game markets; Action Network is preferred when available.
-5. De-vig, aggregate, and convert markets into expected stat components and market-derived fantasy projections.
-6. Grade market coverage and blend sparse players toward vendor/industry priors.
-7. Create final DFS Engine projections and DFS Engine expected ownership estimates.
-8. Run sport-appropriate simulation/outcome distributions using Engine estimates.
-9. Generate a broad mathematical candidate-lineup pool.
-10. Run mandatory GPT/AI game-theory, multi-script, and hidden-concentration review.
-11. Construct/reshape the final portfolio around approved slate theses.
-12. Audit source projection vs market projection vs Engine projection, source ownership vs Engine expected ownership, and Engine exposure.
-13. Perform final GPT/AI sign-off plus final news/market recheck.
-14. Deliver uploadable lineups and audit files.
-15. Post-slate: compare projections, ownership estimates, exposures, actual ownership, and actual scores; store only durable learning.
+5. De-vig, aggregate, reconcile overlapping markets, and convert them into expected stat components and market-derived fantasy projections.
+6. Grade market coverage/confidence for every relevant player.
+7. Use the market projection as primary; apply Savant/vendor fallback weight only where confidence is insufficient.
+8. Create final DFS Engine projections and DFS Engine expected ownership estimates.
+9. Run sport-appropriate simulation/outcome distributions using Engine estimates.
+10. Generate a broad mathematical candidate-lineup pool.
+11. Run mandatory GPT/AI game-theory, multi-script, and hidden-concentration review.
+12. Construct/reshape the final portfolio around approved slate theses.
+13. Audit fallback projection vs market projection vs Engine projection, source ownership vs Engine expected ownership, and Engine exposure.
+14. Perform final GPT/AI sign-off plus final news/market recheck.
+15. Rebuild when material late information changes roles, markets, ownership, or scripts.
+16. Deliver uploadable lineups and audit files.
+17. Post-slate: compare projection methods, ownership estimates, exposures, actual ownership, and actual scores; store only durable learning.
 
 ## Simulation / Outcome Distribution
 
 Run or ingest a sport-appropriate slate simulation when inputs are sufficient. Use calibrated volatility, non-normal distributions where appropriate, and meaningful player/team/game correlations.
 
-Simulation should use DFS Engine estimates while retaining source/vendor values for sensitivity checks. Simulation output should inform ceiling, failure probability, top-tail outcomes, game-script likelihood, and portfolio overlap. It should not replace news validation, ownership analysis, or strategic judgment.
+Simulation should use DFS Engine estimates while retaining market and fallback values for sensitivity checks. Simulation output should inform ceiling, failure probability, top-tail outcomes, game-script likelihood, and portfolio overlap. It should not replace news validation, ownership analysis, or strategic judgment.
 
 ## Candidate Generation and GPT Review
 
@@ -140,7 +144,7 @@ Hard constraints are reserved for true structural necessities such as site roste
 
 Every delivered lineup set should preserve:
 
-| Player | Source Projection | Market-Derived Projection | Market Coverage | DFS Engine Projection | Source Ownership | DFS Engine Expected Ownership | DFS Engine Exposure |
+| Player | Savant/Vendor Fallback | Market-Derived Projection | Market Coverage | DFS Engine Projection | Source Ownership | DFS Engine Expected Ownership | DFS Engine Exposure |
 |---|---:|---:|---|---:|---:|---:|---:|
 
 Investigate the largest projection, ownership, and exposure deviations and ensure they are intentional.
@@ -163,13 +167,15 @@ A portfolio that fails this review must be reshaped before delivery.
 
 Review:
 
-- source/vendor projection vs market-derived projection vs Engine projection vs actual fantasy score
+- Savant/vendor fallback projection vs market-derived projection vs Engine projection vs actual fantasy score
 - source ownership vs Engine expected ownership vs actual field ownership
 - Engine exposure vs portfolio performance
-- whether market coverage/confidence predicted projection reliability
+- whether market-confidence tiers predicted projection reliability
 - simulation calibration
 - game-script judgment
 - correlation and portfolio construction
+
+The Vegas-first hierarchy is itself testable. If high-confidence market projections fail to outperform fallback priors over a meaningful sample, recalibrate confidence rules rather than protecting the assumption.
 
 Grade projection calibration, ownership calibration, and portfolio decision quality separately. Promote only durable lessons into the brain.
 
