@@ -4,12 +4,29 @@
 
 MLB is a high-variance, correlation-heavy sport. The engine should prioritize coherent team-stack outcomes over isolated median projections.
 
+### MLB Strategic Doctrine: Art Backed by Math
+
+For MLB tournaments, math is the foundation but not the final answer. Sim Savant projections, ownership, simulations, betting markets, park/weather data, and matchup metrics define what is plausible. The DFS Engine uses logic, game scripts, game theory, stack interaction, and portfolio construction to decide how to exploit that information.
+
+The goal is not to build the lineup that looks best in a spreadsheet. The goal is to build lineups that are strategically positioned to win when specific slate stories occur.
+
+Every serious MLB build should ask:
+
+- What are the 5-10 most important ways this slate can break?
+- Which chalk stacks or pitchers are dependent on fragile assumptions?
+- If a popular pitcher fails, which opposing stack benefits and how much leverage is created?
+- If a chalk offense succeeds, what secondary stack or pitcher pairing can still make the lineup unique?
+- Which team can outscore its ownership because the field is underestimating a matchup, bullpen path, lineup structure, or power ceiling?
+- Which cheap bats are not just values, but connective pieces that make an entire game-script lineup work?
+- Which lineups are telling the same underlying story even if the players differ?
+
 ### Default GPP Priorities
 
 - Strong preference for full 5-man primary stacks on DraftKings when slate size supports it.
 - Secondary correlation matters; do not treat the remaining hitters as random salary fillers.
 - Pitcher decisions should consider strikeout ceiling, run prevention, matchup, ownership, salary, and correlation with opposing bats.
-- Avoid overfitting to raw optimizer projection when a lineup sacrifices stack quality or ceiling.
+- Avoid overfitting to raw optimizer projection when a lineup sacrifices stack quality, ceiling, leverage, uniqueness, or game-script coherence.
+- Optimizer ranking is subordinate to strategic fit within the portfolio.
 
 ## Required MLB Agent Team
 
@@ -47,6 +64,8 @@ Do not evaluate MLB only from median projections. Assess ceiling and failure dis
 
 The goal is not to predict one exact outcome; it is to identify which outcome families have enough probability and enough payoff to deserve portfolio exposure.
 
+Simulation probabilities should inform game-script selection, not replace it. Two scenarios with similar probabilities may deserve very different exposure if one creates much stronger leverage or a less duplicated path to first place.
+
 ## Batting Order Adjustments
 
 Re-evaluate projection and exposure when:
@@ -73,14 +92,40 @@ For each team, evaluate:
 - wraparound connectivity and lineup-order structure
 - salary efficiency of the full stack
 - likelihood that the field uses the same exact combination
+- how the stack fits specific pitcher and secondary-stack game scripts
 
-The goal is to identify combinations where team ceiling is under-owned relative to the field.
+The goal is to identify combinations where team ceiling is under-owned relative to the field and where the full lineup tells a coherent tournament-winning story.
 
 ## Pitcher Failure Leverage
 
 Popular pitcher exposure must be evaluated together with the opposing offense. When a chalk pitcher has a realistic failure path, the Engine should consider whether the opposing stack offers asymmetric leverage.
 
 Pitcher fades should never be mechanical. They must be supported by matchup, contact quality, platoon, park/weather, pitch-count/role, bullpen, ownership, or other evidence.
+
+The strongest leverage spots often come from linked decisions: underweighting a fragile chalk pitcher while overweighting the offense that directly benefits if the pitcher fails.
+
+## Game-Script Construction
+
+Before final portfolio construction, create a slate-script board. Each major script should include:
+
+- trigger condition
+- teams/players that benefit
+- chalk or field assumptions that fail
+- likely stack/pitcher construction
+- ownership/leverage consequence
+- expected duplication profile
+- confidence tier
+
+Examples:
+
+- elite chalk pitcher dominates and chalk offense also succeeds
+- elite chalk pitcher dominates but chalk offense fails
+- popular pitcher fails and opposing stack breaks the slate
+- two high-total games disappoint while a mid-owned offense erupts
+- value pitcher succeeds and unlocks expensive low-owned stack
+- low-owned wraparound stack outscores the obvious 1-5 combination
+
+Portfolio exposure should be intentionally allocated across these scripts rather than allowing an optimizer to determine the story accidentally.
 
 ## Portfolio Coverage
 
@@ -99,6 +144,8 @@ Coverage must remain concentrated enough that a correct thesis can generate mult
 ## Duplication and Uniqueness
 
 The Engine should estimate likely duplication using salary usage, pitcher pairings, stack popularity, value bats, and common field constructions. Seek meaningful uniqueness without forcing low-quality plays solely to be different.
+
+Uniqueness should preferably come from intelligent game theory: a different stack combination, pitcher pairing, lineup-order structure, or correlated leverage path, not from randomly sacrificing projection.
 
 ## Portfolio Risk Audit
 
@@ -131,6 +178,8 @@ Review not only which stack won but also:
 - whether any value hitter became essential because of lineup position or salary
 - whether duplication or salary construction limited top-end payout
 - whether portfolio concentration was intentional or accidental
+- whether our slate scripts were logically sound even if they did not occur
+- whether the winning construction revealed a new strategic interaction or merely variance
 
 ### Counterfactual Review
 
