@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MLB DFS Engine Slate State",
+  "type": "object",
+  "required": ["slate_id", "state", "contest_groups", "source_audit", "industry_consensus_board", "scenario_board", "first_place_paths", "bink_coverage", "portfolio", "exposure_audit"],
+  "properties": {
+    "slate_id": {"type": "string"},
+    "state": {"enum": ["INTAKE", "INDUSTRY_RESEARCH", "PRELOCK", "FINAL", "POSTSLATE"]},
+    "contest_groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["contest_type", "entry_count"],
+        "properties": {
+          "contest_type": {"enum": ["single_entry", "five_max", "twenty_max", "one_fifty_max", "other"]},
+          "entry_count": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "source_audit": {
+      "type": "object",
+      "required": ["projection_source", "ownership_source", "market_checked", "weather_checked", "lineups_checked", "industry_research_completed"],
+      "properties": {
+        "projection_source": {"type": "string"},
+        "ownership_source": {"type": "string"},
+        "market_checked": {"type": "boolean"},
+        "weather_checked": {"type": "boolean"},
+        "lineups_checked": {"type": "boolean"},
+        "industry_research_completed": {"type": "boolean"},
+        "research_gaps": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "industry_consensus_board": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entity", "entity_type", "facts", "ai_interpretation", "confidence"],
+        "properties": {
+          "entity": {"type": "string"},
+          "entity_type": {"enum": ["game", "team", "pitcher", "hitter", "stack"]},
+          "facts": {"type": "object"},
+          "sources": {"type": "array", "items": {"type": "object"}},
+          "material_disagreement": {"type": ["string", "null"]},
+          "ai_interpretation": {"type": "string"},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "scenario_board": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "family", "confidence", "supporting_evidence"],
+        "properties": {
+          "id": {"type": "string"},
+          "family": {"type": "string"},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+          "supporting_evidence": {"type": "array", "items": {"type": "string"}},
+          "notes": {"type": "string"}
+        }
+      }
+    },
+    "first_place_paths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path_id", "scenario_id", "primary_win_condition", "pitcher_condition", "chalk_dependency", "leverage_event", "target_lineups", "ai_rationale"],
+        "properties": {
+          "path_id": {"type": "string"},
+          "scenario_id": {"type": "string"},
+          "primary_win_condition": {"type": "string"},
+          "secondary_win_condition": {"type": ["string", "null"]},
+          "pitcher_condition": {"type": "string"},
+          "chalk_dependency": {"type": "string"},
+          "leverage_event": {"type": "string"},
+          "target_lineups": {"type": "integer", "minimum": 0},
+          "target_portfolio_pct": {"type": "number", "minimum": 0, "maximum": 1},
+          "failure_linkage": {"type": "array", "items": {"type": "string"}},
+          "ai_rationale": {"type": "string"}
+        }
+      }
+    },
+    "bink_coverage": {
+      "type": "object",
+      "required": ["meaningful_paths_owned", "largest_dead_overlap_cluster", "most_fragile_shared_dependency", "strongest_asymmetric_path", "intentional_fades"],
+      "properties": {
+        "meaningful_paths_owned": {"type": "integer", "minimum": 0},
+        "largest_dead_overlap_cluster": {"type": "string"},
+        "most_fragile_shared_dependency": {"type": "string"},
+        "strongest_asymmetric_path": {"type": "string"},
+        "intentional_fades": {"type": "array", "items": {"type": "string"}},
+        "ai_summary": {"type": "string"}
+      }
+    },
+    "portfolio": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["lineup_id", "contest_type", "scenario_id", "first_place_path_id", "primary_stack", "players", "strategic_reason"],
+        "properties": {
+          "lineup_id": {"type": "string"},
+          "contest_type": {"type": "string"},
+          "scenario_id": {"type": "string"},
+          "first_place_path_id": {"type": "string"},
+          "primary_stack": {"type": "string"},
+          "secondary_stack": {"type": "string"},
+          "pitchers": {"type": "array", "items": {"type": "string"}},
+          "players": {"type": "array", "items": {"type": "string"}},
+          "salary": {"type": "integer"},
+          "projection": {"type": "number"},
+          "ceiling": {"type": "number"},
+          "duplication_risk": {"type": "number", "minimum": 0, "maximum": 1},
+          "strategic_reason": {"type": "string"},
+          "validation_status": {"enum": ["pending", "valid", "invalid"]}
+        }
+      }
+    },
+    "exposure_audit": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["player", "source_projected_ownership", "engine_final_exposure", "difference_vs_ownership_pp", "reason"],
+        "properties": {
+          "player": {"type": "string"},
+          "team": {"type": "string"},
+          "position": {"type": "string"},
+          "source_projected_ownership": {"type": "number"},
+          "source_prebuild_exposure": {"type": ["number", "null"]},
+          "engine_final_exposure": {"type": "number"},
+          "difference_vs_ownership_pp": {"type": "number"},
+          "difference_vs_prebuild_pp": {"type": ["number", "null"]},
+          "reason": {"type": "string"}
+        }
+      }
+    }
+  }
+}

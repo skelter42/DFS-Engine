@@ -6,7 +6,7 @@ MLB is a high-variance, correlation-heavy sport. The engine should prioritize co
 
 ### MLB Strategic Doctrine: Art Backed by Math
 
-For MLB tournaments, math is the foundation but not the final answer. Sim Savant projections, ownership, simulations, betting markets, park/weather data, and matchup metrics define what is plausible. The DFS Engine uses logic, game scripts, game theory, stack interaction, and portfolio construction to decide how to exploit that information.
+For MLB tournaments, math is the foundation but not the final answer. Sim Savant projections, ownership, simulations, betting markets, park/weather data, matchup metrics, and broader industry information define what is plausible. The DFS Engine uses AI reasoning, game scripts, game theory, stack interaction, and portfolio construction to decide how to exploit that information.
 
 The goal is not to build the lineup that looks best in a spreadsheet. The goal is to build lineups that are strategically positioned to win when specific slate stories occur.
 
@@ -16,7 +16,7 @@ Every serious MLB build should ask:
 - Which chalk stacks or pitchers are dependent on fragile assumptions?
 - If a popular pitcher fails, which opposing stack benefits and how much leverage is created?
 - If a chalk offense succeeds, what secondary stack or pitcher pairing can still make the lineup unique?
-- Which team can outscore its ownership because the field is underestimating a matchup, bullpen path, lineup structure, or power ceiling?
+- Which team can outscore its ownership because the field is underestimating a matchup, bullpen path, lineup structure, market move, or power ceiling?
 - Which cheap bats are not just values, but connective pieces that make an entire game-script lineup work?
 - Which lineups are telling the same underlying story even if the players differ?
 
@@ -24,14 +24,16 @@ Every serious MLB build should ask:
 
 - Strong preference for full 5-man primary stacks on DraftKings when slate size supports it.
 - Secondary correlation matters; do not treat the remaining hitters as random salary fillers.
-- Pitcher decisions should consider strikeout ceiling, run prevention, matchup, ownership, salary, and correlation with opposing bats.
+- Pitcher decisions should consider strikeout ceiling, run prevention, matchup, ownership, salary, market support, and correlation with opposing bats.
 - Avoid overfitting to raw optimizer projection when a lineup sacrifices stack quality, ceiling, leverage, uniqueness, or game-script coherence.
 - Optimizer ranking is subordinate to strategic fit within the portfolio.
+- Fixed mathematical scores are evidence summaries, not automatic exposure instructions.
 
 ## Required MLB Agent Team
 
 Every MLB slate build uses the full core agent team plus these specialized passes:
 
+- Industry Research / Market Consensus Agent
 - Simulation / Outcome Distribution Agent
 - Stack Architecture Agent
 - Pitcher Failure / Opposing Stack Agent
@@ -40,9 +42,68 @@ Every MLB slate build uses the full core agent team plus these specialized passe
 
 Default MLB handoff chain:
 
-Slate Intake -> Projection Audit -> News & Role -> Market Environment -> Simulation / Outcome Distribution -> Ownership & Leverage -> Stack Architecture -> Pitcher Failure / Opposing Stack -> Correlation / Game Script -> Portfolio Builder -> Duplication / Lineup Uniqueness -> Portfolio Risk Manager -> Exposure Auditor -> Post-Slate Learning.
+Slate Intake -> Industry Research / Market Consensus -> Projection Audit -> News & Role -> Simulation / Outcome Distribution -> Ownership & Leverage -> Stack Architecture -> Pitcher Failure / Opposing Stack -> Correlation / Game Script -> Portfolio Builder -> Duplication / Lineup Uniqueness -> Portfolio Risk Manager -> Exposure Auditor -> Post-Slate Learning.
 
 These passes are mandatory reasoning stages for MLB, even when implemented within one chat session rather than as autonomous background processes.
+
+## Mandatory Industry Research / Market Consensus
+
+Before any serious MLB portfolio is built, search the current industry and market. Sim Savant or any other uploaded source is a baseline, not the answer.
+
+At minimum, when materially available, evaluate:
+
+- sportsbook game totals
+- implied team run totals
+- moneylines
+- opening vs current line movement
+- relevant pitcher strikeout/outs/earned-run props
+- park factors
+- weather, wind, temperature, precipitation and delay risk
+- confirmed starting pitchers
+- official or expected batting orders
+- injuries, scratches, rest and role/pitch-count news
+- bullpen quality, workload and availability
+- opposing pitcher quality and handedness
+- platoon matchup context
+- broader industry hitter/pitcher projections
+- broader industry projected ownership
+- simulation, ceiling or win-rate information when accessible
+
+Use multiple independent sources when practical. Record source freshness/timestamps when useful. Never pretend a consensus exists when only one source is available.
+
+### Industry Consensus Board
+
+Every slate should create a structured consensus board before the Pitcher, Stack, Leverage, and Game Script agents make final recommendations. Capture when available:
+
+- opening and current game totals
+- implied team runs
+- moneyline
+- market movement
+- pitcher prop expectations
+- park/weather status
+- lineup confirmation status
+- bullpen and role notes
+- Savant/baseline projection
+- broader projection range or consensus
+- Savant/baseline projected ownership
+- broader ownership range or consensus
+- material source disagreement
+- AI interpretation and confidence
+
+Observed facts must be separated from AI interpretation.
+
+### Disagreement Is a Feature
+
+Do not automatically average conflicting sources. Investigate why they disagree.
+
+Examples:
+
+- Savant likes an offense while the market total is moving down.
+- Savant is lukewarm while implied runs, lineup quality, and other projections are improving.
+- a high-owned pitcher has a good median projection but weak K prop, workload, or matchup support.
+- a cheap hitter moves into a premium lineup slot before projections fully update.
+
+A disagreement can indicate uncertainty, stale information, a genuine model edge, or no actionable signal. The AI must decide which and record the reason.
 
 ## Required Cross-Checks
 
@@ -60,7 +121,7 @@ No one projection source is authoritative.
 
 ## Simulation / Outcome Distribution
 
-Do not evaluate MLB only from median projections. Assess ceiling and failure distributions for hitters, pitchers, stacks, and game environments. Use Sim Savant simulations when available, then adjust confidence for current lineup, market, weather, matchup, and ownership context.
+Do not evaluate MLB only from median projections. Assess ceiling and failure distributions for hitters, pitchers, stacks, and game environments. Use Sim Savant simulations when available, then adjust confidence for current lineup, market, weather, matchup, industry disagreement, and ownership context.
 
 The goal is not to predict one exact outcome; it is to identify which outcome families have enough probability and enough payoff to deserve portfolio exposure.
 
@@ -82,10 +143,11 @@ A lineup-position change should influence plate-appearance expectation, stack co
 
 For each team, evaluate:
 
-- implied scoring environment
+- implied scoring environment and market movement
 - top-to-bottom lineup quality
 - home-run and extra-base-hit ceiling
 - matchup platoon advantages
+- opposing pitcher failure path
 - bullpen path
 - ownership of the full stack, not only individual hitters
 - availability of low-owned connective value
@@ -100,7 +162,7 @@ The goal is to identify combinations where team ceiling is under-owned relative 
 
 Popular pitcher exposure must be evaluated together with the opposing offense. When a chalk pitcher has a realistic failure path, the Engine should consider whether the opposing stack offers asymmetric leverage.
 
-Pitcher fades should never be mechanical. They must be supported by matchup, contact quality, platoon, park/weather, pitch-count/role, bullpen, ownership, or other evidence.
+Pitcher fades should never be mechanical. They must be supported by matchup, contact quality, platoon, park/weather, pitch-count/role, market/prop evidence, bullpen, ownership, or other evidence.
 
 The strongest leverage spots often come from linked decisions: underweighting a fragile chalk pitcher while overweighting the offense that directly benefits if the pitcher fails.
 
@@ -109,6 +171,7 @@ The strongest leverage spots often come from linked decisions: underweighting a 
 Before final portfolio construction, create a slate-script board. Each major script should include:
 
 - trigger condition
+- evidence supporting the script
 - teams/players that benefit
 - chalk or field assumptions that fail
 - likely stack/pitcher construction
@@ -126,6 +189,14 @@ Examples:
 - low-owned wraparound stack outscores the obvious 1-5 combination
 
 Portfolio exposure should be intentionally allocated across these scripts rather than allowing an optimizer to determine the story accidentally.
+
+## AI Portfolio Authority
+
+The AI Portfolio Builder is the final strategic authority for tournament lineup construction. Projections, optimizer outputs, composite scores, betting markets, and simulations are inputs. They do not automatically determine exposures.
+
+Deterministic code should be used for tasks such as parsing, salary/position legality, duplicate checks, exposure arithmetic, contest assignment, and storage. If validation fails, return the lineup to the AI for repair without silently changing the slate thesis.
+
+Material exposure decisions should be explainable through evidence + interpretation + game script.
 
 ## Portfolio Coverage
 
@@ -165,7 +236,9 @@ A portfolio containing many different lineups can still represent the same under
 
 Every MLB lineup set must include Sim Savant/source projected ownership vs DFS Engine final exposure with percentage-point difference.
 
-Large differences should have a stated reason such as stack concentration, lineup-order value, ownership leverage, pitching ceiling, uniqueness, game-script coverage, or reduced confidence in the source projection.
+When available, also include Savant/source prebuild portfolio exposure as a separate quantity.
+
+Large differences should have a stated reason such as stack concentration, lineup-order value, ownership leverage, pitching ceiling, market/industry disagreement, uniqueness, game-script coverage, or reduced confidence in the source projection.
 
 ## Post-Slate Learning
 
@@ -179,6 +252,8 @@ Review not only which stack won but also:
 - whether duplication or salary construction limited top-end payout
 - whether portfolio concentration was intentional or accidental
 - whether our slate scripts were logically sound even if they did not occur
+- whether the Industry Research Agent identified the important pre-slate signals
+- whether the AI interpreted market/industry disagreement correctly
 - whether the winning construction revealed a new strategic interaction or merely variance
 
 ### Counterfactual Review
@@ -189,5 +264,6 @@ Post-slate analysis must ask what would have happened if one decision changed wh
 - if our pitcher call was correct, was the secondary stack the real problem?
 - if our leverage thesis was correct, did we simply lack enough exposure?
 - if chalk failed as expected, did we choose the right alternative path?
+- if a market or projection disagreement mattered, did we identify the right side before lock?
 
 Do not conclude that a stack rule is correct merely because one winning lineup used it. Separate process quality from ordinary baseball variance.
