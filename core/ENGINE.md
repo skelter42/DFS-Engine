@@ -1,5 +1,24 @@
 # Core DFS Engine
 
+## Decision Hierarchy
+
+Sim Savant is the default baseline input layer for projections, ownership, and simulation context when available. It is the starting point, not the final answer.
+
+The DFS Engine sits on top of that baseline and uses multiple cooperating analysis roles to challenge, validate, adjust, and portfolio-build around it. The objective is long-term profitable decision quality and first-place equity, not blind agreement with any one source.
+
+Default hierarchy:
+
+1. Sim Savant baseline projections / ownership / sims
+2. Data validation and official news checks
+3. Broader industry and market cross-checks
+4. Sport-specific role, matchup, environment, and correlation analysis
+5. Contest-specific leverage and duplication analysis
+6. Game-script / slate-thesis portfolio construction
+7. Exposure audit versus Savant/source ownership
+8. Post-slate review and durable learning
+
+No agent should override the baseline casually. Any meaningful deviation from Savant should have an explicit reason tied to data, context, leverage, correlation, contest structure, or portfolio coverage.
+
 ## Slate Workflow
 
 ### 1. Ingest
@@ -41,6 +60,8 @@ The engine should not merely maximize raw projected points. It should balance:
 
 Large-field GPP portfolios should accept individual-lineup volatility in exchange for stronger first-place equity. Small-field or flatter-payout contests may justify less leverage and more median projection.
 
+The success metric is long-term expected value and contest-winning upside across repeated slates, not whether every individual slate cashes.
+
 ## Exposure Rules
 
 Exposure is a decision output, not an input copied from projected ownership. A player may be over the field because of superior ceiling, role, correlation, or mispriced ownership. A player may be under the field because the market is overconfident, the projection is fragile, or the portfolio already captures the same outcome through correlated alternatives.
@@ -54,7 +75,7 @@ Every final lineup set must include a table with at least:
 | Player | Source Projected Ownership | DFS Engine Exposure | Difference (pp) |
 |---|---:|---:|---:|
 
-Sort or highlight the largest positive and negative deviations.
+When Sim Savant ownership is available, it is the default source column. Sort or highlight the largest positive and negative deviations.
 
 ## Anti-Hallucination Rules
 
