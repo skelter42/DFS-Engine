@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MLB DFS Engine Post-Slate Record",
+  "type": "object",
+  "required": ["slate_id", "date", "contest_results", "engine_summary", "error_attribution", "learning_candidates"],
+  "properties": {
+    "slate_id": {"type": "string"},
+    "date": {"type": "string", "format": "date"},
+    "contest_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["contest_type", "entry_count", "fees", "winnings", "roi"],
+        "properties": {
+          "contest_type": {"type": "string"},
+          "entry_count": {"type": "integer"},
+          "fees": {"type": "number"},
+          "winnings": {"type": "number"},
+          "roi": {"type": "number"},
+          "best_percentile": {"type": ["number", "null"]},
+          "winner_covered": {"type": "boolean"},
+          "top_1pct_covered": {"type": "boolean"},
+          "top_10pct_covered": {"type": "boolean"},
+          "top_20pct_covered": {"type": "boolean"}
+        }
+      }
+    },
+    "engine_summary": {
+      "type": "object",
+      "properties": {
+        "primary_stack_hit_rate": {"type": "number"},
+        "secondary_stack_hit_rate": {"type": "number"},
+        "pitcher_hit_rate": {"type": "number"},
+        "scenario_hit_rate": {"type": "number"},
+        "average_projection_delta_vs_source": {"type": "number"},
+        "average_exposure_delta_vs_source_ownership": {"type": "number"},
+        "average_exposure_delta_vs_source_prebuild": {"type": ["number", "null"]}
+      }
+    },
+    "error_attribution": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["category", "severity", "evidence"],
+        "properties": {
+          "category": {
+            "enum": [
+              "primary_stack",
+              "secondary_stack",
+              "pitcher_sp1",
+              "pitcher_sp2",
+              "pitcher_pairing",
+              "lineup_order_news",
+              "market_environment",
+              "ownership_leverage",
+              "duplication_uniqueness",
+              "scenario_allocation",
+              "portfolio_concentration",
+              "projection_error",
+              "variance_no_process_error"
+            ]
+          },
+          "severity": {"enum": ["low", "medium", "high"]},
+          "evidence": {"type": "string"},
+          "counterfactual": {"type": "string"}
+        }
+      }
+    },
+    "learning_candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "status", "evidence", "proposed_engine_impact"],
+        "properties": {
+          "title": {"type": "string"},
+          "status": {"enum": ["hypothesis", "validated", "deprecated"]},
+          "evidence": {"type": "string"},
+          "proposed_engine_impact": {"type": "string"},
+          "revisit_condition": {"type": "string"}
+        }
+      }
+    }
+  }
+}
