@@ -1,115 +1,159 @@
 # DFS Engine Agent Team
 
-The DFS Engine should behave like a coordinated research and portfolio team. Agents may be implemented as separate processes later; for now these roles are mandatory reasoning passes.
+The DFS Engine should behave like a coordinated research and portfolio team. The user should not need to manage individual agents. These are reasoning responsibilities, not separate processes by default.
 
-## Core Agents
+## Agent Design Rule
+
+An agent only deserves to exist if it owns a distinct decision or handoff. If two roles repeatedly consume the same evidence and produce the same type of conclusion, merge them.
+
+Sport-specific concepts such as MLB pitcher failure, stack architecture, NCAAF blowout risk, or QB archetypes remain mandatory analysis modules, but they do not become standalone agents unless separating them materially improves decision quality.
+
+## Core Decision Team
 
 ### 1. Slate Intake Agent
-Validates contest, site, slate, player pool, salaries, positions, projection columns, ownership columns, and missing data. Rejects malformed inputs before optimization.
+Validates site, sport, slate, contest structure, true entry count, salaries, positions, player IDs, projection/ownership columns, and missing inputs. It separates actual DK entries from embedded player-pool/reference rows and creates the normalized slate state.
 
-### 2. Projection Audit Agent
-Compares baseline projections with alternate industry signals and identifies meaningful disagreements. It does not automatically replace the baseline; it produces a confidence adjustment and a list of fragile projections.
+### 2. Industry Research & Projection/Role Audit Agent
+Builds the current evidence layer before strategy begins. It:
 
-### 3. News & Role Agent
-Verifies current starting status, injuries, scratches, batting order or lineup position, expected minutes/usage, depth-chart changes, and other role information. It flags changes that materially affect DFS value.
+- seeks multiple independent projection and projected-ownership sources when accessible
+- checks betting markets, implied totals, props, weather/park, matchup context, and other sport-relevant market signals
+- verifies current starting status, injuries, scratches, batting order/depth chart, workload, usage, and role
+- compares Sim Savant or any uploaded baseline with broader industry evidence
+- identifies stale data, thin consensus, meaningful outliers, and fragile projections
 
-### 4. Market Environment Agent
-Uses betting markets and relevant contextual data to identify high-upside environments, overrated environments, and possible market movement. Examples include implied team totals, totals/spreads, park/weather, pace, and matchup quality as sport-appropriate.
+It must distinguish verified facts from AI interpretation. No single source is authoritative.
 
-### 5. Ownership & Leverage Agent
-Evaluates projected ownership, likely field constructions, chalk fragility, leverage pivots, and duplication risk. It distinguishes good chalk from bad chalk rather than fading popularity mechanically.
+### 3. Field Game Theory Agent
+Assumes the serious tournament field is sharp. It models what opponents are likely to build, not merely individual ownership.
 
-### 6. Correlation / Game Script Agent
-Builds coherent slate narratives and identifies lineups that benefit together. It creates multiple plausible game scripts rather than one deterministic prediction.
+Responsibilities include:
 
-### 7. Portfolio Builder Agent
-Combines projection, ceiling, ownership, leverage, correlation, and contest structure to construct the actual lineup set. It manages exposures across the portfolio, not lineup by lineup in isolation.
+- projected ownership consensus and disagreement
+- likely pitcher/QB pairs and other key combinations
+- common stacks/correlations
+- chalk value clusters
+- salary construction
+- duplication pressure
+- conditional leverage
+- field assumptions and correlated failure points
 
-### 8. Exposure Auditor Agent
-Produces the required side-by-side source projected ownership vs DFS Engine exposure list with percentage-point difference. It challenges the largest deviations and catches accidental concentration.
+It distinguishes good chalk from bad chalk and never treats low ownership as an objective by itself.
 
-### 9. Post-Slate Learning Agent
-Compares results with pre-slate theses. It categorizes misses into projection error, ownership error, role/news error, correlation error, portfolio/exposure error, or ordinary variance. Only repeated or clearly structural findings become durable engine rules.
+### 4. Sport Architecture Agent
+Applies the sport-specific strategic brain to the slate. This is one agent with required sport modules rather than a collection of overlapping agents.
 
-## MLB Specialized Agents
+For MLB, required modules include:
 
-These are mandatory for MLB slate builds in addition to the core agents.
+- simulation / outcome distributions
+- pitcher ceiling and failure paths
+- opposing-stack leverage
+- primary and secondary stack architecture
+- batting-order connectivity
+- bullpen path
+- duplication-sensitive stack construction
 
-### 10. Simulation / Outcome Distribution Agent
-Moves beyond median projections to evaluate ceiling paths, volatility, boom rates, team scoring distributions, pitcher upside/failure distributions, and how often different slate scripts can plausibly produce first-place lineups. It should use Sim Savant simulation outputs when available, then challenge them with current context rather than treating them as final truth.
+For NCAAF, required modules include:
 
-### 11. Stack Architecture Agent
-Evaluates full-stack construction quality rather than only individual hitter quality. It scores primary 5-man stacks, secondary correlations, wraparound combinations, lineup-order connectivity, salary efficiency, platoon fit, and full-stack ownership. It should identify stacks that are individually popular but collectively over-owned, as well as under-owned combinations with coherent ceiling.
+- depth-chart and role certainty
+- QB archetype
+- usage concentration
+- blowout/rotation behavior
+- pace and game environment
+- football correlation
 
-### 12. Pitcher Failure / Opposing Stack Agent
-Explicitly models where popular pitchers can fail and connects those failure paths to opposing bats and stacks. It compares pitcher ownership, strikeout ceiling, contact quality allowed, platoon splits, park, weather, bullpen context, and opposing stack leverage. Pitcher fades should be tied to coherent offensive leverage rather than random avoidance.
+The output is a set of viable sport-specific constructions and causal relationships, not final exposures.
 
-### 13. Duplication / Lineup Uniqueness Agent
-Estimates lineup duplication risk using salary usage, common pitcher pairings, chalk stack combinations, popular value bats, roster construction, and likely field behavior. It seeks enough uniqueness for contest-winning equity without sacrificing excessive projection or correlation.
+### 5. Scenario & Bink Path Agent
+Turns evidence, field assumptions, and sport architecture into a small set of coherent ways the slate can be won.
 
-### 14. Portfolio Risk Manager Agent
-Audits the entire lineup set for hidden concentration. It measures exposure not only by player, but also by primary stack, secondary stack, pitcher pairing, game environment, salary construction, and game script. Its job is to prevent the portfolio from making the same underlying bet repeatedly while still preserving concentration when the Engine has a strong edge.
+Each first-place path should identify:
 
-## NCAAF Specialized Agents
+- trigger / causal story
+- primary win condition
+- secondary win condition
+- key player/team/game dependencies
+- pitcher or QB condition where relevant
+- chalk dependency
+- leverage event
+- likely field construction being accepted or attacked
+- duplication profile
+- confidence and unresolved uncertainty
 
-These are mandatory for college-football slate builds in addition to the core agents. Detailed behavior lives in `sports/ncaaf.md`.
+Its purpose is Bink Coverage: identify the important distinct first-place outcomes worth owning without creating random scenario count for its own sake.
 
-### 15. Depth Chart & Role Certainty Agent
-Verifies starting QBs, RB rotations, WR/TE starters, transfers, suspensions, and injury uncertainty. It assigns role confidence and penalizes fragile backup-dependent projections.
+### 6. Portfolio Builder & Risk Agent
+This is the final strategic authority for lineup construction. It converts first-place paths into the actual contest-specific lineup portfolio.
 
-### 16. QB Archetype Agent
-Classifies QBs by rushing floor, passing volume, favorite/underdog script, red-zone rushing, and ceiling path. It prevents the Engine from treating all similarly projected QBs as interchangeable.
+Responsibilities include:
 
-### 17. Usage Concentration Agent
-Measures carries, targets, routes, goal-line usage, and offensive concentration so the Engine can distinguish durable volume from committee-driven median projection.
+- construct lineups around named paths rather than projection rank alone
+- adapt strategy to actual field size, payout structure, max entries, and our entry count
+- decide within-path concentration versus across-path coverage
+- detect dead overlap and correlated death
+- manage player, stack, pitcher/QB, game, salary, and scenario concentration
+- estimate duplication/uniqueness at the lineup level
+- reject cosmetic variants that do not add meaningful first-place coverage
+- preserve strong chalk when it remains strategically correct
 
-### 18. Blowout & Rotation Agent
-Models large-spread outcomes as separate passing, rushing, starter-ceiling, rotation, and favorite-disappointment branches instead of applying one generic blowout penalty.
+A material projection sacrifice must purchase a named edge such as leverage, correlation, uniqueness, scenario coverage, or reduced shared failure.
 
-### 19. Game Environment & Pace Agent
-Ranks games by four-quarter fantasy potential using total, spread, pace, offensive efficiency, explosive-play ability, pass rate, and expected competitiveness.
+### 7. Exposure & Final Validation Agent
+Audits rather than redesigns the portfolio. It must produce the required side-by-side exposure view and verify that strategic decisions survived construction.
 
-### 20. CFB Correlation Agent
-Builds QB/pass-catcher stacks, opponent bring-backs, rushing-heavy favorite constructions, and trailing-underdog volume combinations consistent with actual offensive roles.
+Required checks include:
 
-### 21. Script Portfolio Agent
-Assigns each lineup to a plausible slate narrative and intentionally allocates portfolio weight across game-script families.
+- source/Savant projected ownership
+- industry ownership range or consensus when available
+- source prebuild exposure when available
+- DFS Engine final exposure
+- percentage-point differences and reasons for material deviations
+- player/team/stack/pitcher or QB concentration
+- first-place-path allocation
+- dead-overlap summary
+- unresolved news/weather/market gates
+- legality, salary, positions, IDs, duplicates, uniques, and contest assignment through deterministic checks
 
-### 22. CFB Duplication & Construction Agent
-Audits common double-QB structures, chalk pairings, popular value, salary usage, and repeated lineup cores to preserve first-place equity.
+If deterministic validation fails, return the lineup to the Portfolio Builder for repair without silently changing the thesis.
 
-### 23. CFB Portfolio Risk Agent
-Audits concentration by player, team, game, QB pairing, script family, favorite/underdog archetype, and chalk combination.
+### 8. Post-Slate Learning Agent
+Compares actual results with the saved pre-slate evidence, field model, first-place paths, portfolio, and exposures.
 
-## MLB Default Handoff Chain
+It separates:
 
-Slate Intake -> Projection Audit -> News & Role -> Market Environment -> Simulation / Outcome Distribution -> Ownership & Leverage -> Stack Architecture -> Pitcher Failure / Opposing Stack -> Correlation / Game Script -> Portfolio Builder -> Duplication / Lineup Uniqueness -> Portfolio Risk Manager -> Exposure Auditor -> Post-Slate Learning.
+- source/projection error
+- ownership error
+- field-construction error
+- role/news error
+- sport-architecture error
+- game-theory error
+- missing or underallocated first-place path
+- lineup implementation error
+- dead-overlap / concentration error
+- ordinary variance
 
-## NCAAF Default Handoff Chain
+It must include counterfactual review and must not promote a durable rule from one noisy winner. Repeated evidence, causal support, or explicit experimental status is required before changing the canonical brain.
 
-Slate Intake -> Projection Audit -> Depth Chart & Role Certainty -> News & Role -> Market Environment -> QB Archetype -> Usage Concentration -> Blowout & Rotation -> Game Environment & Pace -> Ownership & Leverage -> CFB Correlation -> Script Portfolio -> Portfolio Builder -> CFB Duplication & Construction -> CFB Portfolio Risk -> Exposure Auditor -> Post-Slate Learning.
+## Default Handoff Chain
 
-## Post-Slate Counterfactual Review
+`Slate Intake -> Industry Research & Projection/Role Audit -> Field Game Theory -> Sport Architecture -> Scenario & Bink Paths -> Portfolio Builder & Risk -> Exposure & Final Validation -> Post-Slate Learning`
 
-For MLB and NCAAF, the Post-Slate Learning Agent must include a counterfactual pass. It should ask what would have happened if one major decision had been correct while another was held constant.
-
-Examples:
-- if the primary stack/game script hit, did another roster decision still sink the lineup?
-- if the leverage thesis was correct, was exposure too low to benefit?
-- if the field chalk failed as expected, did the Engine choose the right alternatives?
-- for NCAAF, if the right game environment was identified, did the correct QB archetype and role players appear in enough builds?
-- was the miss caused by process or ordinary variance?
-
-The purpose is to avoid learning the wrong lesson from final standings alone.
+This is the canonical chain across sports. Sport-specific files define what the Sport Architecture stage must analyze.
 
 ## Handoff Protocol
 
-Each pass should preserve:
+Every stage preserves:
 
-- facts and source data
+- verified facts and source data
+- AI interpretation
 - assumptions
-- derived adjustments
-- confidence level
+- confidence
 - unresolved uncertainty
+- material disagreements
+- decision consequences for the next stage
 
-Later agents should not silently overwrite earlier facts. Any change must be traceable to new evidence or an explicit model decision.
+Later stages must not silently overwrite earlier facts. Material changes require new evidence or an explicit strategic judgment.
+
+## Streamlining Rule
+
+Do not add a new agent because a topic is important. Add an agent only when that topic requires an independent decision boundary that cannot be handled cleanly inside an existing stage.
