@@ -1,0 +1,38 @@
+{
+  "large_field_gpp": {
+    "projection_multiplier": 0.96,
+    "ceiling_multiplier": 1.20,
+    "leverage_multiplier": 1.30,
+    "correlation_multiplier": 1.20,
+    "max_player_exposure": 0.55,
+    "min_uniques": 3,
+    "game_script_diversity": "high"
+  },
+  "small_field_gpp": {
+    "projection_multiplier": 1.02,
+    "ceiling_multiplier": 1.05,
+    "leverage_multiplier": 0.90,
+    "correlation_multiplier": 1.10,
+    "max_player_exposure": 0.70,
+    "min_uniques": 2,
+    "game_script_diversity": "medium"
+  },
+  "single_entry": {
+    "projection_multiplier": 1.08,
+    "ceiling_multiplier": 1.00,
+    "leverage_multiplier": 0.80,
+    "correlation_multiplier": 1.05,
+    "max_player_exposure": 1.00,
+    "min_uniques": 0,
+    "game_script_diversity": "focused"
+  },
+  "cash": {
+    "projection_multiplier": 1.20,
+    "ceiling_multiplier": 0.75,
+    "leverage_multiplier": 0.25,
+    "correlation_multiplier": 0.60,
+    "max_player_exposure": 1.00,
+    "min_uniques": 0,
+    "game_script_diversity": "none"
+  }
+}
