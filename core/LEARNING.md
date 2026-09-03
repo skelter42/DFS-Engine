@@ -3,6 +3,28 @@
 ## Objective
 Improve future decision quality without overfitting to a single winning lineup or one unusual slate.
 
+## Automatic Learning Writeback
+
+For every meaningful DFS Engine session, learning review is the default final stage. The user should not need to ask for it separately.
+
+Trigger automatic learning review after any of the following:
+
+- a lineup portfolio is built or materially revised
+- final-lock news causes strategic changes
+- contest results are reviewed
+- a what-if/replay analysis produces a reusable process insight
+- an input/parsing/routing mistake reveals a preventable workflow flaw
+
+The Engine should automatically decide whether anything from the session is durable enough to save. If yes, write the reusable lesson to GitHub during the same chat session. If no durable lesson exists, do not manufacture one.
+
+Save only reusable knowledge such as process improvements, validated strategic principles, agent handoff changes, contest-specific construction logic, repeated projection/ownership calibration findings, and post-slate causal lessons.
+
+Do not permanently save one-off player takes, raw slate opinions, hindsight-only winner chasing, isolated variance, or facts that can be regenerated from current data.
+
+The intended loop is:
+
+Chat inputs -> GitHub brain loaded -> agents run -> portfolio/output -> session learning review -> durable writeback to GitHub -> stronger next session.
+
 ## Post-Slate Review Questions
 
 1. What lineup/stack structures actually dominated the top of the contest?
@@ -35,6 +57,8 @@ Do not change core logic because one lineup won. Promote a lesson only when it i
 - a clear causal mechanism
 - a backtest or meaningful sample
 - a result that exposes a genuine process flaw rather than hindsight
+
+Process corrections that prevent avoidable mistakes may be promoted immediately when the causal mechanism is clear.
 
 ## Durable Learning Format
 
