@@ -8,7 +8,19 @@ The DFS Engine sits on top of that baseline and uses multiple cooperating analys
 
 ### Core Philosophy: Art Backed by Math
 
-Math defines the plausible decision space. Logic, game scripts, game theory, correlation, and portfolio construction decide how we attack it.
+Math defines the plausible decision space. Logic, game scripts, game theory, correlation, industry context, and portfolio construction decide how we attack it.
+
+### GPT-over-Math Operating Principle
+
+For every sport, quantitative models, optimizers, projections, ownership estimates, simulations, and mathematical scores are subordinate evidence layers. They generate candidates and describe plausible outcomes; they do not have final authority over portfolio construction.
+
+The final portfolio must receive an explicit GPT/AI strategic review after the mathematical candidate-generation stage. That review must evaluate whether the proposed lineups actually express coherent, differentiated paths to first place and whether repeated mathematical solutions are creating hidden concentration, accidental salary plugs, duplicated game scripts, or excessive dependence on one player, team, stack, game, or construction archetype.
+
+GPT/AI judgment is not permission to ignore data. It must remain grounded in projections, simulations, verified news, industry/market information, ownership, correlation, contest structure, and uncertainty. The intended hierarchy is:
+
+**Data and math define what is plausible -> industry and market evidence challenge the assumptions -> GPT/AI game-script judgment decides how the portfolio should attack the slate.**
+
+If the mathematical solution and GPT/AI review disagree materially, the disagreement must be resolved explicitly before final delivery rather than silently accepting the optimizer output.
 
 The Engine should never confuse the highest median projection with the best tournament lineup. Projections, simulations, ownership, betting markets, and other quantitative inputs are evidence. They are not the final decision-maker.
 
@@ -42,10 +54,11 @@ Default hierarchy:
 4. Native cross-sport simulation / outcome-distribution layer
 5. Sport-specific role, matchup, environment, and correlation analysis
 6. Contest-specific ownership, leverage, and duplication analysis
-7. Mandatory AI game-theory and multi-script thesis generation
-8. Portfolio construction around those theses
-9. Exposure audit versus Savant/source ownership
-10. Post-slate review and durable learning
+7. Mathematical candidate-lineup generation
+8. Mandatory GPT/AI game-theory, multi-script, and hidden-concentration review
+9. Portfolio construction / reshaping around the approved theses
+10. Exposure audit versus Savant/source ownership
+11. Post-slate review and durable learning
 
 No agent should override the baseline casually. Any meaningful deviation from Savant should have an explicit reason tied to data, context, leverage, correlation, contest structure, game theory, simulation evidence, industry disagreement, or portfolio coverage.
 
@@ -69,8 +82,13 @@ The shared framework is defined in `core/SIMULATION.md`. Sport modules must supp
 
 Simulation output should inform ceiling, failure probability, top-tail outcomes, game-script likelihood, and portfolio overlap. It should not replace news validation, ownership analysis, or strategic judgment.
 
-### 5. Build AI slate theses — mandatory
-Run an explicit AI game-script judgment pass after the quantitative and industry layers are available.
+### 5. Generate mathematical candidate lineups
+Use projections, simulations, ownership, salary, correlation, and contest-specific scoring to generate a broad candidate pool. Candidate generation is allowed to be optimizer-heavy because it is not the final decision stage.
+
+Do not promote candidate rankings directly into the final portfolio.
+
+### 6. Build AI slate theses and review candidates — mandatory
+Run an explicit GPT/AI game-script judgment pass after the quantitative, industry, simulation, and candidate-generation layers are available.
 
 Identify several plausible ways the slate can be won. Each thesis should describe:
 
@@ -82,24 +100,39 @@ Identify several plausible ways the slate can be won. Each thesis should describ
 - which lineup archetypes express the thesis
 - what evidence supports or weakens the thesis
 
+Then audit the mathematical candidate pool for hidden concentration. Repeated use of the same player, value piece, stack, pitcher, QB, game, salary structure, or construction archetype must be justified by the slate thesis rather than accepted merely because the optimizer repeatedly prefers it.
+
 Theses should be causal, not merely descriptive. A strong thesis connects events: if X happens, Y players/teams become stronger together while Z chalk or construction loses value.
 
 The AI pass must preserve multiple credible paths to victory rather than collapsing the portfolio onto one forecast. Stronger theses may receive more exposure, but alternate scripts should remain represented when they have meaningful probability and payoff.
 
-### 6. Construct portfolios
+### 7. Construct and reshape portfolios
 Build lineups as a coordinated portfolio rather than isolated top-projection lineups. Coverage should represent distinct plausible game scripts while preserving enough concentration to benefit when a thesis is right.
 
-Optimizer output is a tool, not the strategy. Lineups should be accepted, rejected, or reshaped based on thesis coherence, game theory, correlation, duplication, simulation tail metrics, industry context, and portfolio fit.
+Optimizer output is a tool, not the strategy. Lineups should be accepted, rejected, or reshaped based on thesis coherence, game theory, correlation, duplication, simulation tail metrics, industry context, hidden concentration, and portfolio fit.
 
 Roster construction patterns, stack structures, player exposures, team exposures, game exposures, salary usage, and lineup archetypes are outputs of this process. They must not be preset as hard optimization constraints unless required for roster legality, contest rules, inactive-player exclusion, or another verified operational necessity.
 
-### 7. Audit exposures
+### 8. Audit exposures
 For every delivered lineup set, report source projected ownership versus DFS Engine exposure with percentage-point difference. Investigate large deviations and ensure they are intentional.
 
-### 8. Final news / market pass
+### 9. Final GPT/AI sign-off
+Before delivery, perform one final strategic review of the complete portfolio. Confirm that:
+
+- major exposures are explainable
+- high concentration is intentional rather than mathematical repetition
+- multiple credible paths to first remain represented
+- lineups are coherent with their game scripts
+- no optimizer convenience piece has become an accidental universal dependency
+- industry/market disagreement has been considered
+- no arbitrary hard caps/floors or stack quotas distorted the output
+
+A portfolio that fails this review must be reshaped before delivery.
+
+### 10. Final news / market pass
 Re-check official lineups, injuries, scratches, batting order/starting roles, weather where relevant, and late market movement. Re-simulate or re-optimize when role changes materially alter projection, variance, correlation, ownership, industry consensus, or a game-script thesis.
 
-### 9. Post-slate learning
+### 11. Post-slate learning
 Review what won, what the engine captured, what it missed, and whether the failure came from projections, simulation calibration, industry/market interpretation, AI game-script judgment, ownership, game theory, correlation, portfolio construction, or ordinary variance. Promote only durable lessons into the brain.
 
 ## Portfolio Philosophy
