@@ -1,70 +1,30 @@
 {
-  "version": "2.0",
+  "version": "2.1",
   "sport": "MLB",
   "platform": "DraftKings",
-  "states": ["INTAKE", "PRELOCK", "FINAL", "POSTSLATE"],
-  "required_stack_size": 5,
-  "scoring": {
-    "stack_score": {
-      "implied_runs": 0.22,
-      "ceiling": 0.20,
-      "salary_efficiency": 0.10,
-      "lineup_connectivity": 0.12,
-      "platoon_matchup": 0.08,
-      "park_weather": 0.08,
-      "bullpen_path": 0.08,
-      "ownership_leverage": 0.12
-    },
-    "pitcher_score": {
-      "median_projection": 0.18,
-      "ceiling": 0.24,
-      "strikeout_environment": 0.20,
-      "run_prevention": 0.12,
-      "salary_efficiency": 0.10,
-      "ownership_leverage": 0.08,
-      "role_security": 0.08
-    },
-    "lineup_score": {
-      "projection": 0.24,
-      "ceiling": 0.22,
-      "correlation": 0.18,
-      "leverage": 0.14,
-      "script_fit": 0.12,
-      "uniqueness": 0.10
-    }
+  "states": ["INTAKE", "INDUSTRY_RESEARCH", "PRELOCK", "FINAL", "POSTSLATE"],
+  "construction_principles": {
+    "default_primary_stack": "Strong preference for a 5-man primary stack when slate size and contest structure support it; not a mandatory rule on every slate.",
+    "ai_final_authority": true,
+    "assume_sharp_field": true,
+    "industry_consensus_required": true,
+    "bink_coverage_required": true,
+    "dead_overlap_audit_required": true,
+    "contest_specific_portfolios": true,
+    "projection_sacrifice_rule": "Allow only when it purchases a named edge: leverage, correlation, uniqueness, scenario coverage, duplication reduction, or reduced correlated portfolio risk."
   },
-  "contest_presets": {
+  "contest_modes": {
     "single_entry": {
-      "script_count_target": 2,
-      "primary_stack_team_cap": 0.55,
-      "pitcher_cap": 0.70,
-      "min_projection_percentile": 0.80,
-      "leverage_aggression": "low",
-      "uniqueness_aggression": "low"
+      "intent": "Concentrate on the strongest evidence-backed first-place path with enough uniqueness for the actual field and payout structure."
     },
     "five_max": {
-      "script_count_target": 3,
-      "primary_stack_team_cap": 0.50,
-      "pitcher_cap": 0.65,
-      "min_projection_percentile": 0.72,
-      "leverage_aggression": "medium",
-      "uniqueness_aggression": "medium"
+      "intent": "Own a small set of strong first-place paths with meaningful branching rather than cosmetic lineup variation."
     },
     "twenty_max": {
-      "script_count_target": 5,
-      "primary_stack_team_cap": 0.40,
-      "pitcher_cap": 0.55,
-      "min_projection_percentile": 0.62,
-      "leverage_aggression": "medium_high",
-      "uniqueness_aggression": "medium_high"
+      "intent": "Balance concentration in the strongest paths with coverage of materially different plausible winning outcomes."
     },
     "one_fifty_max": {
-      "script_count_target": 8,
-      "primary_stack_team_cap": 0.30,
-      "pitcher_cap": 0.45,
-      "min_projection_percentile": 0.52,
-      "leverage_aggression": "high",
-      "uniqueness_aggression": "high"
+      "intent": "Use the broadest evidence-backed first-place-path coverage, with stronger duplication avoidance and asymmetric leverage where justified."
     }
   },
   "scenario_families": [
@@ -84,21 +44,27 @@
       "team",
       "position",
       "source_projected_ownership",
+      "industry_ownership_consensus_or_range",
       "source_prebuild_exposure",
       "engine_final_exposure",
       "difference_vs_ownership_pp",
+      "difference_vs_industry_ownership_pp",
       "difference_vs_prebuild_pp",
       "reason"
     ],
     "material_difference_pp": 10
   },
   "finalization_gates": [
+    "industry_research_complete_or_gaps_documented",
     "official_lineups_checked",
     "weather_checked",
     "market_checked",
-    "projection_audit_complete",
-    "scenario_board_complete",
+    "projection_and_ownership_consensus_audited",
+    "scenario_and_first_place_path_board_complete",
+    "field_construction_model_complete",
+    "bink_coverage_audit_complete",
     "portfolio_risk_audit_complete",
+    "deterministic_validation_complete",
     "exposure_audit_complete"
   ]
 }
