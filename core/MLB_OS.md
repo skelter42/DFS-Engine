@@ -12,6 +12,14 @@ The DFS Engine is AI-led. Math, projections, simulations, betting markets, and d
 
 Each state has required inputs, transformations, gates, and outputs. No state may silently skip its gates.
 
+## Sharp-Field Game Theory Assumption
+
+Assume the tournament field is sharp unless evidence suggests otherwise. Opponents generally have access to strong projections, ownership, optimizers, markets, and common DFS strategy. The Engine must therefore seek edge in conditional leverage, correlated construction, ownership interaction, duplication avoidance, first-place path selection, and portfolio allocation rather than assuming the field simply misses obvious high-projection plays.
+
+Chalk is not bad because it is popular. A fade or underweight must have a specific game-theory thesis. Every major contrarian decision should identify what the field believes, why that belief is reasonable, what evidence supports disagreement, and which portion of the field fails if the Engine is right.
+
+Player-level ownership is only one layer. The Engine must also analyze likely ownership at the combination level: pitcher pairs, primary stacks, secondary stacks, value clusters, salary constructions, and repeated game environments.
+
 ## Primary Tournament Objective: Bink Coverage
 
 The Engine's tournament objective is not to maximize the median score of the portfolio. It is to maximize the number and quality of distinct first-place paths the portfolio meaningfully owns while avoiding wasteful duplication of the same underlying bet.
@@ -106,13 +114,39 @@ Search the current industry and market for as many of the following as are mater
 - scratches, rest, injuries, pitch-count/role news
 - bullpen quality, workload, and availability
 - platoon and handedness matchup context
-- broader industry hitter/pitcher projections
-- broader industry projected ownership
+- broader industry hitter/pitcher projections from multiple independent sources when possible
+- broader industry projected ownership from multiple independent sources when possible
 - simulation/win-rate/ceiling information where available
+
+Sim Savant must not be treated as the sole projection or ownership truth. Its view can be narrow, stale, model-specific, or materially different from the broader industry. That disagreement can be useful, but only if identified and interpreted.
 
 Use multiple independent sources when practical. Do not manufacture consensus when only one source is available.
 
-### 2.2 Industry Consensus Board
+### 2.2 Industry Projection and Ownership Consensus
+
+For projections, capture when available:
+
+- Sim Savant projection
+- each independent industry projection source
+- industry low/high range
+- industry median/consensus estimate
+- whether Savant sits inside consensus, above it, or below it
+- source freshness/timestamp
+
+For ownership, capture when available:
+
+- Sim Savant projected ownership
+- each independent industry ownership projection
+- industry low/high range
+- industry median/consensus estimate
+- whether Savant sits inside consensus, above it, or below it
+- source freshness/timestamp
+
+Do not blindly average sources. The purpose is to understand the shape of industry opinion, model disagreement, and uncertainty.
+
+If only one external source is available, label the consensus as thin and lower confidence. Never call a one-source comparison an industry consensus.
+
+### 2.3 Industry Consensus Board
 
 Create a structured team/game/player board before the strategic agents proceed. At minimum capture when available:
 
@@ -127,37 +161,44 @@ Create a structured team/game/player board before the strategic agents proceed. 
 - lineup status
 - opposing pitcher and bullpen notes
 - baseline/Savant projection
-- broader projection range or consensus
+- individual industry projection values
+- broader projection range and median/consensus
 - baseline/Savant ownership
-- broader ownership range or consensus
+- individual industry ownership values
+- broader ownership range and median/consensus
+- Savant consensus classification: inside / high outlier / low outlier / insufficient data
 - material disagreements
 - AI confidence and interpretation note
 
 Every important conclusion should distinguish observed facts from AI interpretation.
 
-### 2.3 Disagreement Logic
+### 2.4 Disagreement Logic
 
 The AI must explicitly investigate meaningful disagreement, for example:
 
 - Savant is high on a team while the market is moving against it.
 - Savant is low on a team while implied runs or other projections are rising.
+- Savant ownership differs materially from multiple independent ownership models.
 - projected ownership is high but the payoff profile is fragile.
 - a popular pitcher has strong median projection but weak market/prop/role support.
 - lineup-order changes create value that older projections have not captured.
 
 Do not average disagreements away automatically. Determine why sources differ and whether the disagreement creates uncertainty, an edge, or no actionable signal.
 
-### 2.4 Research Completion Gate
+### 2.5 Research Completion Gate
 
 A slate may not advance to PRELOCK until the Industry Research Agent has either:
 
-1. completed the material market/industry checks, or
+1. completed the material market/industry checks, including attempts to obtain independent projection and ownership sources, or
 2. explicitly documented which inputs could not be obtained and how that uncertainty will affect portfolio confidence.
 
 Required output:
 
 - industry consensus board
-- source list with freshness/timestamps where possible
+- projection source list and freshness
+- ownership source list and freshness
+- Savant-vs-industry projection comparison
+- Savant-vs-industry ownership comparison
 - major consensus signals
 - major disagreements/outliers
 - unresolved research gaps
@@ -310,6 +351,8 @@ The point of this audit is not to maximize the raw number of paths. It is to ens
 A PRELOCK slate package contains:
 
 - Industry Consensus Board
+- Savant-vs-industry projection comparison
+- Savant-vs-industry ownership comparison
 - major source disagreements and AI interpretations
 - scenario/first-place path board with allocations
 - Bink Coverage audit
@@ -329,16 +372,17 @@ Run after official lineup/news checks are sufficiently complete.
 Mandatory refresh when material changes occur:
 
 1. Industry Research / Market Environment
-2. News & Role
-3. AI Projection Audit
-4. Stack Architecture
-5. Pitcher Analysis
-6. Scenario/First-Place Path Board confidence/allocation
-7. Portfolio construction for affected contest groups
-8. Deterministic Validation
-9. Bink Coverage Audit
-10. Portfolio Risk Audit
-11. Exposure Audit
+2. Projection and Ownership Consensus
+3. News & Role
+4. AI Projection Audit
+5. Stack Architecture
+6. Pitcher Analysis
+7. Scenario/First-Place Path Board confidence/allocation
+8. Portfolio construction for affected contest groups
+9. Deterministic Validation
+10. Bink Coverage Audit
+11. Portfolio Risk Audit
+12. Exposure Audit
 
 Finalization gates are defined in `config/mlb.json`. Every gate must be true before status may become `FINAL`.
 
@@ -349,9 +393,11 @@ Required FINAL output:
 - scenario and first-place path assignment per lineup
 - Bink Coverage table
 - player/stack/pitcher exposure tables
-- Savant/source projected ownership vs source prebuild exposure vs DFS Engine final exposure
-- percentage-point differences
-- reasons for every material difference
+- Sim Savant projected ownership
+- industry projected-ownership range/consensus when available
+- source prebuild exposure
+- DFS Engine final exposure
+- percentage-point differences and reasons for material differences
 - final risk/concentration summary
 - material industry/market evidence behind the final portfolio
 
@@ -384,6 +430,8 @@ Classify portfolio misses using one or more categories:
 - pitcher_pairing
 - lineup_order_news
 - industry_research_miss
+- projection_consensus_miss
+- ownership_consensus_miss
 - market_environment
 - ownership_leverage
 - duplication_uniqueness
@@ -401,7 +449,7 @@ Do not assign a structural lesson solely from the winning lineup.
 
 For the highest-value missed lineups, alter one decision at a time and measure whether the result materially changes. Separate a correct thesis with poor implementation from a bad thesis.
 
-Also ask whether the Industry Research Agent correctly identified the material pre-slate signals and whether the AI interpreted them appropriately.
+Also ask whether the Industry Research Agent correctly identified the material pre-slate signals, whether Sim Savant was materially outside industry consensus, and whether the AI interpreted those differences appropriately.
 
 ### 5.5 Learning Promotion
 
@@ -411,10 +459,10 @@ New findings begin as slate notes/hypotheses. Promote to `learning/REGISTRY.md` 
 
 Every delivered MLB portfolio includes a side-by-side table:
 
-| Player | Source Own% | Source Prebuild% | DFS Engine% | vs Own pp | vs Prebuild pp | Reason |
-|---|---:|---:|---:|---:|---:|---|
+| Player | Savant Own% | Industry Own Range/Consensus | Savant Prebuild% | DFS Engine% | vs Savant pp | vs Industry | Reason |
+|---|---:|---:|---:|---:|---:|---|---|
 
-Source prebuild exposure may be null if unavailable, but source ownership and DFS Engine exposure are required.
+Industry ownership may be null when no independent source is accessible, but the Engine must document the research attempt and confidence limitation. Savant prebuild exposure remains separate from projected ownership.
 
 ## AI Authority Rule
 
