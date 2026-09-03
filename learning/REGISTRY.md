@@ -119,3 +119,21 @@ Do not promote:
 - Engine impact: Portfolio Builder and Risk Manager must explain the tradeoff between median projection and first-place equity rather than treating lower ownership as automatically better.
 - Files updated: `learning/REGISTRY.md`.
 - Revisit condition: calibrate acceptable projection-loss bands by contest type as results accumulate.
+
+### 2026-09-03 — Validate standings-export coverage before tier analysis
+- Sport: all DraftKings
+- Status: validated
+- Evidence: recent DraftKings standings ZIPs contained only the leading slice of contests with 1,189–7,134 total entries; exported rows ranged from roughly 60–258. This is enough to cover the true top 1% in the sampled contests, but not the true top 10% or top 20%.
+- Durable lesson: never treat downloaded standings row count as contest field size. Join standings to Entry History `Contest_Entries`, calculate tier cutoffs from the true field size, and only report a tier when the export contains enough ranks to cover it.
+- Engine impact: Contest History ingestion must label winner/top-1% as valid when covered and mark top-10%/top-20% as unavailable rather than estimating them from a truncated export.
+- Files updated: `learning/REGISTRY.md`.
+- Revisit condition: if DraftKings provides a genuinely complete-field export or another reliable full-field source.
+
+### 2026-09-03 — MLB leverage should be selective, not universally low-owned
+- Sport: MLB GPP
+- Status: hypothesis
+- Evidence: across six recent $1 MLB Classic contest samples, the true top 1% varied materially in aggregate ownership. Some winning/top-1% lineups were very low-owned, while other slates were won with heavy chalk. Exact-lineup duplication among the downloaded top slice was generally low, and several winners combined popular pitching with multiple low-owned hitters rather than forcing low ownership at every roster spot.
+- Durable lesson: do not use a blanket low-ownership target. Prefer coherent high-ceiling constructions that can retain strong chalk where justified while creating leverage through selected hitters/stacks, secondary correlations, pitcher combinations, or uniqueness.
+- Engine impact: Ownership & Leverage Agent should evaluate where leverage is purchased and what projection/correlation it preserves, not optimize toward the lowest aggregate ownership sum.
+- Files updated: `learning/REGISTRY.md`.
+- Revisit condition: validate against a larger multi-slate sample and true full-field top-10%/top-20% data before promoting to validated.
