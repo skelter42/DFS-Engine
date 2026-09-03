@@ -15,8 +15,103 @@ For each standings export:
 2. Identify the user's entries in the field without persisting entry IDs or unnecessary account identifiers.
 3. Record sport, contest ID, contest type, field size, best finish, best percentile, and useful aggregate portfolio metrics.
 4. Extract field-level evidence such as winning score, ownership, duplication, stack/lineup structure, and top-percentile construction when available.
-5. Feed reusable findings into `core/LEARNING.md` and `learning/REGISTRY.md` only when they satisfy the promotion standard.
-6. Do not promote one-off winning-player takes or hindsight-only conclusions.
+5. Run the Tiered Construction Analysis defined below for winner, top 1%, top 10%, top 20%, and full field.
+6. Feed reusable findings into `core/LEARNING.md` and `learning/REGISTRY.md` only when they satisfy the promotion standard.
+7. Do not promote one-off winning-player takes or hindsight-only conclusions.
+
+## Tiered Construction Analysis — Mandatory
+
+Every full standings ingest should compare lineup construction across these cohorts:
+
+- Winner / 1st-place lineup
+- Top 1%
+- Top 10%
+- Top 20%
+- Full field baseline
+
+The purpose is to identify what construction traits become more common as lineups move toward the top of tournaments, rather than merely copying one winning lineup.
+
+### Track for every cohort
+
+- sample size
+- average and median fantasy score
+- average aggregate ownership when available
+- lineup duplication rate / average duplicate count
+- salary used and salary left
+- number of unique players relative to other lineups when measurable
+- chalk concentration and low-owned-player count
+- primary correlation / stack structure
+- secondary correlation / mini-stack structure
+- game-environment concentration
+- position-specific construction relevant to the sport
+- exposure to the highest-owned players and teams
+- leverage combinations and common ownership ranges
+
+### MLB
+
+Track distributions for:
+
+- 5-3, 5-2-1, 5-1-1-1, 4-4, 4-3-1, 4-2-2, and other stack shapes
+- primary stack team frequency
+- secondary stack team frequency
+- same-game hitter concentration
+- pitcher pairings
+- pitcher vs opposing-stack leverage when present
+- stack ownership / aggregate lineup ownership
+- one-off ownership and correlation quality
+- salary left on table
+
+### NFL / CFB
+
+Track distributions for:
+
+- QB double stack, single stack, naked QB
+- bring-back count
+- secondary game stacks
+- RB + DST correlation
+- team/game concentration
+- salary left and aggregate ownership
+
+### NBA
+
+Track distributions for:
+
+- same-game player counts
+- mini-correlations / opponent bring-backs
+- stars-and-scrubs vs balanced salary construction
+- positional salary allocation
+- aggregate ownership and number of sub-10% players
+
+### NHL
+
+Track distributions for:
+
+- full-line stacks
+- 2-man line stacks
+- power-play correlation
+- defenseman correlation
+- goalie + skater relationships
+- team concentration and aggregate ownership
+
+### Tennis
+
+Track distributions for:
+
+- favorite/underdog mix
+- salary allocation
+- aggregate ownership
+- number of lower-owned players
+- match/game-environment concentration where relevant
+
+### Interpretation rule
+
+Do not conclude that a construction is optimal merely because the winner used it. Prefer patterns that show a clear lift from full field -> top 20% -> top 10% -> top 1%, especially when repeated across multiple contests/slates.
+
+For each meaningful construction feature, estimate a tier lift when possible:
+
+`Tier Lift = Feature Rate in Target Cohort - Feature Rate in Full Field`
+
+Also track whether the feature is monotonic across performance tiers. A construction that rises consistently from the field through top 20%, top 10%, and top 1% is stronger evidence than an isolated winner result.
 
 ## Initial Ingest — 2026-09-03
 
@@ -48,6 +143,12 @@ Per contest:
 - user best score and score gap to winner
 - actual player ownership
 - lineup duplication
+- winner construction profile
+- top 1% construction distributions
+- top 10% construction distributions
+- top 20% construction distributions
+- full-field construction baseline
+- tier lift for major construction features
 - primary/secondary stack or correlation structure
 - pitcher/QB/etc. pairings when sport-relevant
 - ownership leverage and game-script outcomes
@@ -60,9 +161,11 @@ Across contests:
 - projection-vs-field performance
 - portfolio concentration and diversification performance
 - repeatable construction patterns among top finishers
+- construction feature lift by percentile tier
+- monotonic construction trends from full field to top 1%
 
 ## Workflow
 
-`DraftKings Entry History -> Contest ID index -> Full Standings Export -> Field Analysis -> Contest History Metrics -> Post-Slate Learning -> Durable GitHub Rule Promotion`
+`DraftKings Entry History -> Contest ID index -> Full Standings Export -> Field Analysis -> Tiered Construction Analysis -> Contest History Metrics -> Post-Slate Learning -> Durable GitHub Rule Promotion`
 
 This file is an index/contract, not a raw-data warehouse.
