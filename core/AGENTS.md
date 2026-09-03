@@ -48,20 +48,43 @@ Output per player:
 - major evidence and unresolved uncertainty
 
 ### 3. Ownership & Field Agent
-Owns DFS Engine expected ownership and likely field behavior.
+Owns DFS Engine expected ownership and likely sharp-field behavior.
+
+The field model must represent how strong tournament players and optimizer-driven entrants are likely to construct lineups, not merely reproduce a player-ownership column.
 
 Responsibilities:
 - triangulate source ownership, broader industry ownership, salary/value, roster construction, contest type, slate context, and likely late-news behavior
 - estimate DFS Engine expected ownership independently of final exposure
-- identify chalk combinations, likely stack/game concentrations, pitcher/QB pairings, duplication pressure, and fragile field assumptions
+- model projection-source convergence: players who rate well across multiple common projection systems should receive more field pressure than a single-source estimate may imply
+- model optimizer sensitivity to salary-adjusted projection/value, positional scarcity, cheap starters/value pieces, and obvious spend-up combinations
+- identify likely chalk combinations rather than treating player ownership as independent; estimate common pitcher/QB pairings, stack pairings, secondary-stack pairings, bring-backs, and value cores as sport-appropriate
+- estimate construction-level popularity including salary utilization, roster archetype, stack structure, positional combinations, and common lineup paths
+- distinguish total-field ownership from sharp-field behavior when contest size/type suggests the entrant pool is materially sharper or more optimizer-driven
+- account for late news/lineup movement and how fast sharp fields are likely to react
+- identify duplication pressure and fragile field assumptions
 - never treat projected ownership as a reason to fade or play someone mechanically
+
+Field-model principle:
+
+**Expected field behavior = player ownership + conditional ownership + construction popularity.**
+
+A lineup made of individually reasonable ownership plays may still be extremely duplicated if the combination is the obvious optimizer path. Conversely, a lineup does not become unique merely because one player is low owned if the rest of the construction is highly conventional.
+
+When evidence permits, preserve both:
+- overall expected ownership / construction behavior
+- sharp-field expected ownership / construction behavior
+
+If separate sharp-field data is unavailable, infer it cautiously from projection/value consensus, contest profile, lineup construction incentives, and known optimizer behavior; label uncertainty rather than inventing precision.
 
 Output per player/construction:
 - source ownership
 - DFS Engine expected ownership
+- sharp-field expected ownership when defensible
 - ownership difference
 - confidence
-- field-construction notes
+- conditional/chalk-combination notes
+- likely field construction archetypes
+- duplication-risk notes
 
 ### 4. Simulation & Scenario Agent
 Owns uncertainty and outcome distributions.
@@ -107,8 +130,9 @@ Output:
 Owns lineup generation and final portfolio assembly.
 
 Responsibilities:
-- generate a broad legal candidate pool using Engine projection, expected ownership, simulation, salary, correlation, and contest rules
+- generate a broad legal candidate pool using Engine projection, expected ownership, conditional field behavior, simulation, salary, correlation, and contest rules
 - treat optimization as candidate generation, not final authority
+- compare candidate constructions against likely sharp-field constructions rather than only summing individual ownership
 - select/reshape the final set around coherent scripts, leverage, duplication, and first-place equity
 - allow exposures, stack structures, salary usage, and roster archetypes to emerge naturally
 - never use arbitrary hard caps/floors/stack quotas unless required by site legality, contest rules, confirmed inactivity, or an explicit user constraint
@@ -123,6 +147,7 @@ Owns final strategic QA.
 
 Responsibilities:
 - detect hidden concentration by player, stack/team, game, pitcher/QB pairing, salary construction, chalk combination, and script family
+- compare the portfolio to likely sharp-field archetypes and flag accidental duplication with common optimizer constructions
 - distinguish intentional concentration from repeated optimizer convenience
 - verify multiple credible paths to first remain represented
 - verify all lineup rows are legal, unique as required, and upload-ready
@@ -148,8 +173,9 @@ Owns feedback and durable learning.
 Responsibilities:
 - compare source projection -> Engine projection -> actual result
 - compare source ownership -> Engine expected ownership -> actual field ownership
+- compare estimated sharp-field constructions -> actual top-field constructions when contest data is available
 - compare Engine exposure/scripts -> portfolio performance
-- separately grade projection calibration, ownership calibration, market interpretation, simulation, sport/game-script judgment, correlation, duplication, and portfolio construction
+- separately grade projection calibration, ownership calibration, field-construction calibration, market interpretation, simulation, sport/game-script judgment, correlation, duplication, and portfolio construction
 - run counterfactual review so one bad outcome does not produce the wrong lesson
 - store single-slate observations as hypotheses unless structurally true or repeatedly supported
 - promote, merge, revise, or remove durable rules under `core/PROCESS_GOVERNANCE.md`
