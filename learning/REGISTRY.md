@@ -137,3 +137,21 @@ Do not promote:
 - Engine impact: Ownership & Leverage Agent should evaluate where leverage is purchased and what projection/correlation it preserves, not optimize toward the lowest aggregate ownership sum.
 - Files updated: `learning/REGISTRY.md`.
 - Revisit condition: validate against a larger multi-slate sample and true full-field top-10%/top-20% data before promoting to validated.
+
+### 2026-09-03 — MLB early slate: script completion may matter
+- Sport: MLB GPP
+- Status: hypothesis
+- Evidence: in Contest 194946042, the user's best lineup paired the slate-winning Hunter Brown + Blade Tidwell pitching combination with a 5-man Houston stack and finished around the top 5%, while the winner paired the same pitchers with a 5-man Toronto stack. The user had exposure to Toronto and the winning pitcher pair, but not enough lineups combined those components into the exact winning script.
+- Durable lesson: track whether the portfolio actually combines its strongest independent theses into complete lineups, rather than only measuring player and team exposure separately.
+- Engine impact: no hard construction rule yet. Add script-completion review as a post-slate diagnostic and monitor whether repeated misses come from fragmented theses.
+- Files updated: `learning/REGISTRY.md`, `history/CONTEST_HISTORY.md`.
+- Revisit condition: promote only if the same pattern repeats across multiple slates.
+
+### 2026-09-03 — MLB early slate: elite chalk pitcher underweight may need stronger justification
+- Sport: MLB GPP
+- Status: hypothesis
+- Evidence: in Contest 194946042, Hunter Brown was 71.8% owned in the field, 100% in the true top 1%, and 60% in the user's portfolio. The slate alone does not prove that underweighting elite chalk pitching is wrong, but it shows that generic leverage away from a strong pitcher can be costly when the failure thesis is weak.
+- Durable lesson: monitor whether elite-pitcher underweights are supported by a specific failure case or are being used mainly to manufacture leverage.
+- Engine impact: no hard exposure floor or rule change. Flag elite-pitcher fades for review when the rationale is generic rather than matchup-specific.
+- Files updated: `learning/REGISTRY.md`.
+- Revisit condition: require repeated multi-slate evidence before changing MLB pitcher exposure doctrine.
