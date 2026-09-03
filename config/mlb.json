@@ -1,0 +1,104 @@
+{
+  "version": "2.0",
+  "sport": "MLB",
+  "platform": "DraftKings",
+  "states": ["INTAKE", "PRELOCK", "FINAL", "POSTSLATE"],
+  "required_stack_size": 5,
+  "scoring": {
+    "stack_score": {
+      "implied_runs": 0.22,
+      "ceiling": 0.20,
+      "salary_efficiency": 0.10,
+      "lineup_connectivity": 0.12,
+      "platoon_matchup": 0.08,
+      "park_weather": 0.08,
+      "bullpen_path": 0.08,
+      "ownership_leverage": 0.12
+    },
+    "pitcher_score": {
+      "median_projection": 0.18,
+      "ceiling": 0.24,
+      "strikeout_environment": 0.20,
+      "run_prevention": 0.12,
+      "salary_efficiency": 0.10,
+      "ownership_leverage": 0.08,
+      "role_security": 0.08
+    },
+    "lineup_score": {
+      "projection": 0.24,
+      "ceiling": 0.22,
+      "correlation": 0.18,
+      "leverage": 0.14,
+      "script_fit": 0.12,
+      "uniqueness": 0.10
+    }
+  },
+  "contest_presets": {
+    "single_entry": {
+      "script_count_target": 2,
+      "primary_stack_team_cap": 0.55,
+      "pitcher_cap": 0.70,
+      "min_projection_percentile": 0.80,
+      "leverage_aggression": "low",
+      "uniqueness_aggression": "low"
+    },
+    "five_max": {
+      "script_count_target": 3,
+      "primary_stack_team_cap": 0.50,
+      "pitcher_cap": 0.65,
+      "min_projection_percentile": 0.72,
+      "leverage_aggression": "medium",
+      "uniqueness_aggression": "medium"
+    },
+    "twenty_max": {
+      "script_count_target": 5,
+      "primary_stack_team_cap": 0.40,
+      "pitcher_cap": 0.55,
+      "min_projection_percentile": 0.62,
+      "leverage_aggression": "medium_high",
+      "uniqueness_aggression": "medium_high"
+    },
+    "one_fifty_max": {
+      "script_count_target": 8,
+      "primary_stack_team_cap": 0.30,
+      "pitcher_cap": 0.45,
+      "min_projection_percentile": 0.52,
+      "leverage_aggression": "high",
+      "uniqueness_aggression": "high"
+    }
+  },
+  "scenario_families": [
+    "chalk_offense_succeeds",
+    "chalk_offense_fails",
+    "elite_pitcher_dominates",
+    "popular_pitcher_fails",
+    "value_pitcher_unlocks_premium_stack",
+    "mid_owned_offense_breaks_slate",
+    "low_owned_offense_breaks_slate",
+    "single_game_shootout",
+    "wraparound_stack_wins"
+  ],
+  "exposure_audit": {
+    "required_fields": [
+      "player",
+      "team",
+      "position",
+      "source_projected_ownership",
+      "source_prebuild_exposure",
+      "engine_final_exposure",
+      "difference_vs_ownership_pp",
+      "difference_vs_prebuild_pp",
+      "reason"
+    ],
+    "material_difference_pp": 10
+  },
+  "finalization_gates": [
+    "official_lineups_checked",
+    "weather_checked",
+    "market_checked",
+    "projection_audit_complete",
+    "scenario_board_complete",
+    "portfolio_risk_audit_complete",
+    "exposure_audit_complete"
+  ]
+}
