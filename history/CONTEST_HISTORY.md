@@ -126,6 +126,39 @@ First batch received from recent DraftKings full-contest standings exports.
   - Contest `194878465`: best finish 73rd of 5,945 (~top 1.2%).
   - Contest `194731101`: best finish 83rd of 5,548 (~top 1.5%).
 
+## 2026-09-03 MLB Early Slate — Contest 194946042
+
+- Sport: MLB Classic
+- Field size: 2,378 entries
+- User entries: 20
+- Winning score: 114.15
+- User best: 94.15, rank 118 (~top 5.0%)
+- User top-10% finishes: 2 of 20
+- User top-20% finishes: 4 of 20
+
+### Pitcher construction
+
+- Winner: Hunter Brown + Blade Tidwell.
+- Top 1%: Hunter Brown appeared in 100% of lineups; Blade Tidwell 57.7%; Jose Soriano 38.5%; Tanner Bibee 3.8%.
+- Full field: Hunter Brown 71.8%; Tanner Bibee 43.5%; Jose Soriano 39.4%; Luis Castillo 19.9%; Blade Tidwell 19.7%.
+- User portfolio: Hunter Brown 60%; Tanner Bibee 45%; Jose Soriano 35%; Blade Tidwell 30%; Luis Castillo 25%; Wilber Dotel 5%.
+- Outcome note: Hunter Brown scored 22.7 DK points and Blade Tidwell 12.45, while Soriano (2.5), Bibee (1.6), and Castillo (-2.4) failed. The portfolio was materially underweight the slate-winning Brown/Tidwell combination relative to the true top 1%.
+
+### Stack construction
+
+- Winner used a 5-man Toronto primary stack with one-offs from San Francisco, Houston, and Chicago White Sox: a 5-1-1-1 construction.
+- Top 1% contained 5-man stacks in roughly 42% of entries, versus roughly 23% in the full field. Toronto accounted for 10 of the 11 identified top-1% five-man primary stacks.
+- User portfolio used a 5-man stack in 13 of 20 lineups (65%), so the primary structural doctrine was not the core miss.
+- User best lineup used a 5-man Houston stack plus Hunter Brown + Blade Tidwell and finished 118th. It had the correct pitcher pair but the wrong primary offensive eruption relative to the winning Toronto script.
+- User had two Toronto five-man stacks, but neither combined the slate's best Toronto construction with the winning pitcher pair strongly enough to reach the top tier.
+
+### Slate-level diagnosis
+
+- This was primarily a stack-allocation / game-script coverage miss, not a failure of the full-stack doctrine.
+- Houston exposure produced a near-ceiling lineup, but Toronto was the offense that most strongly populated the top 1%.
+- The pitcher portfolio carried too much exposure to Bibee/Castillo relative to their realized failure and too little Brown/Tidwell relative to the top-1% construction.
+- Future review should distinguish: (1) whether the engine identified the right primary stack families, (2) whether it paired those stacks with the correct pitcher path, and (3) whether enough portfolio weight was placed on the strongest combined script.
+
 ## Metrics To Track Going Forward
 
 Per contest:
