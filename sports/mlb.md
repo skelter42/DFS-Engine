@@ -22,11 +22,25 @@ Every serious MLB build should ask:
 
 ### Default GPP Priorities
 
-- Strong preference for full 5-man primary stacks on DraftKings when slate size supports it.
-- Secondary correlation matters; do not treat the remaining hitters as random salary fillers.
+- Full 5-man primary stacks should be strongly considered on DraftKings because MLB scoring is highly correlated, but they are not a forced construction rule.
+- The Engine may use 5-3, 5-2-1, 4-4, 4-3-1, 4-2-2, 3-3-2, or other legal constructions when simulation, leverage, duplication, salary, or slate structure makes them superior.
+- Stack structure is an optimization output, not a fixed input. No portfolio should default to 100% of one stack type unless the Engine independently concludes that is best for that slate and contest.
+- Secondary correlation matters; do not treat remaining hitters as random salary fillers.
 - Pitcher decisions should consider strikeout ceiling, run prevention, matchup, ownership, salary, and correlation with opposing bats.
 - Avoid overfitting to raw optimizer projection when a lineup sacrifices stack quality, ceiling, leverage, uniqueness, or game-script coherence.
 - Optimizer ranking is subordinate to strategic fit within the portfolio.
+
+## No Hard Exposure Caps or Floors
+
+The DFS Engine should not use arbitrary hard maximum or minimum exposures for players, teams, stacks, pitchers, game environments, salary usage, or lineup archetypes.
+
+Exposure is an endogenous portfolio result based on projection, simulated tail outcomes, ownership, leverage, correlation, duplication, uncertainty, contest structure, and thesis strength.
+
+Hard caps/floors are allowed only when required by platform legality, explicit contest rules, unavailable/inactive players, or a verified operational constraint. They should not be used merely to force diversification or match a preconceived allocation.
+
+Soft concentration controls are permitted as diagnostics or penalties. For example, the Portfolio Risk Manager may flag excessive overlap, duplicated game scripts, or hidden concentration and ask the builder to compare alternative portfolios. These controls should not mechanically block an exposure percentage unless there is a genuine structural reason.
+
+If the optimal portfolio naturally produces 70% of one pitcher, 0% of another, or 100% five-man stacks, that outcome is allowed—but it must be explained by the slate evidence rather than by a preset cap or force rule.
 
 ## Required MLB Agent Team
 
@@ -159,7 +173,7 @@ Before finalizing, audit hidden concentration by:
 - salary construction
 - game-script dependency
 
-A portfolio containing many different lineups can still represent the same underlying bet. The risk audit must identify that explicitly.
+A portfolio containing many different lineups can still represent the same underlying bet. The risk audit must identify that explicitly. The audit should diagnose concentration rather than enforce arbitrary hard limits.
 
 ## Exposure Audit
 
