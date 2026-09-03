@@ -20,6 +20,66 @@ Every serious MLB build should ask:
 - Which cheap bats are not just values, but connective pieces that make an entire game-script lineup work?
 - Which lineups are telling the same underlying story even if the players differ?
 
+### Sharp-Field Game Theory Doctrine
+
+Assume the field is sharp by default. Large-field tournament opponents generally have access to strong projections, ownership tools, optimizer outputs, betting markets, and common DFS strategy. Therefore the Engine should not expect to win simply by identifying the highest-projected plays.
+
+Chalk is usually chalk for a reason. Do not fade strong plays merely to be different. Instead, search for where the field may be efficient at the player level but fragile at the lineup or portfolio level.
+
+The Engine should look for exploitable field behavior such as:
+
+- over-concentrated pitcher pairings
+- highly duplicated primary-stack combinations
+- obvious value bats appearing together too frequently
+- common salary constructions
+- popular game environments that create correlated field failure
+- ownership that is reasonable in isolation but inefficient when several popular pieces are combined
+- opposing-stack leverage against a popular pitcher with a credible failure path
+- secondary-stack or one-off combinations the field underuses despite strong conditional upside
+
+Contrarianism is not an edge by itself. Every major underweight, fade, or low-owned overweight must answer:
+
+1. What does the field believe?
+2. Why is that belief reasonable?
+3. What evidence gives the Engine permission to disagree?
+4. What happens to our first-place probability if our view is correct?
+5. Which portion of the field fails at the same time?
+
+Use conditional leverage rather than raw low ownership. A 25%-owned player can be excellent leverage in the right construction, while a 3%-owned player can still be a poor tournament play.
+
+Working mental model:
+
+- Projection estimates what is likely.
+- Ownership estimates what the field believes.
+- Game theory identifies where probability and payoff may be mispriced.
+- Bink Coverage determines whether the portfolio owns enough distinct first-place paths.
+
+### Multi-Source Projection and Ownership Doctrine
+
+No single projection or ownership source is allowed to define the slate. Sim Savant is a valuable baseline and simulation source, but its projections and ownership can be narrow, stale, model-specific, or wrong in ways that become dangerous when copied directly into portfolio exposure.
+
+The Industry Research Agent must actively seek additional projection and projected-ownership sources whenever materially accessible. The goal is not to blindly average them. The goal is to understand the distribution of industry opinion and identify where Sim Savant is consensus, where it is an outlier, and why.
+
+For projections, capture when possible:
+
+- Sim Savant player projection and ceiling/simulation context
+- at least one additional independent industry projection source
+- additional sources when accessible
+- range, median/consensus, and material outliers
+- timestamps or freshness when relevant
+
+For ownership, capture when possible:
+
+- Sim Savant projected ownership
+- at least one additional independent industry ownership projection
+- additional sources when accessible
+- range, median/consensus, and material outliers
+- likely reasons for disagreement, such as lineup news, pricing, contest assumptions, source update time, or model methodology
+
+A source disagreement should be treated as information. Do not automatically average it away. AI should determine whether the difference represents stale data, uncertainty, a true modeling disagreement, or a possible game-theory opportunity.
+
+When only one external projection or ownership source is obtainable, explicitly record that the consensus is thin and reduce confidence accordingly. Never label a single-source view as industry consensus.
+
 ### Default GPP Priorities
 
 - Strong preference for full 5-man primary stacks on DraftKings when slate size supports it.
@@ -65,8 +125,8 @@ At minimum, when materially available, evaluate:
 - bullpen quality, workload and availability
 - opposing pitcher quality and handedness
 - platoon matchup context
-- broader industry hitter/pitcher projections
-- broader industry projected ownership
+- broader industry hitter/pitcher projections from multiple sources when possible
+- broader industry projected ownership from multiple sources when possible
 - simulation, ceiling or win-rate information when accessible
 
 Use multiple independent sources when practical. Record source freshness/timestamps when useful. Never pretend a consensus exists when only one source is available.
@@ -83,11 +143,14 @@ Every slate should create a structured consensus board before the Pitcher, Stack
 - park/weather status
 - lineup confirmation status
 - bullpen and role notes
-- Savant/baseline projection
-- broader projection range or consensus
-- Savant/baseline projected ownership
-- broader ownership range or consensus
+- Sim Savant/baseline projection
+- each available independent industry projection
+- industry projection range and median/consensus
+- Sim Savant/baseline projected ownership
+- each available independent industry projected ownership
+- industry ownership range and median/consensus
 - material source disagreement
+- whether Sim Savant is inside consensus, high outlier, or low outlier
 - AI interpretation and confidence
 
 Observed facts must be separated from AI interpretation.
@@ -102,6 +165,7 @@ Examples:
 - Savant is lukewarm while implied runs, lineup quality, and other projections are improving.
 - a high-owned pitcher has a good median projection but weak K prop, workload, or matchup support.
 - a cheap hitter moves into a premium lineup slot before projections fully update.
+- Savant ownership is materially higher or lower than multiple independent industry ownership projections.
 
 A disagreement can indicate uncertainty, stale information, a genuine model edge, or no actionable signal. The AI must decide which and record the reason.
 
@@ -114,7 +178,8 @@ Sim Savant or any baseline source must be checked against broader industry infor
 - park factors
 - weather where material
 - official starting batting orders
-- projected ownership
+- multiple projected-ownership sources when accessible
+- multiple projection sources when accessible
 - meaningful injury/rest/scratch news
 
 No one projection source is authoritative.
@@ -236,7 +301,7 @@ A portfolio containing many different lineups can still represent the same under
 
 Every MLB lineup set must include Sim Savant/source projected ownership vs DFS Engine final exposure with percentage-point difference.
 
-When available, also include Savant/source prebuild portfolio exposure as a separate quantity.
+When available, also include Savant/source prebuild portfolio exposure as a separate quantity and industry ownership consensus/range as a separate reference point.
 
 Large differences should have a stated reason such as stack concentration, lineup-order value, ownership leverage, pitching ceiling, market/industry disagreement, uniqueness, game-script coverage, or reduced confidence in the source projection.
 
@@ -254,6 +319,7 @@ Review not only which stack won but also:
 - whether our slate scripts were logically sound even if they did not occur
 - whether the Industry Research Agent identified the important pre-slate signals
 - whether the AI interpreted market/industry disagreement correctly
+- whether Sim Savant was materially outside industry projection or ownership consensus and whether the Engine handled that appropriately
 - whether the winning construction revealed a new strategic interaction or merely variance
 
 ### Counterfactual Review
