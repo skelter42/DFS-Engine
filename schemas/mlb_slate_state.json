@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "MLB DFS Engine Slate State",
   "type": "object",
-  "required": ["slate_id", "state", "contest_groups", "source_audit", "industry_consensus_board", "scenario_board", "portfolio", "exposure_audit"],
+  "required": ["slate_id", "state", "contest_groups", "source_audit", "industry_consensus_board", "scenario_board", "first_place_paths", "bink_coverage", "portfolio", "exposure_audit"],
   "properties": {
     "slate_id": {"type": "string"},
     "state": {"enum": ["INTAKE", "INDUSTRY_RESEARCH", "PRELOCK", "FINAL", "POSTSLATE"]},
@@ -38,39 +38,8 @@
         "properties": {
           "entity": {"type": "string"},
           "entity_type": {"enum": ["game", "team", "pitcher", "hitter", "stack"]},
-          "facts": {
-            "type": "object",
-            "properties": {
-              "opening_game_total": {"type": ["number", "null"]},
-              "current_game_total": {"type": ["number", "null"]},
-              "implied_team_runs": {"type": ["number", "null"]},
-              "moneyline": {"type": ["number", "null"]},
-              "market_movement": {"type": ["string", "null"]},
-              "pitcher_k_prop": {"type": ["number", "null"]},
-              "park_weather_flag": {"type": ["string", "null"]},
-              "lineup_status": {"type": ["string", "null"]},
-              "bullpen_note": {"type": ["string", "null"]},
-              "role_note": {"type": ["string", "null"]},
-              "baseline_projection": {"type": ["number", "null"]},
-              "industry_projection_low": {"type": ["number", "null"]},
-              "industry_projection_high": {"type": ["number", "null"]},
-              "baseline_ownership": {"type": ["number", "null"]},
-              "industry_ownership_low": {"type": ["number", "null"]},
-              "industry_ownership_high": {"type": ["number", "null"]}
-            }
-          },
-          "sources": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": ["name"],
-              "properties": {
-                "name": {"type": "string"},
-                "timestamp": {"type": ["string", "null"]},
-                "url_or_reference": {"type": ["string", "null"]}
-              }
-            }
-          },
+          "facts": {"type": "object"},
+          "sources": {"type": "array", "items": {"type": "object"}},
           "material_disagreement": {"type": ["string", "null"]},
           "ai_interpretation": {"type": "string"},
           "confidence": {"type": "number", "minimum": 0, "maximum": 1}
@@ -81,28 +50,58 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "family", "confidence", "allocation", "beneficiaries", "field_assumption_that_fails", "supporting_evidence"],
+        "required": ["id", "family", "confidence", "supporting_evidence"],
         "properties": {
           "id": {"type": "string"},
           "family": {"type": "string"},
           "confidence": {"type": "number", "minimum": 0, "maximum": 1},
-          "allocation": {"type": "number", "minimum": 0, "maximum": 1},
-          "beneficiaries": {"type": "array", "items": {"type": "string"}},
-          "field_assumption_that_fails": {"type": "string"},
           "supporting_evidence": {"type": "array", "items": {"type": "string"}},
           "notes": {"type": "string"}
         }
+      }
+    },
+    "first_place_paths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path_id", "scenario_id", "primary_win_condition", "pitcher_condition", "chalk_dependency", "leverage_event", "target_lineups", "ai_rationale"],
+        "properties": {
+          "path_id": {"type": "string"},
+          "scenario_id": {"type": "string"},
+          "primary_win_condition": {"type": "string"},
+          "secondary_win_condition": {"type": ["string", "null"]},
+          "pitcher_condition": {"type": "string"},
+          "chalk_dependency": {"type": "string"},
+          "leverage_event": {"type": "string"},
+          "target_lineups": {"type": "integer", "minimum": 0},
+          "target_portfolio_pct": {"type": "number", "minimum": 0, "maximum": 1},
+          "failure_linkage": {"type": "array", "items": {"type": "string"}},
+          "ai_rationale": {"type": "string"}
+        }
+      }
+    },
+    "bink_coverage": {
+      "type": "object",
+      "required": ["meaningful_paths_owned", "largest_dead_overlap_cluster", "most_fragile_shared_dependency", "strongest_asymmetric_path", "intentional_fades"],
+      "properties": {
+        "meaningful_paths_owned": {"type": "integer", "minimum": 0},
+        "largest_dead_overlap_cluster": {"type": "string"},
+        "most_fragile_shared_dependency": {"type": "string"},
+        "strongest_asymmetric_path": {"type": "string"},
+        "intentional_fades": {"type": "array", "items": {"type": "string"}},
+        "ai_summary": {"type": "string"}
       }
     },
     "portfolio": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["lineup_id", "contest_type", "scenario_id", "primary_stack", "players", "strategic_reason"],
+        "required": ["lineup_id", "contest_type", "scenario_id", "first_place_path_id", "primary_stack", "players", "strategic_reason"],
         "properties": {
           "lineup_id": {"type": "string"},
           "contest_type": {"type": "string"},
           "scenario_id": {"type": "string"},
+          "first_place_path_id": {"type": "string"},
           "primary_stack": {"type": "string"},
           "secondary_stack": {"type": "string"},
           "pitchers": {"type": "array", "items": {"type": "string"}},
@@ -110,7 +109,6 @@
           "salary": {"type": "integer"},
           "projection": {"type": "number"},
           "ceiling": {"type": "number"},
-          "lineup_score": {"type": ["number", "null"]},
           "duplication_risk": {"type": "number", "minimum": 0, "maximum": 1},
           "strategic_reason": {"type": "string"},
           "validation_status": {"enum": ["pending", "valid", "invalid"]}
