@@ -6,18 +6,35 @@ Sim Savant is the default baseline input layer for projections, ownership, and s
 
 The DFS Engine sits on top of that baseline and uses multiple cooperating analysis roles to challenge, validate, adjust, and portfolio-build around it. The objective is long-term profitable decision quality and first-place equity, not blind agreement with any one source.
 
+### Core Philosophy: Art Backed by Math
+
+Math defines the plausible decision space. Logic, game scripts, game theory, correlation, and portfolio construction decide how we attack it.
+
+The Engine should never confuse the highest median projection with the best tournament lineup. Projections, simulations, ownership, betting markets, and other quantitative inputs are evidence. They are not the final decision-maker.
+
+The cornerstone of lineup construction is answering strategic questions such as:
+
+- How can this slate realistically be won?
+- What assumptions is the field making?
+- Which popular constructions become fragile if one key assumption fails?
+- Which players or stacks benefit together when a specific game script occurs?
+- Which combinations create asymmetric payoff relative to ownership?
+- Where can we be different without sacrificing too much underlying quality?
+- How should multiple lineups work together as a portfolio rather than as isolated optimizer outputs?
+
 Default hierarchy:
 
 1. Sim Savant baseline projections / ownership / sims
 2. Data validation and official news checks
 3. Broader industry and market cross-checks
 4. Sport-specific role, matchup, environment, and correlation analysis
-5. Contest-specific leverage and duplication analysis
-6. Game-script / slate-thesis portfolio construction
-7. Exposure audit versus Savant/source ownership
-8. Post-slate review and durable learning
+5. Contest-specific ownership, leverage, and duplication analysis
+6. Game-theory and game-script thesis generation
+7. Portfolio construction around those theses
+8. Exposure audit versus Savant/source ownership
+9. Post-slate review and durable learning
 
-No agent should override the baseline casually. Any meaningful deviation from Savant should have an explicit reason tied to data, context, leverage, correlation, contest structure, or portfolio coverage.
+No agent should override the baseline casually. Any meaningful deviation from Savant should have an explicit reason tied to data, context, leverage, correlation, contest structure, game theory, or portfolio coverage.
 
 ## Slate Workflow
 
@@ -31,19 +48,23 @@ Check names, teams, positions, salaries, game inclusion, injuries/availability, 
 Do not anchor to a single source. Compare baseline projections and ownership against broader industry information, betting markets, team totals, matchup context, injuries/news, role changes, and relevant environmental factors.
 
 ### 4. Build slate theses
-Identify the most plausible ways the slate can be won. Each thesis should describe what must happen, which players/teams benefit, which popular constructions fail, and where leverage appears.
+Identify the most plausible ways the slate can be won. Each thesis should describe what must happen, which players/teams benefit, which popular constructions fail, where leverage appears, and what the field is likely assuming.
+
+Theses should be causal, not merely descriptive. A strong thesis connects events: if X happens, Y players/teams become stronger together while Z chalk or construction loses value.
 
 ### 5. Construct portfolios
 Build lineups as a coordinated portfolio rather than isolated top-projection lineups. Coverage should represent distinct plausible game scripts while preserving enough concentration to benefit when a thesis is right.
+
+Optimizer output is a tool, not the strategy. Lineups should be accepted, rejected, or reshaped based on thesis coherence, game theory, correlation, duplication, and portfolio fit.
 
 ### 6. Audit exposures
 For every delivered lineup set, report source projected ownership versus DFS Engine exposure with percentage-point difference. Investigate large deviations and ensure they are intentional.
 
 ### 7. Final news pass
-Re-check official lineups, injuries, scratches, batting order/starting roles, weather where relevant, and late market movement. Re-optimize when role changes materially alter projection, correlation, or ownership.
+Re-check official lineups, injuries, scratches, batting order/starting roles, weather where relevant, and late market movement. Re-optimize when role changes materially alter projection, correlation, ownership, or a game-script thesis.
 
 ### 8. Post-slate learning
-Review what won, what the engine captured, what it missed, and whether the failure came from projections, ownership, correlation, portfolio construction, or variance. Promote only durable lessons into the brain.
+Review what won, what the engine captured, what it missed, and whether the failure came from projections, ownership, game theory, correlation, portfolio construction, or variance. Promote only durable lessons into the brain.
 
 ## Portfolio Philosophy
 
@@ -57,6 +78,7 @@ The engine should not merely maximize raw projected points. It should balance:
 - uncertainty
 - contest payout structure
 - game-script coverage
+- strategic asymmetry versus the field
 
 Large-field GPP portfolios should accept individual-lineup volatility in exchange for stronger first-place equity. Small-field or flatter-payout contests may justify less leverage and more median projection.
 
@@ -64,7 +86,7 @@ The success metric is long-term expected value and contest-winning upside across
 
 ## Exposure Rules
 
-Exposure is a decision output, not an input copied from projected ownership. A player may be over the field because of superior ceiling, role, correlation, or mispriced ownership. A player may be under the field because the market is overconfident, the projection is fragile, or the portfolio already captures the same outcome through correlated alternatives.
+Exposure is a decision output, not an input copied from projected ownership. A player may be over the field because of superior ceiling, role, correlation, game-script importance, or mispriced ownership. A player may be under the field because the market is overconfident, the projection is fragile, the chalk is strategically vulnerable, or the portfolio already captures the same outcome through correlated alternatives.
 
 Never make a large exposure deviation without an explicit reason.
 
