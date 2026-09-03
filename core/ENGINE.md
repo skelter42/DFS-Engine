@@ -18,21 +18,34 @@ The final portfolio must receive an explicit GPT/AI strategic review after the m
 
 GPT/AI judgment is not permission to ignore data. It must remain grounded in projections, simulations, verified news, industry/market information, ownership, correlation, contest structure, and uncertainty. The intended hierarchy is:
 
-**Data and math define what is plausible -> industry and market evidence challenge the assumptions -> GPT/AI game-script judgment decides how the portfolio should attack the slate.**
+**Raw source data -> DFS Engine projection and ownership estimates -> simulation and candidate generation -> industry/market challenge -> GPT/AI portfolio judgment.**
 
 If the mathematical solution and GPT/AI review disagree materially, the disagreement must be resolved explicitly before final delivery rather than silently accepting the optimizer output.
 
 The Engine should never confuse the highest median projection with the best tournament lineup. Projections, simulations, ownership, betting markets, and other quantitative inputs are evidence. They are not the final decision-maker.
 
-The cornerstone of lineup construction is answering strategic questions such as:
+## Mandatory Engine-Owned Projection and Ownership Layer
 
-- How can this slate realistically be won?
-- What assumptions is the field making?
-- Which popular constructions become fragile if one key assumption fails?
-- Which players or stacks benefit together when a specific game script occurs?
-- Which combinations create asymmetric payoff relative to ownership?
-- Where can we be different without sacrificing too much underlying quality?
-- How should multiple lineups work together as a portfolio rather than as isolated optimizer outputs?
+For every serious slate build, the DFS Engine must create and preserve its own projection and ownership estimates before final lineup construction.
+
+Sim Savant and any other vendor source are immutable baseline inputs. They must never be relabeled as DFS Engine estimates.
+
+For each player, preserve at minimum:
+
+- source projection (Sim Savant when provided)
+- DFS Engine projection
+- projection difference (Engine minus source)
+- source projected ownership
+- DFS Engine expected ownership
+- ownership difference (Engine minus source)
+- confidence / uncertainty notes when material
+- major drivers of any meaningful adjustment
+
+DFS Engine projection adjustments should be informed by broader industry projections, betting markets, role/news, matchup, environment, sport-specific context, and simulation calibration. DFS Engine expected ownership should be informed by broader industry ownership, salary, projection/value, contest type, roster construction, recent field tendencies, obvious chalk combinations, and likely late-news behavior.
+
+Do not mechanically average sources. The Engine should form an explicit estimate and preserve the reason for meaningful disagreement.
+
+These Engine-owned estimates are the numbers used for downstream simulation, leverage analysis, game-script construction, candidate generation, and portfolio decisions. Savant remains the raw baseline used for comparison and post-slate calibration.
 
 ## Mandatory Cross-Sport Pillars
 
@@ -48,24 +61,25 @@ If an industry signal is unavailable, label the gap explicitly rather than silen
 
 Default hierarchy:
 
-1. Sim Savant baseline projections / ownership / sims
+1. Sim Savant/source baseline projections / ownership / sims
 2. Data validation and official news checks
 3. Mandatory broader industry and market cross-checks
-4. Native cross-sport simulation / outcome-distribution layer
-5. Sport-specific role, matchup, environment, and correlation analysis
-6. Contest-specific ownership, leverage, and duplication analysis
-7. Mathematical candidate-lineup generation
-8. Mandatory GPT/AI game-theory, multi-script, and hidden-concentration review
-9. Portfolio construction / reshaping around the approved theses
-10. Exposure audit versus Savant/source ownership
-11. Post-slate review and durable learning
+4. Create DFS Engine projection and expected-ownership estimates
+5. Native cross-sport simulation / outcome-distribution layer using Engine estimates
+6. Sport-specific role, matchup, environment, and correlation analysis
+7. Contest-specific ownership, leverage, and duplication analysis
+8. Mathematical candidate-lineup generation
+9. Mandatory GPT/AI game-theory, multi-script, and hidden-concentration review
+10. Portfolio construction / reshaping around the approved theses
+11. Exposure audit versus both Savant/source ownership and DFS Engine expected ownership
+12. Post-slate review and durable learning
 
-No agent should override the baseline casually. Any meaningful deviation from Savant should have an explicit reason tied to data, context, leverage, correlation, contest structure, game theory, simulation evidence, industry disagreement, or portfolio coverage.
+Any meaningful deviation from Savant/source data should have an explicit reason tied to data, context, leverage, correlation, contest structure, game theory, simulation evidence, industry disagreement, or portfolio coverage.
 
 ## Slate Workflow
 
 ### 1. Ingest
-Collect the site player pool/contest file, baseline projections, projected ownership, salaries, positions, and any available ceiling/floor or simulation outputs.
+Collect the site player pool/contest file, baseline projections, projected ownership, salaries, positions, and any available ceiling/floor or simulation outputs. Preserve raw source columns unchanged.
 
 ### 2. Validate
 Check names, teams, positions, salaries, game inclusion, injuries/availability, projected starters, and obvious data mismatches before optimization.
@@ -75,85 +89,59 @@ Do not anchor to a single source. Compare baseline projections and ownership aga
 
 This pass is required for every sport. It should identify consensus, meaningful disagreement, stale assumptions, and possible market blind spots.
 
-### 4. Simulate outcome distributions
+### 4. Create DFS Engine projections and ownership — mandatory
+Produce an Engine projection and Engine expected-ownership estimate for each relevant player. Preserve both raw source values and Engine values side by side.
+
+Large differences must have a reason. Missing evidence should lower confidence rather than cause invented precision.
+
+### 5. Simulate outcome distributions
 Run or ingest a sport-appropriate slate simulation before final portfolio construction when inputs are sufficient. Use empirical or calibrated volatility, non-normal distributions where appropriate, and meaningful player/team/game correlations.
 
 The shared framework is defined in `core/SIMULATION.md`. Sport modules must supply their own variance, distribution, and correlation assumptions rather than using one generic standard deviation model across all sports.
 
-Simulation output should inform ceiling, failure probability, top-tail outcomes, game-script likelihood, and portfolio overlap. It should not replace news validation, ownership analysis, or strategic judgment.
+Simulation should use DFS Engine estimates when they exist while retaining source values for sensitivity checks. Simulation output should inform ceiling, failure probability, top-tail outcomes, game-script likelihood, and portfolio overlap. It should not replace news validation, ownership analysis, or strategic judgment.
 
-### 5. Generate mathematical candidate lineups
-Use projections, simulations, ownership, salary, correlation, and contest-specific scoring to generate a broad candidate pool. Candidate generation is allowed to be optimizer-heavy because it is not the final decision stage.
+### 6. Generate mathematical candidate lineups
+Use Engine projections, Engine expected ownership, simulations, salary, correlation, and contest-specific scoring to generate a broad candidate pool. Candidate generation is allowed to be optimizer-heavy because it is not the final decision stage.
 
 Do not promote candidate rankings directly into the final portfolio.
 
-### 6. Build AI slate theses and review candidates — mandatory
+### 7. Build AI slate theses and review candidates — mandatory
 Run an explicit GPT/AI game-script judgment pass after the quantitative, industry, simulation, and candidate-generation layers are available.
 
-Identify several plausible ways the slate can be won. Each thesis should describe:
-
-- what must happen
-- which players, teams, stacks, or games benefit together
-- which popular assumptions fail
-- where leverage appears
-- how the construction differs from likely field behavior
-- which lineup archetypes express the thesis
-- what evidence supports or weakens the thesis
+Identify several plausible ways the slate can be won. Each thesis should describe what must happen, which players/teams/stacks/games benefit together, which popular assumptions fail, where leverage appears, how construction differs from likely field behavior, which lineup archetypes express the thesis, and what evidence supports or weakens it.
 
 Then audit the mathematical candidate pool for hidden concentration. Repeated use of the same player, value piece, stack, pitcher, QB, game, salary structure, or construction archetype must be justified by the slate thesis rather than accepted merely because the optimizer repeatedly prefers it.
 
-Theses should be causal, not merely descriptive. A strong thesis connects events: if X happens, Y players/teams become stronger together while Z chalk or construction loses value.
-
 The AI pass must preserve multiple credible paths to victory rather than collapsing the portfolio onto one forecast. Stronger theses may receive more exposure, but alternate scripts should remain represented when they have meaningful probability and payoff.
 
-### 7. Construct and reshape portfolios
+### 8. Construct and reshape portfolios
 Build lineups as a coordinated portfolio rather than isolated top-projection lineups. Coverage should represent distinct plausible game scripts while preserving enough concentration to benefit when a thesis is right.
 
 Optimizer output is a tool, not the strategy. Lineups should be accepted, rejected, or reshaped based on thesis coherence, game theory, correlation, duplication, simulation tail metrics, industry context, hidden concentration, and portfolio fit.
 
 Roster construction patterns, stack structures, player exposures, team exposures, game exposures, salary usage, and lineup archetypes are outputs of this process. They must not be preset as hard optimization constraints unless required for roster legality, contest rules, inactive-player exclusion, or another verified operational necessity.
 
-### 8. Audit exposures
-For every delivered lineup set, report source projected ownership versus DFS Engine exposure with percentage-point difference. Investigate large deviations and ensure they are intentional.
+### 9. Audit projections, ownership, and exposures
+Every delivered lineup set should preserve these three comparisons:
 
-### 9. Final GPT/AI sign-off
-Before delivery, perform one final strategic review of the complete portfolio. Confirm that:
+| Player | Source Projection | DFS Engine Projection | Projection Diff | Source Projected Ownership | DFS Engine Expected Ownership | Ownership Diff | DFS Engine Exposure |
+|---|---:|---:|---:|---:|---:|---:|---:|
 
-- major exposures are explainable
-- high concentration is intentional rather than mathematical repetition
-- multiple credible paths to first remain represented
-- lineups are coherent with their game scripts
-- no optimizer convenience piece has become an accidental universal dependency
-- industry/market disagreement has been considered
-- no arbitrary hard caps/floors or stack quotas distorted the output
+Investigate the largest projection, ownership, and exposure deviations and ensure they are intentional.
+
+### 10. Final GPT/AI sign-off
+Before delivery, perform one final strategic review of the complete portfolio. Confirm that major exposures are explainable, high concentration is intentional rather than mathematical repetition, multiple credible paths to first remain represented, lineups are coherent with their game scripts, no optimizer convenience piece has become an accidental universal dependency, industry/market disagreement has been considered, and no arbitrary hard caps/floors or stack quotas distorted the output.
 
 A portfolio that fails this review must be reshaped before delivery.
 
-### 10. Final news / market pass
-Re-check official lineups, injuries, scratches, batting order/starting roles, weather where relevant, and late market movement. Re-simulate or re-optimize when role changes materially alter projection, variance, correlation, ownership, industry consensus, or a game-script thesis.
+### 11. Final news / market pass
+Re-check official lineups, injuries, scratches, batting order/starting roles, weather where relevant, and late market movement. Rebuild Engine projection/ownership estimates, re-simulate, or re-optimize when role changes materially alter projection, variance, correlation, ownership, industry consensus, or a game-script thesis.
 
-### 11. Post-slate learning
-Review what won, what the engine captured, what it missed, and whether the failure came from projections, simulation calibration, industry/market interpretation, AI game-script judgment, ownership, game theory, correlation, portfolio construction, or ordinary variance. Promote only durable lessons into the brain.
+### 12. Post-slate learning
+Review source projection vs Engine projection vs actual outcome, source projected ownership vs Engine expected ownership vs actual field ownership, and Engine exposure vs portfolio performance.
 
-## Portfolio Philosophy
-
-The engine should not merely maximize raw projected points. It should balance:
-
-- projection
-- simulated ceiling / tail probability
-- industry and market context
-- ownership/leverage
-- AI game-script strength
-- correlation
-- lineup duplication risk
-- uncertainty
-- contest payout structure
-- game-script coverage
-- strategic asymmetry versus the field
-
-Large-field GPP portfolios should accept individual-lineup volatility in exchange for stronger first-place equity. Small-field or flatter-payout contests may justify less leverage and more median projection.
-
-The success metric is long-term expected value and contest-winning upside across repeated slates, not whether every individual slate cashes.
+Grade projection calibration, ownership calibration, industry/market interpretation, AI game-script judgment, simulation calibration, correlation, and portfolio construction separately. Promote only durable lessons into the brain.
 
 ## Exposure Rules
 
@@ -171,18 +159,9 @@ Hard constraints are reserved for true structural necessities such as site roste
 
 Never make a large exposure deviation without an explicit reason.
 
-## Source Comparison Requirement
-
-Every final lineup set must include a table with at least:
-
-| Player | Source Projected Ownership | DFS Engine Exposure | Difference (pp) |
-|---|---:|---:|---:|
-
-When Sim Savant ownership is available, it is the default source column. Sort or highlight the largest positive and negative deviations.
-
 ## Anti-Hallucination Rules
 
-- Never invent a player, salary, projection, ownership figure, lineup slot, injury, betting line, contest rule, standard deviation, correlation coefficient, or industry signal.
+- Never invent a player, salary, source projection, Engine projection, source ownership, Engine ownership, lineup slot, injury, betting line, contest rule, standard deviation, correlation coefficient, or industry signal.
 - If an input is missing, label it missing rather than fabricating it.
 - Distinguish verified facts from model assumptions and AI thesis judgment.
 - When current information matters, verify it before using it.
