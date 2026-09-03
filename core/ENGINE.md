@@ -65,6 +65,8 @@ Build lineups as a coordinated portfolio rather than isolated top-projection lin
 
 Optimizer output is a tool, not the strategy. Lineups should be accepted, rejected, or reshaped based on thesis coherence, game theory, correlation, duplication, simulation tail metrics, and portfolio fit.
 
+Roster construction patterns, stack structures, player exposures, team exposures, game exposures, salary usage, and lineup archetypes are outputs of this process. They must not be preset as hard optimization constraints unless required for roster legality, contest rules, inactive-player exclusion, or another verified operational necessity.
+
 ### 7. Audit exposures
 For every delivered lineup set, report source projected ownership versus DFS Engine exposure with percentage-point difference. Investigate large deviations and ensure they are intentional.
 
@@ -95,6 +97,16 @@ The success metric is long-term expected value and contest-winning upside across
 ## Exposure Rules
 
 Exposure is a decision output, not an input copied from projected ownership. A player may be over the field because of superior ceiling, role, correlation, simulated top-tail value, game-script importance, or mispriced ownership. A player may be under the field because the market is overconfident, the projection is fragile, the chalk is strategically vulnerable, or the portfolio already captures the same outcome through correlated alternatives.
+
+### No Arbitrary Hard Caps or Floors
+
+Do not impose arbitrary hard maximums, minimums, ownership bands, stack quotas, team quotas, game quotas, salary-spend rules, or diversification targets merely to make a portfolio look balanced.
+
+The Engine may use soft penalties, diagnostics, and comparative portfolio tests to identify dangerous concentration or excessive duplication, but those mechanisms should inform the decision rather than mechanically prevent an otherwise optimal allocation.
+
+A very high or very low exposure is acceptable when supported by the slate evidence. A 0% or 100% outcome is also permissible when it emerges from the analysis rather than from a preset rule.
+
+Hard constraints are reserved for true structural necessities such as site roster legality, contest rules, confirmed inactive players, invalid combinations, or explicit user-specified operational requirements.
 
 Never make a large exposure deviation without an explicit reason.
 
