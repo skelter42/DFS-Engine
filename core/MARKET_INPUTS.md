@@ -29,27 +29,30 @@ Every `Market Inputs — [SPORT]` request is a **full slate-wide research pass b
 A valid full run must:
 1. Read the entire attached Savant player pool.
 2. Identify every game/event on the slate.
-3. Research game-level markets for every game/event.
-4. Research player-level props for as much of the slate as the public market actually offers.
-5. Use multiple books/sources where practical, not one sportsbook or one DFS source.
-6. Where direct Vegas/player-prop coverage is incomplete, research multiple reputable industry projection systems before falling back to Savant.
-7. Convert the final statistical expectation into the correct site-specific fantasy scoring.
-8. Build ownership from multiple current site/slate-specific ownership touch points plus the behavioral ownership model below.
-9. Use Savant only as the final documented fallback when both market and broader industry coverage are insufficient.
-10. Audit the completed file and return it.
-11. Stop.
+3. Identify the likely active/starting/rotation player pool before measuring market coverage.
+4. Research game-level markets for every game/event.
+5. Systematically sweep sportsbook/player-prop markets for every likely active player, not only stars or obvious DFS plays.
+6. Use sportsbook aggregators and direct sportsbook sources across as many books as practical, including sources that surface DraftKings, FanDuel, BetMGM, Caesars, BetRivers, Hard Rock, Circa, theScore and other available books.
+7. Where direct Vegas/player-prop coverage is incomplete, research multiple reputable industry projection systems before falling back to Savant.
+8. Convert the final statistical expectation into the correct site-specific fantasy scoring.
+9. Build ownership from multiple current site/slate-specific ownership touch points plus the behavioral ownership model below.
+10. Use Savant only as the final documented fallback when both market and broader industry coverage are insufficient.
+11. Audit the completed file and return it.
+12. Stop.
 
 ### No partial-run masquerading
 
 Do not call a file “Market Inputs complete” if only a small subset of players were researched or adjusted.
 
-If broad market coverage is unavailable, say so explicitly and quantify:
+If broad market coverage is unavailable, say so explicitly and quantify coverage against the **likely active/starting pool**, not merely the full raw Savant pool:
 - how many players were Vegas-rich
 - how many were Vegas-supported
 - how many were industry-supported
 - how many remained fallback-heavy
 
-If the run is fallback-heavy, label it as such rather than implying a fully market-derived slate.
+Also report raw-pool counts separately if useful, but do not let bench/inactive/deep-fringe players make usable sportsbook coverage look artificially poor.
+
+If the active-player run is fallback-heavy, label it as such rather than implying a fully market-derived slate.
 
 ## Projection principle
 
@@ -60,7 +63,7 @@ Use multiple sportsbooks and both sides of priced markets when available. A post
 Reconcile player props with game-level markets so individual projections do not collectively imply a materially different game environment from the betting market without a documented reason.
 
 Relevant markets depend on sport. Examples:
-- MLB: pitcher K, outs, ER, hits/walks allowed, win; hitter hits, total bases, HR, RBI, runs, walks, SB, combo props; game total, ML, run line, team totals.
+- MLB: pitcher K, outs, ER, hits/walks allowed, win; hitter hits, singles, total bases, HR, RBI, runs, walks, H+R+RBI, SB; game total, ML, run line, team totals.
 - NFL/NCAAF: passing/rushing/receiving yards, receptions, TDs, attempts, completions, interceptions; spread, total, team totals.
 - NBA: points, rebounds, assists, 3PM, steals/blocks where available, turnovers where relevant; spread, total, team totals, minutes/injury context.
 - NHL: shots, goals, points, goalie saves/goals allowed/win; game total, ML, team totals, PP/line context.
@@ -116,6 +119,47 @@ Use only when direct market coverage and broader industry coverage are both insu
 - Do not manufacture a new number from thin evidence.
 - Mark internally as fallback-heavy.
 
+## Sportsbook sweep standard — mandatory
+
+Do not assume missing sportsbook data after checking only one source or one prop category.
+
+For each likely active player, systematically search the available sportsbook/aggregator ecosystem before assigning Tier 3 or Tier 4. Relevant sources may include:
+- Action Network player/game prop pages
+- PropCruncher or comparable multi-book prop aggregators
+- RotoWire betting/player-prop comparison tools
+- direct DraftKings Sportsbook markets when publicly accessible
+- direct FanDuel Sportsbook markets when publicly accessible
+- BetMGM, Caesars, BetRivers, Hard Rock, Circa, theScore and other books surfaced through reputable comparison tools
+- additional reputable odds/prop aggregators when useful
+
+Do not require every book to be directly accessible. Aggregators that expose current lines and prices across multiple books are valid market touch points.
+
+### MLB-specific sportsbook sweep
+
+For every projected/confirmed starting pitcher, search for as many of the following as available:
+- strikeouts
+- outs recorded
+- earned runs allowed
+- hits allowed
+- walks allowed
+- pitcher win
+- any other workload/run-prevention markets useful for DK/FD scoring
+
+For every confirmed/likely starting hitter, search for as many of the following as available:
+- hits
+- singles
+- total bases
+- home runs
+- RBI
+- runs
+- H+R+RBI or similar combo markets
+- walks
+- stolen bases
+
+A hitter with several of these markets should normally be Vegas-rich or Vegas-supported, not industry-only. A starting pitcher with multiple K/outs/ER/hits/walks markets should normally be Vegas-rich.
+
+Use the available prices on both sides and consensus across books where practical. Do not reduce a market to the posted line alone when juice materially changes the expectation.
+
 ## Projection research standard
 
 For each slate, collect as many of these as legitimately available:
@@ -142,7 +186,7 @@ Assign an internal projection confidence tier:
 
 A player does not need many direct props to avoid Tier D if multiple credible industry systems and the game market provide strong independent support. Conversely, one industry projection alone does not create high confidence.
 
-The final CSV does not need to include confidence tiers unless requested, but every full run must report coverage counts by these tiers or an equivalent summary.
+Every full run must report confidence-tier coverage for the likely active/starting pool and may additionally report the full raw-pool counts.
 
 ## Ownership is a field-behavior forecast
 
@@ -306,7 +350,7 @@ Every returned file must pass:
 13. Largest projection and ownership changes reviewed for plausibility.
 14. Compare output identity columns directly against the source before saving.
 15. Return a short audit summary: rows in/out, mapping conflicts, identity exceptions, projection changes, ownership changes, and fallback-heavy areas.
-16. Return projection coverage counts as Vegas-rich / Vegas-supported / industry-supported / fallback-heavy (or equivalent).
+16. Return projection coverage counts as Vegas-rich / Vegas-supported / industry-supported / fallback-heavy for the likely active/starting pool, with raw-pool counts optional.
 
 ## Hard stop
 
