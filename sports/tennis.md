@@ -17,5 +17,10 @@ Favor players whose win probability and fantasy scoring ceiling are under-owned 
 
 Across a portfolio, include plausible upset paths where the leverage is justified rather than forcing contrarian plays for their own sake.
 
+### Opponent Exclusion
+- Do not roster both players from the same match in a final tournament lineup.
+- Every final lineup must represent six separate winner paths.
+- Treat this as a hard tennis construction and final-QA rule, not an ownership or leverage preference.
+
 ## Exposure Audit
 Every delivered lineup set must include source projected ownership vs DFS Engine final exposure with percentage-point difference and explanations for the largest deviations.
