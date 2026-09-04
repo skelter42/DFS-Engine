@@ -45,6 +45,23 @@ Action Network is a preferred market aggregator when available, but no one marke
 
 Do not substitute crude team-total multipliers when richer player-prop markets exist.
 
+## Source Projection Eligibility Gate
+
+A player with a supplied Savant/vendor projection of exactly `0` is excluded from candidate generation for that build.
+
+This is a hard data-quality/eligibility rule, not an exposure cap and not a requirement that official lineups already be confirmed. Pre-confirmation builds are allowed and expected.
+
+Rules:
+
+- If the current supplied Savant/vendor source has `Proj = 0`, exclude that player from the candidate pool.
+- Do not override a current source zero merely because the DraftKings player pool still lists the player or because a market line exists.
+- If a later refreshed source file gives the player a nonzero projection, the player may re-enter only after the slate is rebuilt from that refreshed source.
+- Missing or unconfirmed lineups alone do not make a nonzero-projection player ineligible.
+- Confirmed OUT/scratched/inactive status remains an independent exclusion when known.
+- Final QA must verify that no player with a current source projection of zero appears in the delivered lineup file.
+
+The purpose is simple: the Engine may build before official lineups confirm, but it must never roster a player whom the current supplied baseline source has explicitly zeroed out.
+
 ## Mandatory Engine-Owned Projection and Ownership Layer
 
 For every serious slate build, the DFS Engine must create and preserve its own projection and ownership estimates before final lineup construction.
@@ -85,8 +102,8 @@ If market or industry data is unavailable, label the gap explicitly rather than 
 ## Canonical Slate Workflow
 
 1. Ingest site player pool, salaries, positions, entries, vendor/source projections/ownership, and available simulation inputs.
-2. Validate names, teams, roster positions, availability, and slate membership.
-3. Verify current news/roles/lineups and material weather/context.
+2. Apply the Source Projection Eligibility Gate and validate names, teams, roster positions, availability, and slate membership.
+3. Verify current news/roles/lineups and material weather/context when available; official lineup confirmation is not required for a prebuild.
 4. Collect multi-book player props and game markets; Action Network is preferred when available.
 5. De-vig, aggregate, reconcile overlapping markets, and convert them into expected stat components and market-derived fantasy projections.
 6. Grade market coverage/confidence for every relevant player.
@@ -97,8 +114,8 @@ If market or industry data is unavailable, label the gap explicitly rather than 
 11. Run mandatory GPT/AI game-theory, multi-script, and hidden-concentration review.
 12. Construct/reshape the final portfolio around approved slate theses.
 13. Audit fallback projection vs market projection vs Engine projection, source ownership vs Engine expected ownership, and Engine exposure.
-14. Perform final GPT/AI sign-off plus final news/market recheck.
-15. Rebuild when material late information changes roles, markets, ownership, or scripts.
+14. Perform final GPT/AI sign-off plus final news/market recheck and re-run the zero-projection audit on every delivered lineup.
+15. Rebuild when material late information changes roles, markets, ownership, source projections, or scripts.
 16. Deliver uploadable lineups and audit files.
 17. Post-slate: compare projection methods, ownership estimates, exposures, actual ownership, and actual scores; store only durable learning.
 
@@ -138,7 +155,7 @@ Soft penalties, diagnostics, and comparative portfolio tests may identify danger
 
 A 0% or 100% exposure is permissible when it emerges from the evidence rather than a preset rule.
 
-Hard constraints are reserved for true structural necessities such as site roster legality, contest rules, confirmed inactive players, invalid combinations, or explicit user-specified operational requirements.
+Hard constraints are reserved for true structural necessities such as site roster legality, contest rules, confirmed inactive players, invalid combinations, the Source Projection Eligibility Gate, or explicit user-specified operational requirements.
 
 ## Required Audit Output
 
@@ -153,6 +170,7 @@ Investigate the largest projection, ownership, and exposure deviations and ensur
 
 Before delivery confirm that:
 
+- no current source-zero player appears in the lineup file
 - major exposures are explainable
 - high concentration is intentional rather than mathematical repetition
 - multiple credible paths to first remain represented
