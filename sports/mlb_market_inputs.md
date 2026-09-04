@@ -21,15 +21,60 @@ When the user attaches a Sim Savant projection file and says **`Savant Prep`**:
 
 1. Read the attached Sim Savant projection CSV.
 2. Identify the site (DraftKings or FanDuel), slate, player pool, player names, and DFS IDs.
-3. Research as many current, reliable sportsbook/player-prop touch points as practical.
-4. Build the most objective market-derived fantasy projection possible for each player.
-5. Convert the betting-market expectations into the correct site-specific fantasy scoring system.
-6. Build the best current site-specific ownership estimate from multiple reputable DFS-industry ownership sources/signals.
-7. Use the original Sim Savant `Proj` and/or `Own` only as a fallback where market or ownership coverage is insufficient.
-8. Preserve the exact Savant import structure and DFS IDs.
-9. Run all import/mapping/duplicate/zero-value audit checks.
-10. Return the clean CSV to the user.
-11. **Stop.** Do not continue into lineup generation, lineup simulation, exposures, stacks, contest allocation, or portfolio game theory.
+3. Run an **exhaustive sportsbook sweep before accepting fallback**. Search across as many current books/aggregators as legitimately accessible, including direct sportsbook pages and reputable multi-book prop aggregators.
+4. For pitchers, actively search every practical component market: strikeouts, outs recorded, earned runs allowed, hits allowed, walks allowed, win probability/moneyline, and any quality-start-relevant markets.
+5. For hitters, actively search every practical component market: hits, total bases, home runs, RBI, runs, walks/HBP, stolen bases, H+R+RBI, and similar combo markets.
+6. Use the odds/juice and multiple books where available. A posted line without price context is weaker evidence than a market with both sides/juice.
+7. Build the most objective market-derived fantasy projection possible for each player and convert it into the correct site scoring system.
+8. Reconcile player-level projections to game totals, implied team totals, lineup slot, park/weather/roof status, matchup and expected workload/plate appearances.
+9. Build the best current site-specific ownership estimate from multiple reputable DFS-industry ownership sources/signals.
+10. Use the original Sim Savant `Proj` and/or `Own` only as a true fallback after the market/industry sweep is exhausted for that player.
+11. Preserve the exact Savant import structure and DFS IDs.
+12. Run all import/mapping/duplicate/zero-value audit checks.
+13. Return the clean CSV to the user.
+14. **Stop.** Do not continue into lineup generation, lineup simulation, exposures, stacks, contest allocation, or portfolio game theory.
+
+### Non-negotiable market-coverage rule
+
+Do **not** stop after finding a small convenient subset of props. The fact that direct props were found for a few pitchers or star hitters is not evidence that the rest of the slate is market-thin.
+
+Before labeling a player as fallback, the process must make a real effort to exhaust the available market surface:
+
+- direct sportsbooks
+- multi-book prop aggregators
+- pitcher component markets
+- hitter component markets
+- combo markets
+- game-level markets
+- independent DFS projections as secondary support
+
+If the slate has broad public prop coverage, the final output should reflect broad market-supported projection coverage. A result where only a handful of players are called Vegas-derived on a normal full MLB slate is an **audit warning**, not an acceptable stopping point.
+
+### Projection provenance requirement
+
+Track an internal source/provenance label for every player projection, even though the final Savant import remains only `Name, DFS ID, Proj, Own`.
+
+Use these labels:
+
+- **VEGAS_DIRECT** — projection materially built from one or more direct player props with pricing/juice.
+- **VEGAS_SUPPORTED** — limited direct props plus game/team market and contextual allocation.
+- **INDUSTRY_BLEND** — insufficient direct market data; multiple independent DFS projection systems materially drive the estimate.
+- **SAVANT_FALLBACK** — insufficient market and independent industry coverage; original Savant projection retained conservatively.
+
+A projection must not be described as Vegas-derived unless its provenance supports that claim.
+
+### Mandatory coverage summary before delivery
+
+Every Savant Prep run must report the projection-source counts for the active positive-projection player pool:
+
+- number and percentage `VEGAS_DIRECT`
+- number and percentage `VEGAS_SUPPORTED`
+- number and percentage `INDUSTRY_BLEND`
+- number and percentage `SAVANT_FALLBACK`
+
+Also report ownership-source coverage where practical: industry consensus vs Savant fallback.
+
+If direct/market-supported coverage is unexpectedly low relative to the available prop market, continue researching rather than merely stating that coverage is below goal.
 
 ### `Savant Prep` explicitly does NOT
 
@@ -97,7 +142,7 @@ Use as many current touch points as are legitimately available, with this priori
    - These should not automatically override the betting market, but large disagreements must be investigated.
 
 5. **Sim Savant projection fallback**
-   - Use only when public betting markets and independent projection coverage are insufficient.
+   - Use only when public betting markets and independent projection coverage are insufficient after the exhaustive sweep.
    - Never invent precision for poorly covered players.
 
 ### Ownership inputs
@@ -234,7 +279,8 @@ Every output file must pass all checks below:
 7. `Proj` must be numeric and non-negative.
 8. `Own` must be numeric when present and between 0 and 100.
 9. Zero-projection players must be intentional; do not accidentally import inactive/non-slate duplicates.
-10. Produce a short audit summary: rows in/out, duplicate conflicts removed, number of projection changes, number of ownership changes, and any fallback-heavy players of note.
+10. Produce a short audit summary: rows in/out, duplicate conflicts removed, number of projection changes, number of ownership changes, source/provenance counts, and any fallback-heavy players of note.
+11. If market-supported coverage is implausibly low for a normal MLB slate, treat the run as incomplete and continue the market sweep before delivery.
 
 ## Core philosophy
 
