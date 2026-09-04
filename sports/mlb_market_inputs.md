@@ -4,7 +4,7 @@
 
 This file defines one narrow responsibility for the DFS Engine: **produce slate-ready player projections and ownership estimates from betting-market and industry information for import into Sim Savant.**
 
-Sim Savant remains responsible for simulation, lineup generation, 1% finish-rate ranking, and exposure spreading. This process does **not** build lineups.
+Sim Savant remains responsible for simulation, lineup generation, 1% finish-rate ranking, exposure spreading, stack settings, and contest setup. This process does **not** build or optimize lineups.
 
 ## Easy trigger keywords
 
@@ -13,28 +13,47 @@ Use these short commands in chat:
 - **`Savant Prep`** = run this market-input process only on the attached Sim Savant projection CSV.
 - **`Savant Check`** = audit a completed Sim Savant lineup/export file for final exposure, salary, correlation, Vegas-story, ownership, and game-theory issues. Do not rebuild lineups unless explicitly asked.
 
+## Strict operating contract
+
 ### `Savant Prep` means exactly
 
+When the user attaches a Sim Savant projection file and says **`Savant Prep`**:
+
 1. Read the attached Sim Savant projection CSV.
-2. Update `Proj` using the best available current Vegas/player-prop information, converted into the correct DraftKings or FanDuel scoring system.
-3. Update `Own` using the best available current site-specific industry ownership consensus and ownership-driving signals.
-4. Use Sim Savant values only as fallback where market/industry coverage is insufficient.
-5. Preserve the exact Savant import structure and DFS IDs.
-6. Run the mandatory import/mapping audit.
-7. Return the clean CSV.
+2. Identify the site (DraftKings or FanDuel), slate, player pool, player names, and DFS IDs.
+3. Research as many current, reliable sportsbook/player-prop touch points as practical.
+4. Build the most objective market-derived fantasy projection possible for each player.
+5. Convert the betting-market expectations into the correct site-specific fantasy scoring system.
+6. Build the best current site-specific ownership estimate from multiple reputable DFS-industry ownership sources/signals.
+7. Use the original Sim Savant `Proj` and/or `Own` only as a fallback where market or ownership coverage is insufficient.
+8. Preserve the exact Savant import structure and DFS IDs.
+9. Run all import/mapping/duplicate/zero-value audit checks.
+10. Return the clean CSV to the user.
+11. **Stop.** Do not continue into lineup generation, lineup simulation, exposures, stacks, contest allocation, or portfolio game theory.
 
 ### `Savant Prep` explicitly does NOT
 
 - build lineups
 - optimize lineups
 - simulate lineups
-- set exposures
+- rank lineups by 1% finish rate
+- set or recommend exposures
 - choose stacks
 - allocate contests
 - alter projections to manufacture leverage
 - apply portfolio game theory
+- duplicate any task Sim Savant already handles in its interface
 
-The user handles all lineup generation, 1% finish-rate sorting, exposure spreading, stack settings, and contest setup inside Sim Savant.
+The user handles lineup generation, 1% finish-rate sorting, exposure spreading, stack settings, and contest setup inside Sim Savant.
+
+### `Savant Check` means exactly
+
+After the user builds the portfolio in Sim Savant and sends the resulting lineup/export file with **`Savant Check`**:
+
+1. Audit the finished portfolio against Vegas expectations, player salary, expected ownership, correlation, stack construction, exposure concentration, and tournament game theory.
+2. Identify only material issues, including specific exposure caps/floors when warranted.
+3. Explain whether the portfolio's overall story is coherent with Vegas, salary, and field expectations.
+4. Do **not** rebuild or replace the portfolio unless explicitly asked.
 
 ## Output contract
 
@@ -216,27 +235,6 @@ Every output file must pass all checks below:
 8. `Own` must be numeric when present and between 0 and 100.
 9. Zero-projection players must be intentional; do not accidentally import inactive/non-slate duplicates.
 10. Produce a short audit summary: rows in/out, duplicate conflicts removed, number of projection changes, number of ownership changes, and any fallback-heavy players of note.
-
-## Slate workflow
-
-When the user provides a Sim Savant projection file and says **`Savant Prep`**:
-
-1. Identify site, sport, slate, player pool, names, and DFS IDs.
-2. Pull current sportsbook props/odds and game markets from multiple sources.
-3. Build market-derived component expectations.
-4. Convert components into site-specific fantasy points.
-5. Cross-check against independent DFS projection systems.
-6. Build site-specific industry ownership consensus.
-7. Use Sim Savant only as fallback where market coverage is insufficient.
-8. Run the mandatory import audit.
-9. Return the clean `Name, DFS ID, Proj, Own` CSV.
-10. Stop. Do not continue into lineup construction or exposure decisions.
-
-After the user builds in Savant and sends the output with **`Savant Check`**:
-
-1. Audit the finished portfolio against Vegas, salary, ownership, correlation, stack construction, exposure concentration, and game theory.
-2. Identify only material issues or recommended exposure caps/floors.
-3. Do not rebuild or replace the portfolio unless explicitly asked.
 
 ## Core philosophy
 
