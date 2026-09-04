@@ -143,6 +143,37 @@ Optimizer output is a tool, not the strategy. Lineups should be accepted, reject
 
 Roster construction patterns, stack structures, player exposures, team exposures, game exposures, salary usage, and lineup archetypes are outputs of this process. They must not be preset as hard optimization constraints unless required for roster legality, contest rules, inactive-player exclusion, or another verified operational necessity.
 
+### Multi-Contest Portfolio Allocation
+
+When entries span multiple contests on the same slate, optimize at two levels simultaneously:
+
+1. **Contest portfolio:** each contest's entries must form a complete, coherent mini-portfolio capable of taking down that contest on its own.
+2. **Bankroll portfolio:** all entries together must broaden aggregate first-place equity, reduce redundant outcome exposure, and support long-term profitability.
+
+Do not sort all lineups by median projection and place the entire highest-ranked block into the largest or highest-buy-in contest. That creates scenario gaps in the other contests and treats them as leftovers.
+
+Before allocation, label each lineup by its meaningful slate script, correlation structure, anchor combination, risk tier, ownership/duplication profile, and other sport-specific outcome drivers. Allocate the lineup set across contests with a scenario-stratified quality ladder:
+
+- distribute the strongest risk-adjusted lineup to the highest-priority contest, the next comparable lineup to the next contest, and continue through the contest set before restarting the rotation;
+- perform that ladder within or across the material script families so every contest retains credible favorite/chalk, balanced, and leverage/upset paths as appropriate to the sport;
+- allow the higher-priority or higher-buy-in contest to be modestly stronger on average, but never let it monopolize the strongest scripts or leave another contest without a viable path to first;
+- treat contest size, payout concentration, field strength, duplication, buy-in, and the user's risk objective as the real priority inputs; use entry fee only as a weak proxy when richer contest metadata is unavailable;
+- let slate uncertainty control the degree of coverage and quality tilt: uncertain slates require broader script protection inside each contest, while more deterministic slates may concentrate more heavily on the strongest thesis;
+- permit repeating a lineup across different contests only when the repeated lineup has intentional positive expected value and the added contest coverage is worth the increased outcome correlation; do not require either global uniqueness or cross-contest duplication mechanically.
+
+Allocation is a portfolio decision, not administrative row ordering. Lower-buy-in contests must not become dumping grounds for lower-quality candidates. Every allocated lineup must remain strategically coherent and every contest must pass an independent take-down-path audit.
+
+For every multi-contest build, report by contest at minimum:
+
+- lineup count and uniqueness
+- average projection plus ceiling/top-tail evidence when available
+- average ownership/leverage or duplication proxy
+- allocation across material script, anchor, correlation, and risk families
+- key player/team/game exposure where relevant
+- the reason for any contest-specific tilt
+
+Reject and reallocate a portfolio when one contest monopolizes the best risk-adjusted candidates, another contest lacks a material script family without a documented reason, or the contest blocks do not collectively improve bankroll-level first-place equity.
+
 ## Exposure Rules
 
 Exposure is a decision output, not an input copied from projected ownership.
