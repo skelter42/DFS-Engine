@@ -287,6 +287,21 @@ Before finalizing, audit hidden concentration by:
 
 A portfolio containing many different lineups can still represent the same underlying bet. The risk audit must identify that explicitly. The audit should diagnose concentration rather than enforce arbitrary hard limits.
 
+### Short-Slate Pitcher Concentration Audit
+
+On short slates with few viable pitchers, an optimizer can turn a modest median-projection preference into hidden portfolio-wide concentration. If one pitcher or one pitcher pair appears in all or nearly all multi-entry lineups, the Portfolio Risk Manager must run an explicit counterfactual stress test before final delivery.
+
+The audit must:
+
+- distinguish simulation-supported concentration from repeated optimizer convenience
+- test credible alternate-pitcher success and chalk-pitcher failure scenarios
+- measure the stack and hitter-ceiling paths unlocked by alternate pitcher salaries
+- compare the concentrated portfolio with at least one plausible alternate candidate portfolio
+- verify that each contest mini-portfolio still contains distinct paths to first place
+- document why the concentration remains superior if it is retained
+
+This is a diagnostic and evidence requirement, not a hard pitcher exposure cap, floor, or mechanical diversification quota.
+
 ## Exposure Audit
 
 Every MLB lineup set must include source projected ownership, DFS Engine expected ownership, and DFS Engine final exposure with percentage-point differences.
