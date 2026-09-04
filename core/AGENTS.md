@@ -11,7 +11,7 @@ The Engine should use the fewest agents needed to create clear ownership and tra
 ## Canonical Agent Team
 
 ### 1. Slate Intake & Validation Agent
-Owns raw slate integrity.
+Owns raw slate integrity and pre-generation eligibility.
 
 Responsibilities:
 - identify sport, site, slate, contest, entry count, lock state, and contest type
@@ -19,9 +19,20 @@ Responsibilities:
 - validate IDs, names, teams, positions, roster eligibility, game inclusion, and malformed files
 - preserve source columns unchanged
 - identify missing inputs before downstream modeling
+- apply a hard eligibility gate before any projection, simulation, or candidate-generation stage
+
+Hard eligibility gate:
+- exclude any player with a source projection of exactly 0 unless there is verified current evidence that the zero is stale and the player has an active role that warrants a rebuilt Engine projection
+- exclude any player with a blank/missing source projection when there is no verified current active role or defensible market-derived projection
+- exclude confirmed inactive/out/scratched players
+- for sports with confirmed starters/lineups, require current role validation near lock before treating a player as lineup-eligible
+- if a zero or missing source projection conflicts with verified active status, stop and resolve the conflict explicitly; do not silently pass the player through optimization
+- eligibility is a hard structural gate, not an exposure preference or game-theory decision
 
 Output:
 - validated slate dataset
+- explicit eligible-player universe
+- excluded-player list with reason
 - source inventory
 - unresolved data gaps
 
@@ -36,6 +47,7 @@ Responsibilities:
 - assign projection confidence based on market coverage and data quality
 - shrink sparse-market estimates toward a prior instead of inventing precision
 - preserve source/vendor projections separately for comparison and sensitivity analysis
+- never override the eligibility gate merely because a market line exists without confirming the player is active for the slate
 
 Canonical implementation lives in `core/MARKET_PROJECTIONS.md`; sport-specific conversion rules live in `sports/<sport>.md`.
 
@@ -139,6 +151,7 @@ Output:
 Owns lineup generation and final portfolio assembly.
 
 Responsibilities:
+- generate candidates only from the eligible-player universe approved by Slate Intake & Validation
 - generate a broad legal candidate pool using Engine projection, expected ownership, conditional field behavior, simulation outputs when available, salary, correlation, and contest rules
 - treat optimization as candidate generation, not final authority
 - compare candidate constructions against likely sharp-field constructions rather than only summing individual ownership
@@ -152,7 +165,7 @@ Output:
 - key portfolio allocations
 
 ### 7. Portfolio Risk & Exposure Auditor
-Owns final strategic QA.
+Owns final strategic QA and independent pre-delivery eligibility validation.
 
 Responsibilities:
 - detect hidden concentration by player, stack/team, game, pitcher/QB pairing, salary construction, chalk combination, and script family
@@ -161,6 +174,9 @@ Responsibilities:
 - verify multiple credible paths to first remain represented
 - audit portfolio concentration across simulated winning worlds when simulation output exists
 - verify all lineup rows are legal, unique as required, and upload-ready
+- independently recheck every rostered player against the current eligibility universe immediately before delivery
+- fail the build if any delivered lineup contains a player with a source projection of 0, missing unresolved projection/role, confirmed inactive/out/scratched status, or another unresolved eligibility conflict
+- if verified current evidence proves a zero source projection is stale, require the rebuilt Engine projection and active-status evidence to be documented before allowing that player into the final file
 - preserve the required projection/ownership/exposure audit
 
 Required player audit:
@@ -172,6 +188,7 @@ When the user asks for direct file-only exposure or stack counts, calculate them
 
 Output:
 - upload-ready lineup file
+- eligibility validation result
 - exposure audit
 - stack/correlation allocation audit where relevant
 - simulation/portfolio-risk summary when available
@@ -186,7 +203,7 @@ Responsibilities:
 - compare source ownership -> Engine expected ownership -> actual field ownership
 - compare estimated sharp-field constructions -> actual top-field constructions when contest data is available
 - compare Engine exposure/scripts -> portfolio performance
-- separately grade projection calibration, ownership calibration, field-construction calibration, market interpretation, simulation calibration, sport/game-script judgment, correlation, duplication, and portfolio construction
+- separately grade projection calibration, ownership calibration, field-construction calibration, market interpretation, simulation calibration, sport/game-script judgment, correlation, duplication, eligibility failures, and portfolio construction
 - run counterfactual review so one bad outcome does not produce the wrong lesson
 - store single-slate observations as hypotheses unless structurally true or repeatedly supported
 - promote, merge, revise, or remove durable rules under `core/PROCESS_GOVERNANCE.md`
@@ -209,7 +226,7 @@ Slate Intake & Validation
 -> Delivery
 -> Post-Slate Learning
 
-A late material role, weather, lineup, or market change loops back to Market Projection and all affected downstream stages.
+A late material role, weather, lineup, or market change loops back to Market Projection and all affected downstream stages. A late eligibility change immediately invalidates affected candidates and lineups and requires rebuild/revalidation before delivery.
 
 ## Handoff Contract
 
@@ -219,6 +236,7 @@ Every agent passes forward:
 - assumptions
 - confidence
 - unresolved uncertainty
+- current eligibility status
 
 Later stages must not silently overwrite source data or earlier facts. Derived estimates may change only because of explicit new evidence or a documented model decision.
 
@@ -226,7 +244,7 @@ Later stages must not silently overwrite source data or earlier facts. Derived e
 
 Quantitative systems generate evidence and candidates. The final portfolio requires GPT/AI strategic sign-off as defined in `core/ENGINE.md`.
 
-GPT judgment must remain grounded in market projections, ownership, simulations, current news, sport correlation, contest structure, and portfolio interaction. It is not permission for ungrounded narrative overrides and is not a replacement for Monte Carlo simulation.
+GPT judgment must remain grounded in market projections, ownership, simulations, current news, sport correlation, contest structure, and portfolio interaction. It is not permission for ungrounded narrative overrides, is not a replacement for Monte Carlo simulation, and cannot override an unresolved eligibility failure.
 
 ## Sport-Specific Extensions
 
