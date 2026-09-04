@@ -197,31 +197,64 @@ Assign an internal projection confidence tier:
 
 The final CSV does not need to include confidence tiers unless requested.
 
+## Player identity preservation — absolute rule
+
+The attached Savant CSV is the canonical identity source.
+
+For every returned row:
+- `Name` must be copied **exactly character-for-character** from the source Savant file.
+- `DFS ID` must be copied **exactly character-for-character** from the source Savant file.
+- Do not normalize accents, punctuation, suffixes, apostrophes, hyphens, spaces, capitalization, abbreviations, or name order in the output.
+- Do not replace a Savant name with a sportsbook, DFS-site, or industry spelling.
+- Do not generate names from an external player database.
+- External-source names may be normalized internally for research matching only; after matching, write results back to the exact original Savant row.
+- Never modify `Name` or `DFS ID` as part of deduplication.
+
+Before delivery, compare every output `Name` and `DFS ID` against the source file. Any text mismatch is an audit failure.
+
+### Savant ambiguous-name handling
+
+Some names can still trigger Savant mapping prompts even when the text is unchanged because Savant may have multiple internal identities with the same display name.
+
+For a known ambiguous row:
+1. First preserve the exact original `Name` and `DFS ID`.
+2. If Savant still cannot import it automatically and the row's `Proj`/`Own` were not changed, omit that row from the import so Savant retains its native values.
+3. If the row's `Proj` or `Own` would be changed, do **not** silently rename it. Either keep the exact source identity and flag that manual mapping may be required, or conservatively revert that player's values to the source and omit the row if an import-clean file is required.
+4. Record the omitted/flagged identity in the audit summary.
+
+The priority is a clean, repeatable Savant import without corrupting player identity.
+
 ## Output contract
 
 Return exactly the source Savant import structure, normally:
 
 `Name, DFS ID, Proj, Own`
 
+- `Name` = exact source Savant text, unchanged.
+- `DFS ID` = exact source Savant text, unchanged.
 - `Proj` = site-specific fantasy points.
 - `Own` = expected site/slate field ownership percentage.
-- Preserve source names and DFS IDs whenever possible.
+- Only `Proj` and `Own` are intended to change during Market Inputs.
 
 ## Mandatory import audit
 
 Every returned file must pass:
 1. Exact source column structure preserved.
-2. Correct sport/site scoring system used.
-3. No duplicate DFS IDs.
-4. No duplicate exact-name mapping conflicts.
-5. Remove dead duplicate identities when one live identity exists.
-6. Omit a known Savant ambiguous-name row only when its projection/ownership remain unchanged, allowing Savant to retain its existing value.
-7. `Proj` numeric and non-negative.
-8. `Own` numeric when present and between 0 and 100.
-9. Zero projections intentional.
-10. Largest projection and ownership changes reviewed for plausibility.
-11. Return a short audit summary: rows in/out, mapping conflicts, projection changes, ownership changes, and fallback-heavy areas.
-12. Return coverage counts by confidence tier or equivalent market-coverage summary.
+2. `Name` values are byte-for-byte/character-for-character identical to their source Savant rows.
+3. `DFS ID` values are byte-for-byte/character-for-character identical to their source Savant rows.
+4. Correct sport/site scoring system used.
+5. No duplicate DFS IDs created by the process.
+6. No duplicate exact-name rows created by the process.
+7. Never deduplicate by editing a player's name or ID.
+8. Remove dead duplicate source identities only when one live identity clearly exists and document the removal.
+9. Apply the Savant ambiguous-name handling rules above.
+10. `Proj` numeric and non-negative.
+11. `Own` numeric when present and between 0 and 100.
+12. Zero projections intentional.
+13. Largest projection and ownership changes reviewed for plausibility.
+14. Compare output identity columns directly against the source before saving.
+15. Return a short audit summary: rows in/out, mapping conflicts, identity exceptions, projection changes, ownership changes, and fallback-heavy areas.
+16. Return coverage counts by confidence tier or equivalent market-coverage summary.
 
 ## Hard stop
 
@@ -244,4 +277,6 @@ After returning the audited CSV, stop. The user performs lineup generation and e
 
 Every Market Inputs invocation is a full slate-wide research pass unless the user explicitly requests a quicker targeted adjustment.
 
-Keep projection quality, ownership forecasting, and portfolio game theory separate so each layer can be evaluated honestly.
+**Only Proj and Own should change. Savant player identity text is immutable.**
+
+Keep projection quality, ownership forecasting, player identity, and portfolio game theory separate so each layer can be evaluated honestly.
