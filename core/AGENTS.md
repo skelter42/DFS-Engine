@@ -157,11 +157,13 @@ Responsibilities:
 - compare candidate constructions against likely sharp-field constructions rather than only summing individual ownership
 - select/reshape the final set around coherent scripts, leverage, duplication, top-tail simulation evidence when available, and first-place equity
 - allow exposures, stack structures, salary usage, and roster archetypes to emerge naturally
+- when entries span multiple contests, allocate lineups under the two-level framework in `core/ENGINE.md` so each contest is a complete mini-portfolio and the combined entries remain one coordinated bankroll portfolio
 - never use arbitrary hard caps/floors/stack quotas unless required by site legality, contest rules, confirmed inactivity, or an explicit user constraint
 
 Output:
 - final portfolio
 - script assignment for each lineup when practical
+- contest-level allocation and quality ladder when multiple contests are entered
 - key portfolio allocations
 
 ### 7. Portfolio Risk & Exposure Auditor
@@ -174,6 +176,7 @@ Responsibilities:
 - compare the portfolio to likely sharp-field archetypes and flag accidental duplication with common optimizer constructions
 - distinguish intentional concentration from repeated optimizer convenience
 - verify multiple credible paths to first remain represented
+- for multi-contest builds, independently verify that every contest has viable script coverage, that higher-priority quality tilts are modest and justified, and that no contest is merely receiving leftover lineups
 - audit portfolio concentration across simulated winning worlds when simulation output exists
 - verify all lineup rows are legal, unique as required, and upload-ready
 - independently recheck every rostered player against the current eligibility universe immediately before delivery
