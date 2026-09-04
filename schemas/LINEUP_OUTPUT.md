@@ -29,6 +29,18 @@ Difference is `Engine Exposure - Source Own` in percentage points.
 ### Correlation / Stack Summary
 Use sport-appropriate structure such as MLB primary/secondary stacks, QB stacks, NHL lines, or game-stack combinations.
 
+### Multi-Contest Allocation Audit
+When entries span multiple contests, report for each contest:
+
+- lineup count and uniqueness
+- average projection and available ceiling/top-tail metrics
+- average ownership, leverage, and duplication proxy
+- script/anchor/correlation/risk-family distribution
+- material player/team/game exposures
+- quality-ladder position and any contest-specific tilt
+
+Confirm that every contest is a viable standalone mini-portfolio and that the combined entries form one coordinated bankroll portfolio. Explicitly flag any contest that lacks a material script family or receives a disproportionate share of lower-quality candidates.
+
 ### Risk Flags
 Identify late news, uncertain roles, weather, lineup confirmation, ownership uncertainty, or any assumption that can materially change the build.
 
