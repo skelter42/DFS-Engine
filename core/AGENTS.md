@@ -169,6 +169,8 @@ Owns final strategic QA and independent pre-delivery eligibility validation.
 
 Responsibilities:
 - detect hidden concentration by player, stack/team, game, pitcher/QB pairing, salary construction, chalk combination, and script family
+- audit construction-shape distribution when the sport has meaningful correlation structures (for example MLB stack sizes, NFL/NCAAF game stacks, NHL line stacks); compare the final mix with sport correlation, slate size, salary/position constraints, simulation evidence when available, and likely sharp-field construction
+- when a portfolio is unusually concentrated in or unusually sparse on a high-correlation construction (for example very few MLB 5-man stacks), require an explicit strategic explanation and stress-test a plausible alternative construction mix before final delivery; this is a diagnostic requirement, not a hard quota or preset stack rule
 - compare the portfolio to likely sharp-field archetypes and flag accidental duplication with common optimizer constructions
 - distinguish intentional concentration from repeated optimizer convenience
 - verify multiple credible paths to first remain represented
