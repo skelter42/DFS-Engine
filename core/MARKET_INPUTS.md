@@ -22,6 +22,24 @@ Examples:
 - `Market Inputs — NCAAF`
 - `Market Inputs — Tennis`
 
+## Core target — mandatory
+
+The default target for every Market Inputs run is:
+
+**`Proj = Vegas-derived first`**
+
+**`Own = industry-derived first`**
+
+Savant is not the source of truth for either column. Savant is the final fallback only when external market or industry coverage is genuinely insufficient.
+
+The intended division of labor is:
+
+**Vegas tells us what is likely to happen.**
+
+**The DFS industry tells us what the field is likely to play.**
+
+**Savant uses those inputs to build the lineups.**
+
 ## Full-run requirement — mandatory
 
 Every `Market Inputs — [SPORT]` request is a **full slate-wide research pass by default**. Do not substitute a quick targeted adjustment pass unless the user explicitly asks for one.
@@ -35,10 +53,34 @@ A valid full run must:
 6. Use sportsbook aggregators and direct sportsbook sources across as many books as practical, including sources that surface DraftKings, FanDuel, BetMGM, Caesars, BetRivers, Hard Rock, Circa, theScore and other available books.
 7. Where direct Vegas/player-prop coverage is incomplete, research multiple reputable industry projection systems before falling back to Savant.
 8. Convert the final statistical expectation into the correct site-specific fantasy scoring.
-9. Build ownership from multiple current site/slate-specific ownership touch points plus the behavioral ownership model below.
+9. Build ownership from multiple current site/slate-specific industry ownership projections plus the behavioral ownership model below.
 10. Use Savant only as the final documented fallback when both market and broader industry coverage are insufficient.
 11. Audit the completed file and return it.
 12. Stop.
+
+### No low-Vegas-coverage pass accepted without escalation
+
+A Market Inputs run should not quietly finish with a low percentage of Vegas-supported projections for likely starters when public sportsbook markets are known to be broadly available.
+
+Before assigning a likely active player to Industry-supported or Savant fallback, the process must escalate through:
+1. direct sportsbook pages when accessible
+2. sportsbook comparison/aggregation pages
+3. alternate prop categories for the same player
+4. game/team markets
+5. additional reputable sportsbook/odds aggregators
+
+For MLB specifically, if a confirmed starting hitter or starting pitcher is still not Vegas-rich or Vegas-supported after the first pass, perform a second sportsbook sweep before accepting that classification.
+
+Do not treat inability to extract one sportsbook page as evidence that Vegas coverage does not exist.
+
+### Coverage target
+
+For mature major-sport slates with broad public prop markets, the expected steady-state outcome is:
+- **most confirmed starters/rotation players should be Vegas-rich or Vegas-supported for projection**
+- **most DFS-relevant players should have at least one external industry ownership source**
+- Savant fallback should be concentrated mainly among bench, inactive, deep-fringe, or genuinely uncovered players
+
+This is a process target, not a reason to invent data. If the target is not met, explicitly state why and identify which source categories failed before delivery.
 
 ### No partial-run masquerading
 
@@ -91,7 +133,7 @@ Use when only some direct props are available.
 - Vegas still carries the most weight.
 
 ### Tier 3 — Industry-supported
-Use when direct player props are sparse or absent but broader public/industry projection coverage exists.
+Use only after a real sportsbook sweep shows that direct player-market coverage is genuinely sparse or absent.
 
 Research multiple reputable projection systems before retaining Savant unchanged. Depending on sport and availability, examples may include:
 - THE BAT / THE BAT X
@@ -160,6 +202,22 @@ A hitter with several of these markets should normally be Vegas-rich or Vegas-su
 
 Use the available prices on both sides and consensus across books where practical. Do not reduce a market to the posted line alone when juice materially changes the expectation.
 
+### MLB second-pass rule
+
+Before any confirmed starting pitcher is classified Industry-supported or fallback-heavy, verify at least:
+- one strikeout source
+- one workload source such as outs recorded
+- one run-prevention/baserunner source such as ER, hits allowed, or walks allowed
+- game moneyline and total/team-total context
+
+Before any confirmed starting hitter is classified Industry-supported or fallback-heavy, verify that multiple hitter prop families were checked across aggregators/books, including at minimum:
+- hits or total bases
+- HR
+- RBI or runs
+- at least one additional category such as walks, H+R+RBI, singles, or SB
+
+If those categories are broadly posted for the slate, failure to find one source does not justify fallback. Search alternate books/aggregators.
+
 ## Projection research standard
 
 For each slate, collect as many of these as legitimately available:
@@ -187,6 +245,20 @@ Assign an internal projection confidence tier:
 A player does not need many direct props to avoid Tier D if multiple credible industry systems and the game market provide strong independent support. Conversely, one industry projection alone does not create high confidence.
 
 Every full run must report confidence-tier coverage for the likely active/starting pool and may additionally report the full raw-pool counts.
+
+## Ownership principle — industry first
+
+Ownership should be **industry-derived first**, not Savant-derived first.
+
+For DFS-relevant players, the process should actively search for multiple site/slate-specific ownership projections before retaining Savant ownership unchanged. Savant is one ownership source, not the baseline authority.
+
+The preferred hierarchy is:
+1. multiple current numeric industry ownership projections for the exact site/slate
+2. one current numeric ownership source plus corroborating salary/value/optimizer/stack behavior
+3. behavioral field model plus Savant as a conservative anchor
+4. Savant-only fallback when no credible external ownership signal exists
+
+For mature main slates, a low percentage of external ownership coverage should trigger an additional industry-search pass before delivery.
 
 ## Ownership is a field-behavior forecast
 
@@ -273,13 +345,13 @@ Calibrate for:
 The same player can correctly have very different ownership across DK and FD.
 
 ### Step 6 — Final ownership estimate and confidence
-Produce the final `Own` using numeric consensus as the anchor, modified only when credible behavioral evidence shows the consensus is stale or inconsistent.
+Produce the final `Own` using numeric industry consensus as the preferred anchor, modified only when credible behavioral evidence shows the consensus is stale or inconsistent.
 
 Assign an internal ownership confidence tier:
-- **A — High confidence:** multiple fresh numeric sources agree and the field story supports them.
-- **B — Good confidence:** several signals with modest disagreement.
+- **A — High confidence:** multiple fresh numeric industry sources agree and the field story supports them.
+- **B — Good confidence:** at least one fresh numeric industry source plus corroborating field signals.
 - **C — Sparse:** limited numeric coverage; behavioral inference contributes materially.
-- **D — Fallback-heavy:** retain Savant/industry baseline conservatively.
+- **D — Fallback-heavy:** Savant-only or nearly Savant-only ownership due to insufficient external data.
 
 When confidence is low, avoid false precision and make smaller changes from Savant.
 
@@ -292,6 +364,7 @@ Treat the following as failures that must be investigated before delivery:
 - mixing ownership from the wrong site or slate
 - large ownership changes with no observable field-behavior explanation
 - calling ownership “industry consensus” when only one source was checked
+- finishing a mature main slate with low external ownership coverage without performing a second industry-search pass
 
 ## Player identity preservation — absolute rule
 
@@ -350,7 +423,10 @@ Every returned file must pass:
 13. Largest projection and ownership changes reviewed for plausibility.
 14. Compare output identity columns directly against the source before saving.
 15. Return a short audit summary: rows in/out, mapping conflicts, identity exceptions, projection changes, ownership changes, and fallback-heavy areas.
-16. Return projection coverage counts as Vegas-rich / Vegas-supported / industry-supported / fallback-heavy for the likely active/starting pool, with raw-pool counts optional.
+16. Return projection coverage for the likely active pool as Vegas-rich / Vegas-supported / industry-supported / fallback-heavy.
+17. Return ownership coverage for the likely active pool as multi-source industry / single-source industry-supported / behavioral-supported / Savant-only fallback.
+18. If likely-active projection Vegas coverage is unexpectedly low, do not finalize until a second sportsbook sweep is completed or the lack of coverage is explicitly demonstrated.
+19. If likely-active external ownership coverage is unexpectedly low, do not finalize until a second industry ownership sweep is completed or the lack of coverage is explicitly demonstrated.
 
 ## Hard stop
 
@@ -369,7 +445,7 @@ After returning the audited CSV, stop. The user performs lineup generation and e
 
 ## Core philosophy
 
-**Vegas estimates what happens first. Industry consensus fills missing market coverage. Ownership estimates what the field will play. Savant builds the lineups.**
+**Vegas estimates what happens first. Industry consensus estimates what the field will play. Savant builds the lineups.**
 
 Every Market Inputs invocation is a full slate-wide research pass unless the user explicitly requests a quicker targeted adjustment.
 
