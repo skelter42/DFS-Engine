@@ -4,7 +4,7 @@ The DFS Engine is a coordinated decision system. Agents are mandatory reasoning 
 
 ## Design Rule
 
-`core/ENGINE.md` is the canonical operating sequence. `core/AGENTS.md` defines ownership of each stage. Sport files define only sport-specific implementation details. Agents must not restate global policy already defined in `core/ENGINE.md`.
+`core/ENGINE.md` is the canonical operating sequence. `core/AGENTS.md` defines ownership of each stage. `core/SIMULATION.md` is the single authoritative simulation specification. Sport files define only sport-specific implementation details. Agents and sport files must not restate global policy already defined in core files.
 
 The Engine should use the fewest agents needed to create clear ownership and traceable handoffs. Avoid multiple agents solving the same problem under different names.
 
@@ -87,20 +87,28 @@ Output per player/construction:
 - duplication-risk notes
 
 ### 4. Simulation & Scenario Agent
-Owns uncertainty and outcome distributions.
+Owns all simulation execution and interpretation. GPT does not substitute for simulation.
 
 Responsibilities:
+- follow `core/SIMULATION.md` as the single authoritative simulation contract
 - use DFS Engine projections as the primary simulation mean/input while retaining source projections for sensitivity checks
-- estimate ceiling, floor/failure, top-tail rates, correlated team/game outcomes, and scenario frequencies
+- generate full-slate correlated worlds when executable inputs are sufficient
+- estimate ceiling, floor/failure, top-tail rates, correlated team/game outcomes, scenario frequencies, lineup finish proxies, and portfolio overlap
 - use empirical/calibrated sport-specific volatility and correlation; never invent unsupported SDs or correlation coefficients
-- ingest native/vendor simulation outputs when useful but do not treat them as final authority
+- ingest vendor/native simulation outputs when useful but do not treat them as final authority
+- clearly label whether a build used: (a) native executable simulation, (b) trusted external simulation inputs, or (c) scenario-only fallback because calibrated sim inputs were unavailable
+- never describe a scenario-only reasoning pass as a Monte Carlo simulation
 
-Canonical simulation policy lives in `core/SIMULATION.md`.
+Implementation rule:
+- there should be one native executable simulation implementation shared across sports, with sport-specific distribution/correlation adapters; do not create separate overlapping simulators in sport files
+- if native simulation code is unavailable for a build, preserve the gap explicitly rather than letting GPT silently mimic simulation
 
 Output:
+- simulation mode used
 - player/team/game outcome distributions
 - scenario probabilities
-- top-tail and failure signals
+- lineup top-tail / finish proxies when field modeling is available
+- portfolio overlap / hidden-world concentration
 - sensitivity/uncertainty notes
 
 ### 5. Sport Strategy & Game Script Agent
@@ -112,6 +120,7 @@ Responsibilities:
 - identify which field assumptions succeed or fail in each world
 - connect leverage decisions to the players/teams that directly benefit
 - identify construction archetypes appropriate to each script
+- interpret simulation output strategically without replacing it
 - prevent the Engine from collapsing to one median forecast
 
 Examples:
@@ -130,10 +139,10 @@ Output:
 Owns lineup generation and final portfolio assembly.
 
 Responsibilities:
-- generate a broad legal candidate pool using Engine projection, expected ownership, conditional field behavior, simulation, salary, correlation, and contest rules
+- generate a broad legal candidate pool using Engine projection, expected ownership, conditional field behavior, simulation outputs when available, salary, correlation, and contest rules
 - treat optimization as candidate generation, not final authority
 - compare candidate constructions against likely sharp-field constructions rather than only summing individual ownership
-- select/reshape the final set around coherent scripts, leverage, duplication, and first-place equity
+- select/reshape the final set around coherent scripts, leverage, duplication, top-tail simulation evidence when available, and first-place equity
 - allow exposures, stack structures, salary usage, and roster archetypes to emerge naturally
 - never use arbitrary hard caps/floors/stack quotas unless required by site legality, contest rules, confirmed inactivity, or an explicit user constraint
 
@@ -150,6 +159,7 @@ Responsibilities:
 - compare the portfolio to likely sharp-field archetypes and flag accidental duplication with common optimizer constructions
 - distinguish intentional concentration from repeated optimizer convenience
 - verify multiple credible paths to first remain represented
+- audit portfolio concentration across simulated winning worlds when simulation output exists
 - verify all lineup rows are legal, unique as required, and upload-ready
 - preserve the required projection/ownership/exposure audit
 
@@ -164,6 +174,7 @@ Output:
 - upload-ready lineup file
 - exposure audit
 - stack/correlation allocation audit where relevant
+- simulation/portfolio-risk summary when available
 - largest intentional deviations
 - unresolved pre-lock risks
 
@@ -175,7 +186,7 @@ Responsibilities:
 - compare source ownership -> Engine expected ownership -> actual field ownership
 - compare estimated sharp-field constructions -> actual top-field constructions when contest data is available
 - compare Engine exposure/scripts -> portfolio performance
-- separately grade projection calibration, ownership calibration, field-construction calibration, market interpretation, simulation, sport/game-script judgment, correlation, duplication, and portfolio construction
+- separately grade projection calibration, ownership calibration, field-construction calibration, market interpretation, simulation calibration, sport/game-script judgment, correlation, duplication, and portfolio construction
 - run counterfactual review so one bad outcome does not produce the wrong lesson
 - store single-slate observations as hypotheses unless structurally true or repeatedly supported
 - promote, merge, revise, or remove durable rules under `core/PROCESS_GOVERNANCE.md`
@@ -215,7 +226,7 @@ Later stages must not silently overwrite source data or earlier facts. Derived e
 
 Quantitative systems generate evidence and candidates. The final portfolio requires GPT/AI strategic sign-off as defined in `core/ENGINE.md`.
 
-GPT judgment must remain grounded in market projections, ownership, simulations, current news, sport correlation, contest structure, and portfolio interaction. It is not permission for ungrounded narrative overrides.
+GPT judgment must remain grounded in market projections, ownership, simulations, current news, sport correlation, contest structure, and portfolio interaction. It is not permission for ungrounded narrative overrides and is not a replacement for Monte Carlo simulation.
 
 ## Sport-Specific Extensions
 
