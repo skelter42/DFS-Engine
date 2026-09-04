@@ -135,6 +135,24 @@ GPT/AI review must identify several plausible ways the slate can be won and audi
 
 The AI pass must preserve multiple credible paths to victory. Stronger theses may receive more exposure, but alternate scripts should remain represented when they have meaningful probability and payoff.
 
+### Champion-Challenger Portfolio Gate
+
+When the user supplies a source/prebuild lineup portfolio, treat that portfolio as the current champion and the DFS Engine portfolio as the challenger. A customized portfolio is not automatically an improvement merely because it uses Engine projections or different exposures.
+
+Before replacing or materially reshaping the source portfolio, compare champion and challenger on the best available pre-lock evidence:
+
+- legality and current player eligibility
+- median projection and ceiling distribution
+- simulated or scenario-based top-tail performance
+- coherent slate-script and failure-path coverage
+- player, pitcher, stack, game, and hidden-world concentration
+- ownership leverage and conditional field behavior
+- correlation, duplication risk, and contest fit
+
+The challenger does not need to win every metric. It must have a documented portfolio-level reason to expect more first-place equity or better risk-adjusted contest performance. If it narrows credible scripts or adds material concentration without stronger top-tail evidence, retain the source portfolio or blend selected Engine improvements into it instead of replacing it wholesale.
+
+This gate is ex-ante process control. Post-slate results calibrate it but must not be used as hindsight proof that the losing portfolio was irrational.
+
 ## Portfolio Construction
 
 Build lineups as a coordinated portfolio rather than isolated top-projection lineups.
