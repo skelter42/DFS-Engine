@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This is the cross-sport market-input workflow for Sim Savant. Its only job is to take an attached Sim Savant projection CSV and return the same import structure with the best available market-derived fantasy projections and the best available estimate of expected field ownership.
+This is the cross-sport market-input workflow for Sim Savant. Its only job is to take an attached Sim Savant projection CSV and return the same import structure with the best available **full-slate market-derived fantasy projections** and the best available estimate of **expected field ownership**.
 
 The user specifies the sport. This process researches the relevant betting markets, player props, game lines, site scoring, slate context, and ownership signals for that sport.
 
@@ -22,16 +22,33 @@ Examples:
 - `Market Inputs — NCAAF`
 - `Market Inputs — Tennis`
 
-When invoked with a Sim Savant projection file:
-1. Identify sport, site, slate, player pool, names, DFS IDs, and original `Proj`/`Own`.
-2. Research as many current reliable sportsbook/game/prop touch points as practical for that sport.
-3. Build the most objective market-derived statistical expectation possible.
-4. Convert that expectation into the correct DraftKings/FanDuel scoring system.
-5. Estimate site-specific expected ownership using the ownership process below.
-6. Use original Savant values only as fallback when market/industry coverage is insufficient.
-7. Preserve the exact Savant import structure and DFS IDs.
-8. Run the mandatory import/mapping audit.
-9. Return the clean CSV and stop.
+## Full-run requirement — mandatory
+
+Every `Market Inputs — [SPORT]` request is a **full slate-wide research pass by default**. Do not substitute a quick targeted adjustment pass unless the user explicitly asks for one.
+
+A valid full run must:
+1. Read the entire attached Savant player pool.
+2. Identify every game/event on the slate.
+3. Research game-level markets for every game/event.
+4. Research player-level props for as much of the slate as the public market actually offers.
+5. Use multiple books/sources where practical, not one sportsbook or one DFS source.
+6. Convert those expectations into the correct site-specific fantasy scoring.
+7. Build ownership from multiple current site/slate-specific ownership touch points plus the behavioral ownership model below.
+8. Use Savant only as a documented fallback for players/markets with insufficient public coverage.
+9. Audit the completed file and return it.
+10. Stop.
+
+### No partial-run masquerading
+
+Do not call a file “Market Inputs complete” if only a small subset of players were researched or adjusted.
+
+If broad market coverage is unavailable, say so explicitly and quantify:
+- how many players were market-rich
+- how many were market-supported
+- how many required sparse-market inference
+- how many remained fallback-heavy
+
+If the run is fallback-heavy, label it as such rather than implying a fully market-derived slate.
 
 ## Projection principle
 
@@ -49,6 +66,21 @@ Relevant markets depend on sport. Examples:
 - Tennis: match/set/game markets, moneyline, total games, aces/double faults/break markets where available.
 
 Use lineup/role/minutes/workload/injury/weather/venue context only to allocate market expectation appropriately. Independent DFS projections are sanity checks, not automatic overrides. Savant is the conservative fallback for sparse markets; never invent precision.
+
+## Projection research standard
+
+For each slate, collect as many of these as legitimately available:
+- multiple sportsbook prices for the same prop
+- both over and under prices when possible
+- game totals, spreads/moneylines and team totals
+- correlated player markets where useful
+- recent line movement when material
+- confirmed starting/lineup/role information
+- site-specific DFS scoring rules
+
+Where many books disagree, prefer a consensus expectation rather than cherry-picking the most favorable line.
+
+Where direct props are missing, infer conservatively from team/game markets, role, workload and independent projections. Do not simply apply a flat multiplier to Savant and call it market-derived.
 
 ## Ownership is a field-behavior forecast
 
@@ -71,6 +103,7 @@ Rules:
 - Use a median, trimmed consensus, or reliability-weighted consensus so one outlier cannot dominate.
 - Do not mix DK and FD ownership directly.
 - Do not mix main-slate and short-slate ownership directly.
+- Do not claim broad consensus if only one numeric source was available.
 
 If multiple reliable sources agree closely, that consensus should carry heavy weight.
 
@@ -136,7 +169,7 @@ The same player can correctly have very different ownership across DK and FD.
 ### Step 6 — Final ownership estimate and confidence
 Produce the final `Own` using numeric consensus as the anchor, modified only when credible behavioral evidence shows the consensus is stale or inconsistent.
 
-Assign an internal confidence tier:
+Assign an internal ownership confidence tier:
 - **A — High confidence:** multiple fresh numeric sources agree and the field story supports them.
 - **B — Good confidence:** several signals with modest disagreement.
 - **C — Sparse:** limited numeric coverage; behavioral inference contributes materially.
@@ -152,6 +185,7 @@ Treat the following as failures that must be investigated before delivery:
 - using stale ownership after material injury/lineup news
 - mixing ownership from the wrong site or slate
 - large ownership changes with no observable field-behavior explanation
+- calling ownership “industry consensus” when only one source was checked
 
 ## Projection confidence
 
@@ -187,6 +221,7 @@ Every returned file must pass:
 9. Zero projections intentional.
 10. Largest projection and ownership changes reviewed for plausibility.
 11. Return a short audit summary: rows in/out, mapping conflicts, projection changes, ownership changes, and fallback-heavy areas.
+12. Return coverage counts by confidence tier or equivalent market-coverage summary.
 
 ## Hard stop
 
@@ -206,5 +241,7 @@ After returning the audited CSV, stop. The user performs lineup generation and e
 ## Core philosophy
 
 **Markets estimate what happens. Ownership estimates what the field will play. Savant builds the lineups.**
+
+Every Market Inputs invocation is a full slate-wide research pass unless the user explicitly requests a quicker targeted adjustment.
 
 Keep projection quality, ownership forecasting, and portfolio game theory separate so each layer can be evaluated honestly.
