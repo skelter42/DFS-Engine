@@ -1,0 +1,213 @@
+# MLB Market Inputs Process
+
+## Purpose
+
+This file defines one narrow responsibility for the DFS Engine: **produce slate-ready player projections and ownership estimates from betting-market and industry information for import into Sim Savant.**
+
+Sim Savant remains responsible for simulation, lineup generation, 1% finish-rate ranking, and exposure spreading. This process does **not** build lineups.
+
+## Output contract
+
+For each site/slate, output exactly:
+
+`Name, DFS ID, Proj, Own`
+
+- `Proj` = site-specific fantasy points (DraftKings or FanDuel)
+- `Own` = expected field ownership percentage for that site/slate
+- Preserve the source Sim Savant player names and DFS IDs so imports map cleanly.
+
+## Source hierarchy
+
+### Projection inputs
+
+Use as many current touch points as are legitimately available, with this priority:
+
+1. **Sportsbook player props and prices**
+   - Pitchers: strikeouts, outs recorded, earned runs allowed, hits allowed, walks allowed, win probability, and any quality-start-relevant markets.
+   - Hitters: hits, total bases, home runs, RBI, runs, walks/HBP where available, stolen bases, and H+R+RBI / similar combo markets.
+   - Use the odds/juice on both sides when available, not only the posted line.
+   - Prefer consensus across multiple books rather than one sportsbook.
+
+2. **Game-level Vegas markets**
+   - Moneyline
+   - Run line
+   - Game total
+   - Derived implied team totals
+   - These act as reconciliation constraints for player-level expectations.
+
+3. **Context needed to allocate team expectation**
+   - Confirmed batting order / starter status
+   - Lineup slot
+   - Handedness matchup
+   - Park
+   - Weather / roof status
+   - Expected plate appearances / pitcher workload
+
+4. **Independent DFS projection systems**
+   - Use multiple reputable industry projection systems as sanity checks where accessible.
+   - These should not automatically override the betting market, but large disagreements must be investigated.
+
+5. **Sim Savant projection fallback**
+   - Use only when public betting markets and independent projection coverage are insufficient.
+   - Never invent precision for poorly covered players.
+
+### Ownership inputs
+
+Ownership should be a consensus estimate, not a single-source number.
+
+Collect as many current site-specific ownership projections as legitimately available, including Sim Savant and other reputable DFS industry sources. Then reconcile with the factors that drive ownership:
+
+- Salary / points per dollar
+- Position scarcity
+- Batting order
+- Implied team total
+- Stack popularity
+- Pitcher opportunity cost
+- Obvious value created by lineup news
+- Industry tout consensus / public DFS analysis
+- Recent ownership updates close to lock
+
+If the numeric ownership consensus conflicts strongly with the public DFS story, flag it and investigate before output.
+
+## Market-to-fantasy conversion
+
+### DraftKings MLB scoring
+
+#### Hitters
+- Single: 3
+- Double: 5
+- Triple: 8
+- Home run: 10
+- RBI: 2
+- Run: 2
+- Walk/HBP: 2
+- Stolen base: 5
+
+#### Pitchers
+- Inning pitched: 2.25
+- Strikeout: 2
+- Win: 4
+- Earned run allowed: -2
+- Hit allowed: -0.6
+- Walk/HBP allowed: -0.6
+- Complete game: 2.5
+- Complete-game shutout: 2.5 additional
+- No-hitter: 5
+
+Translate expected baseball outcomes into expected DraftKings points. Rare bonuses should be probability-weighted, not assumed.
+
+### FanDuel MLB scoring
+
+#### Hitters
+- Single: 3
+- Double: 6
+- Triple: 9
+- Home run: 12
+- RBI: 3.5
+- Run: 3.2
+- Walk/HBP: 3
+- Stolen base: 6
+
+#### Pitchers
+- Inning pitched: 3
+- Strikeout: 3
+- Win: 6
+- Quality start: 4
+- Earned run allowed: -3
+
+For pitchers, an outs prop is especially useful because each recorded out is worth 1 FanDuel point through innings pitched.
+
+## Estimation rules
+
+### Pitchers
+
+Build the expectation from the market components rather than applying a flat percentage adjustment to Savant.
+
+Conceptually:
+
+- Expected innings / outs from outs market
+- Expected strikeouts from strikeout market and price
+- Expected ER from ER market, opponent implied total, and workload
+- Win probability from moneyline adjusted for starter qualification / bullpen context
+- FanDuel QS probability from workload + ER expectation + opponent context
+- DK hits/walks allowed from direct props when available; otherwise conservative inferred expectation
+
+Then apply site scoring.
+
+### Hitters
+
+Use market expectations for the component stats when available:
+
+- Expected singles/doubles/triples/HR from hits, total bases, HR props and supporting rates
+- Expected RBI and runs from direct props, lineup slot, implied team total, and surrounding hitters
+- Expected walks/HBP from direct or supporting markets where available
+- Expected SB from stolen-base markets / matchup context
+
+Reconcile the sum of hitter expectations against the team implied run environment. Do not allow individual projections collectively to tell a materially different offensive story from the game market without a documented reason.
+
+## Confidence tiers
+
+Assign an internal confidence tier to every player projection.
+
+### Tier A — Market-rich
+Multiple independent prop markets across multiple books plus stable game markets.
+
+### Tier B — Market-supported
+Some direct props plus strong team/game context and independent projection support.
+
+### Tier C — Sparse market
+Limited direct props; use team market + context + projection consensus.
+
+### Tier D — Fallback
+Insufficient market coverage; use Sim Savant / projection consensus conservatively.
+
+The final CSV does not need to include the confidence tier unless requested, but the process must use it to avoid fake precision.
+
+## Ownership consensus rules
+
+- Prefer current site-specific ownership sources.
+- Weight fresher updates more heavily as lock approaches.
+- Avoid treating one provider as authoritative.
+- Use median/trimmed consensus where multiple projections exist to reduce outlier influence.
+- Check ownership against salary, projection, stack popularity and industry discussion.
+- If a player is universally touted but modeled as nearly unowned, treat that as an audit failure until explained.
+
+## Import audit — mandatory before delivery
+
+Every output file must pass all checks below:
+
+1. Exact 4-column structure: `Name, DFS ID, Proj, Own`.
+2. Correct site scoring system used.
+3. No duplicate DFS IDs.
+4. No duplicate exact player-name mapping conflicts.
+5. Remove dead duplicate identities when one live positive-projection identity exists.
+6. Known Sim Savant ambiguous-name rows that cannot import cleanly should be omitted **only when their projection/ownership are unchanged from the original Savant file**, allowing Savant to retain its existing values.
+7. `Proj` must be numeric and non-negative.
+8. `Own` must be numeric when present and between 0 and 100.
+9. Zero-projection players must be intentional; do not accidentally import inactive/non-slate duplicates.
+10. Produce a short audit summary: rows in/out, duplicate conflicts removed, number of projection changes, number of ownership changes, and any fallback-heavy players of note.
+
+## Slate workflow
+
+When the user provides a Sim Savant projection file:
+
+1. Identify site, sport, slate, player pool, names, and DFS IDs.
+2. Pull current sportsbook props/odds and game markets from multiple sources.
+3. Build market-derived component expectations.
+4. Convert components into site-specific fantasy points.
+5. Cross-check against independent DFS projection systems.
+6. Build site-specific industry ownership consensus.
+7. Use Sim Savant only as fallback where market coverage is insufficient.
+8. Run the mandatory import audit.
+9. Return the clean `Name, DFS ID, Proj, Own` CSV.
+10. User imports that file into Sim Savant.
+11. Sim Savant handles simulation, 1% finish-rate ranking, lineup construction, and exposure spreading.
+12. Separately audit Savant's final exposures for extreme game-theory positions, but do not change this market-input process to force lineup outcomes.
+
+## Core philosophy
+
+**Vegas/props create the expectation. Industry consensus estimates what the field will do. Sim Savant builds the lineups.**
+
+Do not optimize projections toward the lineup result we want. Do not reverse-engineer projections to create leverage. Keep the market-input layer objective and independent from lineup construction.
+
+This separation is intentional: projection quality and ownership quality should be judged on their own, while Savant's simulation and portfolio logic are judged separately.
