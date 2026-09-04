@@ -1,13 +1,13 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "site": "DraftKings",
   "projection_blend": {
     "primary_weight": 0.55,
-    "industry_weight": 0.30,
+    "industry_weight": 0.3,
     "market_context_weight": 0.15
   },
   "score_weights": {
-    "projection": 1.0,
+    "projection": 1,
     "ceiling": 0.22,
     "leverage": 0.18,
     "correlation": 0.12,
@@ -18,9 +18,16 @@
     "default_lineups": 20,
     "min_uniques": 2,
     "max_player_exposure": 0.65,
-    "min_player_exposure": 0.0,
-    "ownership_fade_guardrail_pp": 20.0,
-    "ownership_overweight_guardrail_pp": 30.0
+    "min_player_exposure": 0,
+    "ownership_fade_guardrail_pp": 20,
+    "ownership_overweight_guardrail_pp": 30,
+    "multi_contest_allocation": {
+      "method": "risk_sensitive_scenario_stratified_quality_ladder",
+      "optimize_per_contest_and_global_portfolio": true,
+      "require_per_contest_script_coverage": true,
+      "allow_modest_priority_quality_tilt": true,
+      "reject_leftover_contest_allocation": true
+    }
   },
   "required_outputs": [
     "slate_thesis",
@@ -29,6 +36,7 @@
     "portfolio",
     "correlation_summary",
     "source_ownership_vs_engine_exposure",
-    "largest_exposure_deviations"
+    "largest_exposure_deviations",
+    "contest_allocation_audit"
   ]
 }
