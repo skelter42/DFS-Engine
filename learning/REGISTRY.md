@@ -39,6 +39,15 @@ Do not promote:
 
 ## Seeded Durable Learnings
 
+### 2026-09-04 — MLB short-slate pitcher concentration requires stress testing
+- Sport: MLB GPP, especially short slates
+- Status: validated
+- Evidence: Two September 3 reviews exposed the same portfolio mechanism. In Contest 194946069, the Engine raised Kade Anderson to 45% versus Savant's 20% while reducing Kevin Gausman and Michael Wacha; Engine pitcher scoring averaged 30.43 versus Savant's 33.13. In the two-game Night Contest 194946121, the Engine used Tarik Skubal + Kade Anderson in all 20 lineups, while Savant retained Jack Perkins and Quinn Mathews paths. The Engine averaged 84.10 points with a best rank of 354th; Savant would have averaged 98.31 with a best rank of 38th. This does not prove the realized pitcher scores were predictable, but it proves the final portfolio repeatedly converted a median-projection preference into an unaudited all-or-nearly-all pitcher bet.
+- Durable lesson: On short MLB slates, a strong median projection edge may justify pitcher concentration but cannot by itself eliminate every credible alternate pitcher script. Any all-or-nearly-all pitcher or pitcher-pair exposure must survive an explicit counterfactual portfolio stress test covering chalk failure, alternate-pitcher success, salary-unlock effects, and the resulting stack combinations.
+- Engine impact: Add a mandatory short-slate pitcher-concentration diagnostic to MLB Portfolio Risk review. This is not a hard exposure cap or forced diversification rule; concentrated exposure remains allowed when top-tail evidence and scenario coverage justify it.
+- Files updated: `learning/REGISTRY.md`, `sports/mlb.md`.
+- Revisit condition: Track whether the diagnostic improves top-tail coverage over the next meaningful sample of short MLB slates; revise if concentrated portfolios consistently retain superior simulated first-place equity.
+
 ### 2026-09-03 — Multi-source projection discipline
 - Sport: all
 - Status: validated
