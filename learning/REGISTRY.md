@@ -39,6 +39,15 @@ Do not promote:
 
 ## Seeded Durable Learnings
 
+### 2026-09-04 — Source portfolio remains the champion until displaced
+- Sport: all GPPs
+- Status: validated
+- Evidence: In both reviewed September 3 MLB portfolios, the Engine materially changed the supplied Savant construction without a documented portfolio-level acceptance test. Savant subsequently produced the stronger top tail in Contest 194946069 and decisively outperformed in Contest 194946121. Realized results alone do not prove future superiority, but the workflow gap is structural: producing a customized portfolio was implicitly treated as sufficient reason to replace the supplied baseline.
+- Durable lesson: When a source/prebuild portfolio is supplied, treat it as the champion benchmark and the DFS Engine portfolio as the challenger. Replace or materially reshape the baseline only when the challenger has a documented ex-ante advantage in simulated/top-tail evidence, coherent script coverage, correlation, ownership/leverage, duplication, or reduced hidden concentration. If no defensible portfolio-level edge is shown, retain or blend the baseline rather than assuming custom logic is superior.
+- Engine impact: Add a mandatory champion-challenger portfolio acceptance gate before final sign-off. The gate compares portfolios, not hindsight scores, and does not require the Engine to beat the source on every median metric.
+- Files updated: `learning/REGISTRY.md`, `core/ENGINE.md`.
+- Revisit condition: Recalibrate the acceptance criteria after a meaningful sample of tracked slates with pre-lock simulations and post-slate results.
+
 ### 2026-09-04 — MLB short-slate concentration requires stress testing
 - Sport: MLB GPP, especially short slates
 - Status: validated
