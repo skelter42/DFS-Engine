@@ -4,7 +4,7 @@
 
 This is the cross-sport market-input workflow for Sim Savant. Its only job is to take an attached Sim Savant projection CSV and return the same import structure with the best available **full-slate market-derived fantasy projections** and the best available estimate of **expected field ownership**.
 
-The user specifies the sport. This process researches the relevant betting markets, player props, game lines, site scoring, slate context, and ownership signals for that sport.
+The user specifies the sport. This process researches the relevant betting markets, player props, game lines, site scoring, slate context, ownership signals, and broader DFS industry projection consensus for that sport.
 
 Sim Savant remains responsible for simulation, lineup generation, finish-rate ranking, exposure spreading, stack/correlation settings, and contest setup. Market Inputs does not build or optimize lineups.
 
@@ -32,27 +32,28 @@ A valid full run must:
 3. Research game-level markets for every game/event.
 4. Research player-level props for as much of the slate as the public market actually offers.
 5. Use multiple books/sources where practical, not one sportsbook or one DFS source.
-6. Convert those expectations into the correct site-specific fantasy scoring.
-7. Build ownership from multiple current site/slate-specific ownership touch points plus the behavioral ownership model below.
-8. Use Savant only as a documented fallback for players/markets with insufficient public coverage.
-9. Audit the completed file and return it.
-10. Stop.
+6. Where direct Vegas/player-prop coverage is incomplete, research multiple reputable industry projection systems before falling back to Savant.
+7. Convert the final statistical expectation into the correct site-specific fantasy scoring.
+8. Build ownership from multiple current site/slate-specific ownership touch points plus the behavioral ownership model below.
+9. Use Savant only as the final documented fallback when both market and broader industry coverage are insufficient.
+10. Audit the completed file and return it.
+11. Stop.
 
 ### No partial-run masquerading
 
 Do not call a file “Market Inputs complete” if only a small subset of players were researched or adjusted.
 
 If broad market coverage is unavailable, say so explicitly and quantify:
-- how many players were market-rich
-- how many were market-supported
-- how many required sparse-market inference
+- how many players were Vegas-rich
+- how many were Vegas-supported
+- how many were industry-supported
 - how many remained fallback-heavy
 
 If the run is fallback-heavy, label it as such rather than implying a fully market-derived slate.
 
 ## Projection principle
 
-**Betting markets create the statistical expectation; site scoring converts that expectation into DFS points.**
+**Vegas is the primary truth source. Broader industry projection consensus fills the gaps. Site scoring converts the final statistical expectation into DFS points.**
 
 Use multiple sportsbooks and both sides of priced markets when available. A posted prop line without juice is not a complete expectation. De-vig and consensus prices where practical. Prefer broad market agreement to any one book.
 
@@ -65,7 +66,55 @@ Relevant markets depend on sport. Examples:
 - NHL: shots, goals, points, goalie saves/goals allowed/win; game total, ML, team totals, PP/line context.
 - Tennis: match/set/game markets, moneyline, total games, aces/double faults/break markets where available.
 
-Use lineup/role/minutes/workload/injury/weather/venue context only to allocate market expectation appropriately. Independent DFS projections are sanity checks, not automatic overrides. Savant is the conservative fallback for sparse markets; never invent precision.
+Use lineup/role/minutes/workload/injury/weather/venue context only to allocate market expectation appropriately. Savant is the conservative final fallback; never invent precision.
+
+## Projection source hierarchy — mandatory
+
+Use this order for every player:
+
+### Tier 1 — Vegas-rich
+Use when multiple direct player props are available, ideally across multiple books, plus stable game/team markets.
+
+- Direct props and prices are primary.
+- Use both over and under prices when possible.
+- Use multiple sportsbooks and consensus/de-vigged expectations where practical.
+- Reconcile with game total, spread/moneyline, and team total.
+
+### Tier 2 — Vegas-supported
+Use when only some direct props are available.
+
+- Start with available direct props.
+- Fill missing components from game/team markets, role/workload, and independent projection systems.
+- Vegas still carries the most weight.
+
+### Tier 3 — Industry-supported
+Use when direct player props are sparse or absent but broader public/industry projection coverage exists.
+
+Research multiple reputable projection systems before retaining Savant unchanged. Depending on sport and availability, examples may include:
+- THE BAT / THE BAT X
+- RotoGrinders projections
+- Daily Fantasy Fuel
+- FantasyPros daily projections
+- LineStar
+- Stokastic/Awesemo public projection content when accessible
+- RotoWire projection/DFS tools when accessible
+- other reputable, current, site-specific projection systems
+
+Rules:
+- Prefer numeric projections over narrative analysis.
+- Prefer current site/slate-specific data.
+- Use multiple independent sources where possible.
+- Use median, trimmed mean, or reliability-weighted consensus rather than cherry-picking the highest/lowest projection.
+- Convert component-stat projections into the target site's scoring when useful instead of blindly averaging fantasy-point outputs.
+- Cross-check the industry consensus against game/team Vegas markets so industry projections cannot collectively contradict the betting environment without explanation.
+- Strong Vegas evidence overrides conflicting industry consensus.
+
+### Tier 4 — Savant fallback
+Use only when direct market coverage and broader industry coverage are both insufficient.
+
+- Retain Savant conservatively.
+- Do not manufacture a new number from thin evidence.
+- Mark internally as fallback-heavy.
 
 ## Projection research standard
 
@@ -77,10 +126,23 @@ For each slate, collect as many of these as legitimately available:
 - recent line movement when material
 - confirmed starting/lineup/role information
 - site-specific DFS scoring rules
+- multiple reputable industry projection systems for players with sparse direct prop coverage
 
 Where many books disagree, prefer a consensus expectation rather than cherry-picking the most favorable line.
 
-Where direct props are missing, infer conservatively from team/game markets, role, workload and independent projections. Do not simply apply a flat multiplier to Savant and call it market-derived.
+Where direct props are missing, do **not** jump directly to Savant. First build an industry consensus from available independent projections, anchored/reconciled to the game-level market. Savant is the last fallback.
+
+## Projection confidence
+
+Assign an internal projection confidence tier:
+- **A — Vegas-rich:** multiple direct props across multiple books plus stable game/team markets.
+- **B — Vegas-supported:** some direct props plus game context and independent projection support.
+- **C — Industry-supported:** direct props are sparse, but multiple reputable projection systems plus game/team Vegas provide a coherent consensus.
+- **D — Fallback-heavy:** insufficient market and industry coverage; retain Savant conservatively.
+
+A player does not need many direct props to avoid Tier D if multiple credible industry systems and the game market provide strong independent support. Conversely, one industry projection alone does not create high confidence.
+
+The final CSV does not need to include confidence tiers unless requested, but every full run must report coverage counts by these tiers or an equivalent summary.
 
 ## Ownership is a field-behavior forecast
 
@@ -110,7 +172,7 @@ If multiple reliable sources agree closely, that consensus should carry heavy we
 ### Step 2 — Reconstruct what the field sees
 For every player, estimate the information that a sharp DFS field and common optimizers are reacting to:
 - site salary and salary rank
-- market-derived fantasy projection
+- market-derived/industry-supported fantasy projection
 - points-per-dollar/value
 - position or roster-slot scarcity
 - role, lineup spot, minutes/workload and confirmed news
@@ -187,16 +249,6 @@ Treat the following as failures that must be investigated before delivery:
 - large ownership changes with no observable field-behavior explanation
 - calling ownership “industry consensus” when only one source was checked
 
-## Projection confidence
-
-Assign an internal projection confidence tier:
-- **A — Market-rich:** multiple direct props across multiple books plus stable game markets.
-- **B — Market-supported:** some direct props plus strong game context and independent projection support.
-- **C — Sparse market:** limited direct props; use game/team market plus context and projection consensus.
-- **D — Fallback:** insufficient market coverage; use Savant/projection consensus conservatively.
-
-The final CSV does not need to include confidence tiers unless requested.
-
 ## Player identity preservation — absolute rule
 
 The attached Savant CSV is the canonical identity source.
@@ -240,8 +292,8 @@ Return exactly the source Savant import structure, normally:
 
 Every returned file must pass:
 1. Exact source column structure preserved.
-2. `Name` values are byte-for-byte/character-for-character identical to their source Savant rows.
-3. `DFS ID` values are byte-for-byte/character-for-character identical to their source Savant rows.
+2. `Name` values are character-for-character identical to their source Savant rows.
+3. `DFS ID` values are character-for-character identical to their source Savant rows.
 4. Correct sport/site scoring system used.
 5. No duplicate DFS IDs created by the process.
 6. No duplicate exact-name rows created by the process.
@@ -254,7 +306,7 @@ Every returned file must pass:
 13. Largest projection and ownership changes reviewed for plausibility.
 14. Compare output identity columns directly against the source before saving.
 15. Return a short audit summary: rows in/out, mapping conflicts, identity exceptions, projection changes, ownership changes, and fallback-heavy areas.
-16. Return coverage counts by confidence tier or equivalent market-coverage summary.
+16. Return projection coverage counts as Vegas-rich / Vegas-supported / industry-supported / fallback-heavy (or equivalent).
 
 ## Hard stop
 
@@ -273,7 +325,7 @@ After returning the audited CSV, stop. The user performs lineup generation and e
 
 ## Core philosophy
 
-**Markets estimate what happens. Ownership estimates what the field will play. Savant builds the lineups.**
+**Vegas estimates what happens first. Industry consensus fills missing market coverage. Ownership estimates what the field will play. Savant builds the lineups.**
 
 Every Market Inputs invocation is a full slate-wide research pass unless the user explicitly requests a quicker targeted adjustment.
 
