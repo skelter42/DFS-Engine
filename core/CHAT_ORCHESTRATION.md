@@ -38,6 +38,20 @@ At the start of a slate task, infer:
 
 Then load only the relevant brain files and execute the workflow.
 
+## Finalization Gate
+
+The chat execution layer must enforce the canonical workflow in `core/ENGINE.md`; describing a required stage in documentation is not enough.
+
+Before any slate build is labeled **final**, **ready to upload**, or otherwise delivered as the completed DFS Engine portfolio, verify that every mandatory upstream stage has actually been executed.
+
+For sports with usable player-prop markets, this specifically means the Vegas/market-derived projection layer must be completed before portfolio construction is finalized. Vendor inputs such as Sim Savant remain fallback priors and comparison baselines, not the default primary projection simply because they were supplied by the user.
+
+If usable player-level market data cannot be obtained, the assistant must explicitly mark the build as fallback-driven or incomplete-market before constructing/delivering it. It must never silently substitute the vendor projection for the required market-first stage and still call the result a full DFS Engine run.
+
+The same principle applies to other mandatory stages owned by `core/ENGINE.md`: missing simulation capability must be labeled by the allowed simulation mode; missing market/industry data must be disclosed; and no skipped required stage may be implied to have run.
+
+This section is an execution guard only. Projection hierarchy and methodology remain owned by `core/ENGINE.md` and `core/MARKET_PROJECTIONS.md` and should not be redefined here.
+
 ## GitHub Responsibilities
 
 GitHub stores:
