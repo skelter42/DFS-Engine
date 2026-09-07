@@ -1,26 +1,32 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "site": "DraftKings",
-  "projection_blend": {
-    "primary_weight": 0.55,
-    "industry_weight": 0.3,
-    "market_context_weight": 0.15
+  "projection_method": {
+    "primary": "market_derived_projection_when_coverage_is_reliable",
+    "secondary": "independent_industry_consensus",
+    "fallback": "trusted_vendor_projection",
+    "fixed_blend_weights": false,
+    "require_source_provenance": true
   },
-  "score_weights": {
-    "projection": 1,
-    "ceiling": 0.22,
-    "leverage": 0.18,
-    "correlation": 0.12,
-    "value": 0.08,
-    "volatility_penalty": 0.05
+  "candidate_evaluation": {
+    "fixed_score_weights": false,
+    "factors": [
+      "projection",
+      "ceiling",
+      "leverage",
+      "correlation",
+      "value",
+      "volatility",
+      "duplication",
+      "contest_fit",
+      "thesis_strength"
+    ]
   },
   "portfolio": {
     "default_lineups": 20,
-    "min_uniques": 2,
-    "max_player_exposure": 0.65,
-    "min_player_exposure": 0,
-    "ownership_fade_guardrail_pp": 20,
-    "ownership_overweight_guardrail_pp": 30,
+    "uniques_policy": "derive_from_slate_contest_and_candidate_quality",
+    "exposure_policy": "diagnostic_and_comparative_not_fixed_caps_or_floors",
+    "ownership_delta_policy": "investigate_material_deltas_without_fixed_percentage_point_thresholds",
     "multi_contest_allocation": {
       "method": "risk_sensitive_scenario_stratified_quality_ladder",
       "optimize_per_contest_and_global_portfolio": true,
