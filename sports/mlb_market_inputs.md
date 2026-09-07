@@ -163,6 +163,21 @@ Collect as many current site-specific ownership projections as legitimately avai
 
 If the numeric ownership consensus conflicts strongly with the public DFS story, flag it and investigate before output.
 
+### Ownership quality gate for 20-max and small-field GPPs
+
+For DraftKings 20-max and other duplication-sensitive tournament fields, ownership is a first-class market input and must receive the same exhaustion standard as projections.
+
+Before delivery:
+
+1. Use Sim Savant ownership only as a numerical prior, not as the final answer by default.
+2. Cross-check at least two independent current DFS-industry signals when available (numeric ownership pages, expert surveys, live-before-lock content, stack rankings, optimizer commentary, or equivalent).
+3. Re-rank pitcher ownership from the current industry field story. If experts repeatedly describe a pitcher as one of the most-popular arms but the file shows low-teens ownership, treat that as an audit failure and correct it.
+4. Reconcile hitter ownership at both player and team-stack level. Popular stacks must generally carry higher individual ownership through their core bats; explicit pivot stacks should not inherit chalk-level ownership without a documented salary/value reason.
+5. Preserve player-specific salary/value information from the numerical prior while applying current team-level popularity adjustments; do not flatten every player on a team to the same ownership.
+6. Check the most important tournament ownership relationships explicitly: top pitchers, top spend-up hitters, obvious values, chalk stacks, and low-owned pivot stacks.
+7. Report the number of active-player ownership estimates materially changed from Savant and identify the largest changes.
+8. A normal MLB slate where only a handful of ownership numbers have been independently challenged is an **ownership audit warning**. Continue the industry sweep instead of accepting the file as complete.
+
 ## Market-to-fantasy conversion
 
 ### DraftKings MLB scoring
