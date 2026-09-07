@@ -31,8 +31,9 @@ When the user attaches a Sim Savant projection file and says **`Savant Prep`**:
 10. Use the original Sim Savant `Proj` and/or `Own` only as a true fallback after the market/industry sweep is exhausted for that player.
 11. Preserve the exact Savant import structure and DFS IDs.
 12. Run all import/mapping/duplicate/zero-value audit checks.
-13. Return the clean CSV to the user.
-14. **Stop.** Do not continue into lineup generation, lineup simulation, exposures, stacks, contest allocation, or portfolio game theory.
+13. Run the **AI quality-grade gate** described below. A market-input pass graded below **A** is incomplete and must continue researching/refining before delivery unless the user explicitly asks to stop.
+14. Return the clean CSV to the user.
+15. **Stop.** Do not continue into lineup generation, lineup simulation, exposures, stacks, contest allocation, or portfolio game theory.
 
 ### Non-negotiable market-coverage rule
 
@@ -75,6 +76,61 @@ Every Savant Prep run must report the projection-source counts for the active po
 Also report ownership-source coverage where practical: industry consensus vs Savant fallback.
 
 If direct/market-supported coverage is unexpectedly low relative to the available prop market, continue researching rather than merely stating that coverage is below goal.
+
+### AI quality-grade gate — mandatory
+
+Before any market-input CSV is called final, the AI must grade the pass on both **projection quality** and **ownership quality** using current evidence and the intended contest context.
+
+Use letter grades: `A+`, `A`, `A-`, `B+`, `B`, `B-`, `C`, or `Incomplete`.
+
+A final pass must receive an **overall grade of A or A+**. Anything below A is a failure of the market-input process and requires another research/refinement pass before delivery unless the user explicitly instructs otherwise.
+
+The grade is not based on arbitrary percentage targets. It is based on whether the process exhausted the realistically available information and whether the remaining uncertainty is honest and acceptable for the contest.
+
+#### Projection grade criteria
+
+Grade projections on:
+
+- breadth and freshness of sportsbook/player-prop coverage
+- use of juice and multi-book consensus where available
+- pitcher component completeness: Ks, outs, ER, hits/walks, win context
+- hitter component completeness: hits, TB, HR, RBI, runs, walks/HBP, SB and combo markets
+- reconciliation to game totals and implied team totals
+- confirmed lineup, batting-order, park, weather/roof and workload context
+- correct DraftKings/FanDuel scoring conversion
+- provenance honesty and fallback burden
+- investigation of material Savant-vs-market disagreements
+
+A projection grade below A means the AI must keep searching or explain a genuine external-data limitation and continue improving everything still addressable.
+
+#### Ownership grade criteria
+
+Grade ownership on:
+
+- breadth and freshness of site-specific industry ownership evidence
+- multiple independent DFS-industry signals where available
+- pitcher popularity ordering and magnitude
+- player-level salary/value/chalk relationships
+- team-stack popularity consistency
+- identification of obvious values and late-news chalk
+- small-field / 20-max duplication sensitivity when relevant
+- consistency between numeric ownership and current expert/public DFS field story
+- percentage of important players independently challenged rather than blindly inheriting Savant
+- investigation of large provider disagreements
+
+For DraftKings $1 20-max and similar contests, ownership and projections are **equally first-class inputs**. A pass cannot receive an A/A+ overall grade if either projection quality or ownership quality is below A.
+
+#### Required grade report
+
+Before delivery, report:
+
+- `Projection grade: <grade>`
+- `Ownership grade: <grade>`
+- `Overall market-input grade: <grade>`
+- the main reasons for the grade
+- remaining fallback/uncertainty that prevents a higher grade, if any
+
+Never label a pass `A+` merely because it is the best available attempt. `A+` means the evidence coverage, reconciliation and audits are exceptional for what is realistically accessible. If the work is strong but meaningful uncertainty remains, use `A`.
 
 ### `Savant Prep` explicitly does NOT
 
@@ -296,6 +352,7 @@ Every output file must pass all checks below:
 9. Zero-projection players must be intentional; do not accidentally import inactive/non-slate duplicates.
 10. Produce a short audit summary: rows in/out, duplicate conflicts removed, number of projection changes, number of ownership changes, source/provenance counts, and any fallback-heavy players of note.
 11. If market-supported coverage is implausibly low for a normal MLB slate, treat the run as incomplete and continue the market sweep before delivery.
+12. Run and report the AI quality-grade gate. Do not call the pass final unless the overall grade is `A` or `A+`, unless the user explicitly accepts a lower grade.
 
 ## Core philosophy
 
