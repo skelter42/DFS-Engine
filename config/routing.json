@@ -13,6 +13,11 @@
       "pipeline": ["load_brain", "cross_check", "projection_consensus", "ownership_consensus", "market_context", "thesis_update"]
     },
     {
+      "intent": "market_inputs",
+      "triggers": ["market inputs", "@GitHub market inputs", "Savant Prep"],
+      "pipeline": ["load_brain", "ingest", "validate", "sportsbook_sweep", "market_projection", "sport_scoring_conversion", "projection_grade", "import_audit", "deliver"]
+    },
+    {
       "intent": "exposure_report",
       "triggers": ["exposures side by side", "send exposures", "ownership vs exposure"],
       "pipeline": ["exposure_audit", "exposure_delta_report"]
@@ -34,12 +39,12 @@
     }
   ],
   "sport_routing": {
-    "mlb": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/mlb.md"],
-    "ncaaf": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/ncaaf.md"],
-    "nfl": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/nfl.md"],
-    "nba": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/nba.md"],
-    "nhl": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/nhl.md"],
-    "tennis": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/tennis.md"]
+    "mlb": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "core/MARKET_INPUTS.md", "core/MARKET_PROJECTIONS.md", "core/SAVANT_PREP.md", "sports/mlb.md", "sports/mlb_market_inputs.md"],
+    "ncaaf": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "core/MARKET_INPUTS.md", "core/MARKET_PROJECTIONS.md", "core/SAVANT_PREP.md", "sports/ncaaf.md"],
+    "nfl": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "core/MARKET_INPUTS.md", "core/MARKET_PROJECTIONS.md", "core/SAVANT_PREP.md", "sports/nfl.md"],
+    "nba": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "core/MARKET_INPUTS.md", "core/MARKET_PROJECTIONS.md", "core/SAVANT_PREP.md", "sports/nba.md"],
+    "nhl": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "core/MARKET_INPUTS.md", "core/MARKET_PROJECTIONS.md", "core/SAVANT_PREP.md", "sports/nhl.md"],
+    "tennis": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "core/MARKET_INPUTS.md", "core/MARKET_PROJECTIONS.md", "core/SAVANT_PREP.md", "sports/tennis.md"]
   },
   "rules": {
     "user_must_name_agents": false,

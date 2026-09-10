@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This file defines one narrow responsibility for the DFS Engine: **produce slate-ready player projections and ownership estimates from betting-market and industry information for import into Sim Savant.**
+This file defines one narrow responsibility for the DFS Engine: **produce slate-ready, Vegas-first player projections for import into Sim Savant.** The standard MLB pass preserves source ownership unchanged. Build new ownership estimates only when the user explicitly requests an ownership pass or audit.
 
 Sim Savant remains responsible for simulation, lineup generation, 1% finish-rate ranking, exposure spreading, stack settings, and contest setup. This process does **not** build or optimize lineups.
 
@@ -27,8 +27,8 @@ When the user attaches a Sim Savant projection file and says **`Savant Prep`**:
 6. Use the odds/juice and multiple books where available. A posted line without price context is weaker evidence than a market with both sides/juice.
 7. Build the most objective market-derived fantasy projection possible for each player and convert it into the correct site scoring system.
 8. Reconcile player-level projections to game totals, implied team totals, lineup slot, park/weather/roof status, matchup and expected workload/plate appearances.
-9. Build the best current site-specific ownership estimate from multiple reputable DFS-industry ownership sources/signals.
-10. Use the original Sim Savant `Proj` and/or `Own` only as a true fallback after the market/industry sweep is exhausted for that player.
+9. Preserve the original Sim Savant `Own` value unchanged unless the user explicitly requests an ownership pass or ownership audit.
+10. Use the original Sim Savant `Proj` only as a true fallback after the market/industry sweep is exhausted for that player.
 11. Preserve the exact Savant import structure and DFS IDs.
 12. Run all import/mapping/duplicate/zero-value audit checks.
 13. Run the **AI quality-grade gate** described below. A market-input pass graded below **A** is incomplete and must continue researching/refining before delivery unless the user explicitly asks to stop.
@@ -73,13 +73,13 @@ Every Savant Prep run must report the projection-source counts for the active po
 - number and percentage `INDUSTRY_BLEND`
 - number and percentage `SAVANT_FALLBACK`
 
-Also report ownership-source coverage where practical: industry consensus vs Savant fallback.
+Do not spend the standard MLB market-input research budget rebuilding ownership. Ownership-source coverage is required only for an explicitly requested ownership pass.
 
 If direct/market-supported coverage is unexpectedly low relative to the available prop market, continue researching rather than merely stating that coverage is below goal.
 
 ### AI quality-grade gate — mandatory
 
-Before any market-input CSV is called final, the AI must grade the pass on both **projection quality** and **ownership quality** using current evidence and the intended contest context.
+Before any standard MLB market-input CSV is called final, the AI must grade **projection quality** using current evidence and the intended contest context.
 
 Use letter grades: `A+`, `A`, `A-`, `B+`, `B`, `B-`, `C`, or `Incomplete`.
 
@@ -103,30 +103,16 @@ Grade projections on:
 
 A projection grade below A means the AI must keep searching or explain a genuine external-data limitation and continue improving everything still addressable.
 
-#### Ownership grade criteria
+#### Explicit ownership-pass criteria
 
-Grade ownership on:
-
-- breadth and freshness of site-specific industry ownership evidence
-- multiple independent DFS-industry signals where available
-- pitcher popularity ordering and magnitude
-- player-level salary/value/chalk relationships
-- team-stack popularity consistency
-- identification of obvious values and late-news chalk
-- small-field / 20-max duplication sensitivity when relevant
-- consistency between numeric ownership and current expert/public DFS field story
-- percentage of important players independently challenged rather than blindly inheriting Savant
-- investigation of large provider disagreements
-
-For DraftKings $1 20-max and similar contests, ownership and projections are **equally first-class inputs**. A pass cannot receive an A/A+ overall grade if either projection quality or ownership quality is below A.
+If the user explicitly requests an ownership pass, grade ownership separately using current site/slate-specific industry evidence, salary/value and stack context, likely field behavior, and late news. Ownership does not reduce the standard projection-only grade.
 
 #### Required grade report
 
 Before delivery, report:
 
 - `Projection grade: <grade>`
-- `Ownership grade: <grade>`
-- `Overall market-input grade: <grade>`
+- `Overall projection-input grade: <grade>`
 - the main reasons for the grade
 - remaining fallback/uncertainty that prevents a higher grade, if any
 
@@ -163,7 +149,7 @@ For each site/slate, output exactly:
 `Name, DFS ID, Proj, Own`
 
 - `Proj` = site-specific fantasy points (DraftKings or FanDuel)
-- `Own` = expected field ownership percentage for that site/slate
+- `Own` = exact source ownership value, passed through unchanged by default; replace it only during an explicitly requested ownership pass
 - Preserve the source Sim Savant player names and DFS IDs so imports map cleanly.
 
 ## Source hierarchy
@@ -202,6 +188,8 @@ Use as many current touch points as are legitimately available, with this priori
    - Never invent precision for poorly covered players.
 
 ### Ownership inputs
+
+This section applies only when the user explicitly requests an ownership pass or audit. It is not part of the default MLB `Savant Prep` workflow.
 
 Ownership should be a consensus estimate, not a single-source number.
 
@@ -350,13 +338,13 @@ Every output file must pass all checks below:
 7. `Proj` must be numeric and non-negative.
 8. `Own` must be numeric when present and between 0 and 100.
 9. Zero-projection players must be intentional; do not accidentally import inactive/non-slate duplicates.
-10. Produce a short audit summary: rows in/out, duplicate conflicts removed, number of projection changes, number of ownership changes, source/provenance counts, and any fallback-heavy players of note.
+10. Produce a short audit summary: rows in/out, duplicate conflicts removed, number of projection changes, confirmation that ownership was preserved (or number of ownership changes for an explicit ownership pass), source/provenance counts, and any fallback-heavy players of note.
 11. If market-supported coverage is implausibly low for a normal MLB slate, treat the run as incomplete and continue the market sweep before delivery.
-12. Run and report the AI quality-grade gate. Do not call the pass final unless the overall grade is `A` or `A+`, unless the user explicitly accepts a lower grade.
+12. Run and report the projection quality-grade gate. Do not call the pass final unless the projection-input grade is `A` or `A+`, unless the user explicitly accepts a lower grade.
 
 ## Core philosophy
 
-**Vegas/props create the expectation. Industry consensus estimates what the field will do. Sim Savant builds the lineups.**
+**Vegas/props create the fantasy-point expectation. Sim Savant receives the improved projections and retains its ownership values unless the user asks for a separate ownership pass.**
 
 Do not optimize projections toward the lineup result we want. Do not reverse-engineer projections to create leverage. Keep the market-input layer objective and independent from lineup construction.
 
