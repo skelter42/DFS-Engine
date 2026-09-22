@@ -15,14 +15,24 @@ Authoritative projection standard: `core/MARKET_PROJECTIONS.md`.
 
 The user runs the returned file through Savant themselves for sims and lineups.
 
+## Trust Savant zeros — mandatory
+
+If source `Proj` is `0` (or blank treated as 0):
+
+- Leave `Proj = 0`.
+- Do not research props, industry projections, or ownership for that player.
+- Keep the row in the output file so import structure is preserved.
+
+Industry numeric + Vegas prop work applies only to the **positive-Proj pool**. Coverage grades and the 10+ industry target are measured against that pool, not the raw file. Zero-Proj rows are not researched fallback; they stay 0 by rule.
+
 ## Projection Workflow — pure numeric conglomerate
 
 ### What goes into Proj
 
 1. **Industry layer** — scrape/pull independent **numeric** DFS/projection systems (target **10+** when the slate supports it). Only numbers count; rankings and write-ups do not enter the blend.
-2. **Vegas layer** — scrape/pull multi-book player props and game markets; de-vig when possible; use as statistical expectation and as reconciliation so the blend does not contradict the betting environment.
+2. **Vegas layer** — scrape/pull multi-book player props and game markets via **board-level / aggregator-first** sweeps; de-vig when possible; use as statistical expectation and as reconciliation so the blend does not contradict the betting environment.
 3. **Blend** — median / trimmed mean / coverage-weighted composite. Weight by evidence quality (how many sources, how much multi-book agreement), not by opinion.
-4. **Savant** — final fallback only when both layers are genuinely thin. Label as such.
+4. **Savant** — final fallback only when both layers are genuinely thin **for a positive-Proj player**. Label as such. Savant zeros stay zero without research.
 
 **No narrative enters Proj.** No matchup story, no "due," no leverage manufacturing.
 
@@ -31,14 +41,14 @@ The user runs the returned file through Savant themselves for sims and lineups.
 1. Full composite (deep industry + multi-book Vegas)
 2. Industry-led composite with game-market reconciliation (thin props)
 3. Vegas-led with industry cross-check (deep props, thin industry)
-4. Original Savant only when both external layers fail
+4. Original Savant only when both external layers fail on a positive-Proj player
 
 Never force a fake Vegas or industry number when the data does not exist.
 
-### MLB DraftKings component checklist (when converting props)
+### MLB DraftKings / FanDuel component checklist (when converting props)
 
-- Pitchers: K props, outs/IP, ER, hits/walks allowed, win/ML context — convert to DK scoring.
-- Hitters: hits, TB, HR, RBI, runs, walks, SB, combos + team implied runs — convert to DK scoring.
+- Pitchers: K props, outs/IP, ER, hits/walks allowed, win/ML context — convert to the target site scoring.
+- Hitters: hits, TB, HR, RBI, runs, walks, SB, combos + team implied runs — convert to the target site scoring.
 - Multi-book + juice when available; reconcile to game totals.
 
 ## Ownership Workflow
@@ -59,6 +69,8 @@ The goal is the best estimate of **actual contest ownership**, not an optimizer 
 
 **Default for projection-only passes:** leave `Own` unchanged.
 
+Do not research ownership for Savant-zero players.
+
 ## Output Contract
 
 Return a Savant-importable CSV preserving the user's original player identifiers and required structure. At minimum keep the same identifying columns and replace the projection (and ownership only if requested) values in their expected fields.
@@ -72,7 +84,8 @@ Do not:
 - modify projections just to create leverage;
 - add unsupported players;
 - remove viable players unless the source format / confirmed status explicitly requires it;
-- inject narrative into any projection number.
+- inject narrative into any projection number;
+- research or overwrite Savant-zero rows.
 
 ## Quality Control
 
@@ -80,9 +93,10 @@ Before returning the file:
 
 - confirm the row count / player IDs still match the input;
 - confirm projection and ownership columns are numeric and importable;
-- report projection grade (target A / A+), industry source breadth, Vegas coverage, provenance mix;
+- report projection grade (target A / A+), industry source breadth, Vegas coverage, provenance mix **on the positive-Proj pool**;
 - sanity-check pitcher and hitter ranges against site scoring;
 - identify major composite-vs-Savant changes and verify they are supported by scraped numbers;
+- preserve Savant zeros at 0;
 - preserve Savant values when evidence is insufficient rather than inventing precision.
 
 ## Required Behavior

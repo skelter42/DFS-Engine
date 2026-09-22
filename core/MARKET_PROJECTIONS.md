@@ -15,6 +15,18 @@ Sim Savant / any single vendor is **not** the source of truth. It is the final f
 
 The final `Proj` returned to Sim Savant is always the composite number.
 
+## Trust Savant zeros — mandatory efficiency rule
+
+If the attached Sim Savant `Proj` is `0` (or blank/missing treated as 0):
+
+- **Leave that player at 0.**
+- Do **not** research industry projections, Vegas props, or ownership for that row.
+- Keep the row in the output file so import structure and DFS IDs are preserved.
+
+Industry numeric + Vegas prop work applies only to the **positive-Proj pool**. Coverage grades, the 10+ industry target, and provenance mix are measured against that positive pool, not the raw 1,000-row file. Zero-Proj rows are not counted as `SAVANT_FALLBACK` in the active-pool grade.
+
+This shrinks a large main-slate file down to the DFS-relevant universe without changing inactive/bench zeros.
+
 ## Quality bar — A+ required
 
 Every projection-only (or full Market Inputs) pass must aim for an **A or A+** on the composite.
@@ -23,7 +35,7 @@ An A+ pass means:
 - Industry: as many independent **numeric** projection sources as are realistically accessible for that sport/slate were pulled and blended (explicit target **10+** when the public ecosystem supports it; never stop at 1–2 sources).
 - Vegas: multi-book props and game markets were swept; juice/de-vig used where available; player-level expectations reconciled to team/game totals.
 - The two layers were cross-checked numerically; material disagreements were investigated with more sources or fresher lines, not with narrative.
-- Coverage and provenance are reported honestly (Vegas-rich / Vegas-supported / Industry-blend / Fallback-heavy).
+- Coverage and provenance are reported honestly (Vegas-rich / Vegas-supported / Industry-blend / Fallback-heavy) **on the positive-Proj pool**.
 - No single source was treated as authoritative.
 - **No narrative, opinion, or qualitative judgment altered any projection value.**
 
@@ -33,16 +45,16 @@ Anything below A requires more research (more numeric sources / more prop lines)
 
 1. **Industry multi-source numeric blend** (target 10+) + **Vegas multi-book layer** — co-primary evidence. Build both; form the composite from them.
 2. **Role / lineup / news / availability facts** — validity layer only (who is in / out / starting). These can zero or reallocate a player; they do not invent fantasy points from a story.
-3. **Sim Savant (or other single vendor)** — final fallback only when both industry breadth and Vegas coverage fail.
+3. **Sim Savant (or other single vendor)** — final fallback only when both industry breadth and Vegas coverage fail **for a positive-Proj player**. Zero-Proj rows stay 0 by rule, not after research.
 
 **Order of work, not order of weight:**
-- Always research industry breadth and Vegas in parallel (or staged for efficiency).
+- Always research industry breadth and Vegas in parallel (or staged for efficiency) **on the positive-Proj pool only**.
 - Weight the final composite by **evidence quality and coverage**, not by opinion:
   - Strong multi-book props → Vegas carries more weight; industry is cross-check and gap-fill.
   - Sparse props but deep industry (many independent numeric sources agreeing) → industry blend carries more weight; Vegas game totals still constrain the environment.
   - Thin on both → Savant fallback, labeled as such.
 
-Never begin from Savant and lightly adjust. Begin from the external composite.
+Never begin from Savant and lightly adjust. Begin from the external composite — except for Savant zeros, which stay zero.
 
 ## Industry layer — breadth target
 
@@ -78,6 +90,8 @@ Additional / sport-specific:
 
 Vegas is not optional window dressing. It is a full evidence layer built from scraped odds.
 
+**Preferred method: board-level / aggregator-first.** Hit multi-player prop boards (PropCruncher, Covers matchup prop sections, Action Network boards, PropPrizm, FanDuel Research, comparable multi-book pages) before player-by-player searches. Deep-dive only material gaps in the positive-Proj pool.
+
 **Primary use**
 - Multi-book player props (with juice / both sides when available)
 - Alternate / ladder markets when useful for expectation and distribution
@@ -89,8 +103,10 @@ Vegas is not optional window dressing. It is a full evidence layer built from sc
 - Large industry-vs-Vegas disagreements trigger more source pulls or fresher line checks — not narrative interpretation.
 
 ### Preferred Vegas sources
+- PropCruncher or comparable multi-book prop tools (preferred first stop for mass data)
 - Action Network (multi-book aggregator)
-- PropCruncher or comparable multi-book prop tools
+- Covers matchup prop sections
+- PropPrizm / FanDuel Research / OddsShopper-style boards
 - Direct DraftKings, FanDuel, BetMGM, Caesars, BetRivers, Hard Rock, Circa, theScore and other books when publicly accessible
 - Additional reputable odds/prop aggregators
 
@@ -98,7 +114,7 @@ De-vig paired markets. Prefer robust multi-book consensus over any single book. 
 
 ## What the composite number is
 
-For each player:
+For each **positive-Proj** player:
 
 1. Build **industry consensus** from as many independent **numeric** sources as obtained (target 10+).
 2. Build **Vegas-derived expectation** from available props + game context (de-vigged, multi-book).
@@ -115,15 +131,15 @@ For each player:
 ## Cross-sport flow (efficient)
 
 1. Intake the attached file once (names, DFS IDs, source Proj, Own, slate context).
-2. Validate active universe (starters / likely roles / out players) with facts only.
+2. Validate active universe. **Trust Savant zeros:** leave `Proj = 0` rows at 0; do not research them. Research only the positive-Proj pool.
 3. Cache game-level Vegas markets for every game.
-4. Broad prop sweep across aggregators/books.
-5. Parallel (or staged) pull of industry projection sources — keep going until the breadth target is met or sources are exhausted.
+4. Broad **board-level** prop sweep across aggregators/books for the positive-Proj pool.
+5. Parallel (or staged) pull of industry projection sources for the positive-Proj pool — keep going until the breadth target is met or sources are exhausted.
 6. Normalize names; reject stale/wrong-game lines.
 7. Convert and form per-player composite (numeric blend only).
 8. Reconcile player totals to team/game markets; investigate material breaks with more data.
-9. Audit: coverage counts, largest source-to-composite moves, low-breadth players, zeros.
-10. Return file (Proj updated only, unless ownership pass requested) + grade + coverage summary.
+9. Audit: coverage counts on the **positive-Proj pool**, largest source-to-composite moves, low-breadth players. Zeros stay zeros.
+10. Return file (Proj updated only for the researched pool, unless ownership pass requested) + grade + coverage summary.
 11. Stop.
 
 ## Coverage-weighted weighting (no fixed % for every player)
@@ -139,12 +155,12 @@ Confidence inputs: prop count, book count, alternate markets, freshness, book ag
 
 1. Projection-only unless user asks for ownership.
 2. Preserve Name, DFS ID, Own, row order exactly.
-3. Replace only `Proj` with the composite.
+3. Replace only `Proj` with the composite **for positive-Proj players**. Leave Savant zeros at 0.
 4. Return updated file + audit:
    - Projection grade (target A / A+)
    - Industry source count used (and list when useful)
    - Vegas coverage summary
-   - Provenance mix (Vegas-rich / Vegas-supported / Industry-blend / Fallback-heavy)
+   - Provenance mix on the **positive-Proj pool** (Vegas-rich / Vegas-supported / Industry-blend / Fallback-heavy)
    - Largest composite vs original Savant deltas
 5. Do not build lineups or change ownership unless asked.
 6. Do not inject narrative into any projection.
@@ -170,4 +186,4 @@ If A+ composites do not outperform single-source priors over a meaningful sample
 
 ## Sport modules
 
-Each `sports/<sport>.md` defines prop families, scoring conversion, and sport-specific industry sources. This file owns the cross-sport composite standard, the pure numeric conglomerate rule, and the A+ / 10+ industry breadth target.
+Each `sports/<sport>.md` defines prop families, scoring conversion, and sport-specific industry sources. This file owns the cross-sport composite standard, the pure numeric conglomerate rule, the Savant-zero efficiency rule, and the A+ / 10+ industry breadth target.
