@@ -31,7 +31,7 @@ Projection-only mode must:
 2. Research and replace only the projection fields. For Showdown, set CPT projection to exactly 1.5 times FLEX projection unless the source schema requires a different representation.
 3. Leave source ownership unchanged. Do not research, rebuild, normalize, or reinterpret ownership.
 4. Stop after the projection CSV and projection audit are complete. Do not simulate, optimize, rank, select, or allocate lineups.
-5. Use the same Vegas-first hierarchy, active-role validation, sportsbook sweep, scoring conversion, confidence grading, and audit rules defined below.
+5. Use the composite hierarchy in `core/MARKET_PROJECTIONS.md` (industry numeric + Vegas scrape, no narrative), active-role validation, sportsbook sweep, scoring conversion, confidence grading, and audit rules defined below.
 
 ### Efficient projection-pull execution
 
@@ -74,7 +74,7 @@ Report active-pool coverage separately as Vegas-rich, Vegas-supported, industry-
 
 The default target for every Market Inputs run is:
 
-**`Proj = Vegas-derived first`**
+**`Proj = pure numeric composite (industry scrape + Vegas scrape)`** — see `core/MARKET_PROJECTIONS.md` (authoritative).
 
 **`Own = industry-derived first`**
 
@@ -82,9 +82,9 @@ Savant is not the source of truth for either column. Savant is the final fallbac
 
 The intended division of labor is:
 
-**Vegas tells us what is likely to happen.**
+**Industry numeric projections + sportsbook odds are scraped and blended into one composite Proj. No narrative.**
 
-**The DFS industry tells us what the field is likely to play.**
+**The DFS industry (ownership sources) tells us what the field is likely to play.**
 
 **Savant uses those inputs to build the lineups.**
 
@@ -146,11 +146,11 @@ If the active-player run is fallback-heavy, label it as such rather than implyin
 
 ## Projection principle
 
-**Vegas is the primary truth source. Broader industry projection consensus fills the gaps. Site scoring converts the final statistical expectation into DFS points.**
+**Proj is a pure numeric conglomerate: scrape independent industry projections + scrape multi-book sportsbook odds, then blend. No narrative enters the number.** Full standard lives in `core/MARKET_PROJECTIONS.md` (target 10+ industry sources + Vegas layer → A+).
 
 Use multiple sportsbooks and both sides of priced markets when available. A posted prop line without juice is not a complete expectation. De-vig and consensus prices where practical. Prefer broad market agreement to any one book.
 
-Reconcile player props with game-level markets so individual projections do not collectively imply a materially different game environment from the betting market without a documented reason.
+Reconcile player props with game-level markets so individual projections do not collectively imply a materially different game environment from the betting market without a documented **data** reason.
 
 Relevant markets depend on sport. Examples:
 - MLB: pitcher K, outs, ER, hits/walks allowed, win; hitter hits, singles, total bases, HR, RBI, runs, walks, H+R+RBI, SB; game total, ML, run line, team totals.
@@ -327,176 +327,44 @@ Rules:
 - Match the exact site and slate.
 - Weight fresher updates more heavily as lock approaches.
 - Use a median, trimmed consensus, or reliability-weighted consensus so one outlier cannot dominate.
-- Do not mix DK and FD ownership directly.
-- Do not mix main-slate and short-slate ownership directly.
-- Do not claim broad consensus if only one numeric source was available.
+- Prefer current site/slate-specific data over generic season-long ownership.
 
-If multiple reliable sources agree closely, that consensus should carry heavy weight.
+### Step 2 — Behavioral field model
+When numeric sources are thin, model field behavior from:
+- salary and value relative to slate
+- projection rank and consensus
+- stack/correlation structure of the slate
+- news/role confirmation timing
+- public content and optimizer bias patterns
 
-### Step 2 — Reconstruct what the field sees
-For every player, estimate the information that a sharp DFS field and common optimizers are reacting to:
-- site salary and salary rank
-- market-derived/industry-supported fantasy projection
-- points-per-dollar/value
-- position or roster-slot scarcity
-- role, lineup spot, minutes/workload and confirmed news
-- game/team implied scoring environment
-- stacking/correlation popularity where relevant
-- opportunity cost versus alternatives at the same position/salary tier
-- obvious salary relief/value created by news
-- star/name recognition and obvious slate narratives
-- industry tout frequency and consensus
-- recent ownership-moving news
-- likely optimizer behavior and common lineup construction paths
+This is still an estimate of what the field will do, not a preferred portfolio.
 
-This layer is not used to invent ownership. It is used to determine whether the published numeric consensus is behaviorally plausible.
+### Step 3 — Savant as ownership anchor only when needed
+Use Savant ownership as a conservative anchor when external signals are weak, not as the default authority.
 
-### Step 3 — Team/game/stack ownership reconciliation
-Ownership must be coherent at the portfolio level.
+## Ownership research standard
 
-Estimate which teams, games, stacks, stars, value plays, and salary constructions the field is likely to prioritize. Player-level ownership should make sense relative to those aggregate stories.
+Search for current ownership projections from available industry tools and content for the exact site and slate. Prefer numeric ownership percentages over qualitative "chalk" labels.
 
-Examples:
-- In MLB, if a team is projected to be the most popular stack, its core hitters should not all project as low-owned unless there is a salary/position reason.
-- In NFL/NCAAF, a popular QB/WR game stack should be reflected in correlated ownership.
-- In NBA, a newly opened value play can increase ownership on both that player and expensive stars that the salary relief enables.
+Ownership confidence tiers:
+- **A — multi-source numeric**
+- **B — one strong numeric + corroboration**
+- **C — behavioral model + Savant anchor**
+- **D — Savant-only fallback**
 
-### Step 4 — Behavioral sanity model
-Treat ownership as a probability of roster selection and compare the numeric consensus with a behavioral model driven by:
-- projection
-- value
-- salary
-- role
-- position
-- Vegas environment
-- industry attention
-- roster construction
-- correlation/stacking context
-
-The behavioral model is a sanity check, not a replacement for real ownership data.
-
-Large disagreements require investigation. If Savant says 8% but several industry sources, value metrics, and public content imply 25%+, do not ship 8% without resolving why.
-
-### Step 5 — Site/slate calibration
-Ownership is site- and slate-specific.
-
-Calibrate for:
-- DraftKings vs FanDuel salary structure
-- roster rules and positional flexibility
-- slate size
-- number of viable alternatives
-- amount of obvious value
-- concentrated vs flat projection landscape
-- common optimizer construction paths
-- stack requirements/correlation incentives where relevant
-
-The same player can correctly have very different ownership across DK and FD.
-
-### Step 6 — Final ownership estimate and confidence
-Produce the final `Own` using numeric industry consensus as the preferred anchor, modified only when credible behavioral evidence shows the consensus is stale or inconsistent.
-
-Assign an internal ownership confidence tier:
-- **A — High confidence:** multiple fresh numeric industry sources agree and the field story supports them.
-- **B — Good confidence:** at least one fresh numeric industry source plus corroborating field signals.
-- **C — Sparse:** limited numeric coverage; behavioral inference contributes materially.
-- **D — Fallback-heavy:** Savant-only or nearly Savant-only ownership due to insufficient external data.
-
-When confidence is low, avoid false precision and make smaller changes from Savant.
-
-### Ownership audit failures
-Treat the following as failures that must be investigated before delivery:
-- a universally touted obvious value modeled as nearly unowned
-- a highly popular projected stack whose core players are all modeled low-owned
-- a player with extreme ownership that has no plausible salary/value/role/field explanation
-- using stale ownership after material injury/lineup news
-- mixing ownership from the wrong site or slate
-- large ownership changes with no observable field-behavior explanation
-- calling ownership “industry consensus” when only one source was checked
-- finishing a mature main slate with low external ownership coverage without performing a second industry-search pass
-
-## Player identity preservation — absolute rule
-
-The attached Savant CSV is the canonical identity source.
-
-For every returned row:
-- `Name` must be copied **exactly character-for-character** from the source Savant file.
-- `DFS ID` must be copied **exactly character-for-character** from the source Savant file.
-- Do not normalize accents, punctuation, suffixes, apostrophes, hyphens, spaces, capitalization, abbreviations, or name order in the output.
-- Do not replace a Savant name with a sportsbook, DFS-site, or industry spelling.
-- Do not generate names from an external player database.
-- External-source names may be normalized internally for research matching only; after matching, write results back to the exact original Savant row.
-- Never modify `Name` or `DFS ID` as part of deduplication.
-
-Before delivery, compare every output `Name` and `DFS ID` against the source file. Any text mismatch is an audit failure.
-
-### Savant ambiguous-name handling
-
-Some names can still trigger Savant mapping prompts even when the text is unchanged because Savant may have multiple internal identities with the same display name.
-
-For a known ambiguous row:
-1. First preserve the exact original `Name` and `DFS ID`.
-2. If Savant still cannot import it automatically and the row's `Proj`/`Own` were not changed, omit that row from the import so Savant retains its native values.
-3. If the row's `Proj` or `Own` would be changed, do **not** silently rename it. Either keep the exact source identity and flag that manual mapping may be required, or conservatively revert that player's values to the source and omit the row if an import-clean file is required.
-4. Record the omitted/flagged identity in the audit summary.
-
-The priority is a clean, repeatable Savant import without corrupting player identity.
+Never invent ownership precision. Never move ownership to create leverage.
 
 ## Output contract
 
-Return exactly the source Savant import structure, normally:
+Return:
+1. Updated CSV with the same structure as the input (Name, DFS ID, Proj, Own by default).
+2. Audit summary: projection grade, ownership grade (if ownership pass), coverage tiers, largest deltas, unresolved gaps.
+3. Stop. No lineups unless the user asks.
 
-`Name, DFS ID, Proj, Own`
+## Relation to other docs
 
-- `Name` = exact source Savant text, unchanged.
-- `DFS ID` = exact source Savant text, unchanged.
-- `Proj` = site-specific fantasy points.
-- `Own` = expected site/slate field ownership percentage.
-- Only `Proj` and `Own` are intended to change during Market Inputs.
+- `core/MARKET_PROJECTIONS.md` is authoritative for how `Proj` is built (pure numeric conglomerate, 10+ industry target, Vegas layer, A+ bar, no narrative).
+- Sport modules under `sports/` define prop families and scoring conversion.
+- Ownership logic lives here; projection logic is centralized in MARKET_PROJECTIONS.
 
-## Mandatory import audit
-
-Every returned file must pass:
-1. Exact source column structure preserved.
-2. `Name` values are character-for-character identical to their source Savant rows.
-3. `DFS ID` values are character-for-character identical to their source Savant rows.
-4. Correct sport/site scoring system used.
-5. No duplicate DFS IDs created by the process.
-6. No duplicate exact-name rows created by the process.
-7. Never deduplicate by editing a player's name or ID.
-8. Remove dead duplicate source identities only when one live identity clearly exists and document the removal.
-9. Apply the Savant ambiguous-name handling rules above.
-10. `Proj` numeric and non-negative.
-11. `Own` numeric when present and between 0 and 100.
-12. Zero projections intentional.
-13. Largest projection and ownership changes reviewed for plausibility.
-14. Compare output identity columns directly against the source before saving.
-15. Return a short audit summary: rows in/out, mapping conflicts, identity exceptions, projection changes, ownership changes, and fallback-heavy areas.
-16. Return projection coverage for the likely active pool as Vegas-rich / Vegas-supported / industry-supported / fallback-heavy.
-17. Return ownership coverage for the likely active pool as multi-source industry / single-source industry-supported / behavioral-supported / Savant-only fallback.
-18. If likely-active projection Vegas coverage is unexpectedly low, do not finalize until a second sportsbook sweep is completed or the lack of coverage is explicitly demonstrated.
-19. If likely-active external ownership coverage is unexpectedly low, do not finalize until a second industry ownership sweep is completed or the lack of coverage is explicitly demonstrated.
-
-## Hard stop
-
-Market Inputs does **not**:
-- build lineups
-- simulate lineups
-- rank lineups
-- optimize lineups
-- set exposures
-- choose stacks
-- allocate contests
-- alter projections to manufacture leverage
-- alter ownership to manufacture leverage
-
-After returning the audited CSV, stop. The user performs lineup generation and exposure spreading inside Sim Savant and may send the resulting portfolio back for a separate final game-theory/exposure audit.
-
-## Core philosophy
-
-**Vegas estimates what happens first. Industry consensus estimates what the field will play. Savant builds the lineups.**
-
-Every Market Inputs invocation is a full slate-wide research pass unless the user explicitly requests a quicker targeted adjustment.
-
-**Only Proj and Own should change. Savant player identity text is immutable.**
-
-Keep projection quality, ownership forecasting, player identity, and portfolio game theory separate so each layer can be evaluated honestly.
+Keep projection quality, ownership quality, and portfolio game theory separate so each layer can be evaluated honestly.
