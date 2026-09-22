@@ -2,40 +2,44 @@
 
 ## Trigger
 
-When the user says **"Savant prep"**, run this workflow only. Do not build lineups, optimize portfolios, run full DFS Engine construction, or add extra slate strategy unless explicitly asked.
+When the user says **"Savant prep"** (or attaches a projection CSV under Market Inputs / projections only), run this workflow only. Do not build lineups, optimize portfolios, run full DFS Engine construction, or add extra slate strategy unless explicitly asked.
 
 ## Purpose
 
-Take the user's Sim/Savant projection CSV and return the same import-ready file structure with two fields recalibrated:
+Take the user's Sim/Savant projection CSV and return the same import-ready file structure with **`Proj` recalibrated to an objective consensus** and, when requested, **`Own` recalibrated toward actual field ownership**.
 
-1. **Projection** — make player fantasy-point projections as market-derived as possible from current Vegas / sportsbook information.
-2. **Ownership** — replace or recalibrate Savant ownership toward the best estimate of actual field ownership using current industry consensus and slate context.
+**Projection goal (mandatory):**  
+Get the best available **objective consensus projection** by scraping as many independent **numeric** industry projection sources as possible and scraping multi-book sportsbook odds/props, then blending them. We are **not** trying to beat the market or invent edge. We are minimizing reliance on any single projection source (including Savant).
 
-The user will then run the file through Savant's interface themselves.
+Authoritative projection standard: `core/MARKET_PROJECTIONS.md`.
 
-## Projection Workflow
+The user runs the returned file through Savant themselves for sims and lineups.
 
-### Market first
+## Projection Workflow — pure numeric conglomerate
 
-For every player where usable current market data exists, derive the fantasy projection from sportsbook expectations rather than simply retaining Savant.
+### What goes into Proj
 
-For MLB DraftKings:
+1. **Industry layer** — scrape/pull independent **numeric** DFS/projection systems (target **10+** when the slate supports it). Only numbers count; rankings and write-ups do not enter the blend.
+2. **Vegas layer** — scrape/pull multi-book player props and game markets; de-vig when possible; use as statistical expectation and as reconciliation so the blend does not contradict the betting environment.
+3. **Blend** — median / trimmed mean / coverage-weighted composite. Weight by evidence quality (how many sources, how much multi-book agreement), not by opinion.
+4. **Savant** — final fallback only when both layers are genuinely thin. Label as such.
 
-- Pitchers: prioritize strikeout props, outs recorded / innings expectations, earned-runs or runs-allowed props where available, win probability / moneyline, opponent implied runs, and related pitcher markets. Convert the market expectation into DraftKings scoring expectations.
-- Hitters: prioritize total bases, hits, home run, RBI, runs, stolen-base and other usable batter props, plus team implied run total and game environment. Convert those expectations into DraftKings scoring.
-- Use multiple books / consensus prices when available; avoid anchoring to one outlier book.
-- Remove vig / interpret probabilities and line prices where materially useful rather than treating posted odds as raw probabilities.
-- Cross-check player props against team totals, game totals, moneylines, park/weather and lineup context so individual projections remain coherent with the game market.
+**No narrative enters Proj.** No matchup story, no "due," no leverage manufacturing.
 
 ### Fallback hierarchy
 
-If a player lacks sufficient usable market data:
+1. Full composite (deep industry + multi-book Vegas)
+2. Industry-led composite with game-market reconciliation (thin props)
+3. Vegas-led with industry cross-check (deep props, thin industry)
+4. Original Savant only when both external layers fail
 
-1. partial Vegas adjustment using team/game environment and available correlated markets;
-2. broader reliable industry projection consensus when available;
-3. original Savant projection as the final fallback.
+Never force a fake Vegas or industry number when the data does not exist.
 
-Never force a fake Vegas projection when the market does not contain enough information.
+### MLB DraftKings component checklist (when converting props)
+
+- Pitchers: K props, outs/IP, ER, hits/walks allowed, win/ML context — convert to DK scoring.
+- Hitters: hits, TB, HR, RBI, runs, walks, SB, combos + team implied runs — convert to DK scoring.
+- Multi-book + juice when available; reconcile to game totals.
 
 ## Ownership Workflow
 
@@ -53,9 +57,11 @@ Ownership is **not** derived from Vegas alone. Estimate expected field ownership
 
 The goal is the best estimate of **actual contest ownership**, not an optimizer target exposure and not a leverage recommendation.
 
+**Default for projection-only passes:** leave `Own` unchanged.
+
 ## Output Contract
 
-Return a Savant-importable CSV preserving the user's original player identifiers and required structure. At minimum keep the same identifying columns and replace the projection and ownership values in their expected fields.
+Return a Savant-importable CSV preserving the user's original player identifiers and required structure. At minimum keep the same identifying columns and replace the projection (and ownership only if requested) values in their expected fields.
 
 Do not:
 
@@ -65,7 +71,8 @@ Do not:
 - intentionally make ownership contrarian;
 - modify projections just to create leverage;
 - add unsupported players;
-- remove viable players unless the source format / confirmed status explicitly requires it.
+- remove viable players unless the source format / confirmed status explicitly requires it;
+- inject narrative into any projection number.
 
 ## Quality Control
 
@@ -73,11 +80,15 @@ Before returning the file:
 
 - confirm the row count / player IDs still match the input;
 - confirm projection and ownership columns are numeric and importable;
-- sanity-check pitcher and hitter ranges against DraftKings scoring;
-- check that ownership totals / distribution look plausible for the slate rather than mechanically copying Savant;
-- identify major market-vs-Savant changes internally and verify they are supported by actual evidence;
+- report projection grade (target A / A+), industry source breadth, Vegas coverage, provenance mix;
+- sanity-check pitcher and hitter ranges against site scoring;
+- identify major composite-vs-Savant changes and verify they are supported by scraped numbers;
 - preserve Savant values when evidence is insufficient rather than inventing precision.
 
 ## Required Behavior
 
-**"Savant prep" means exactly this process and nothing more unless the user explicitly expands the request.**
+**"Savant prep" / Market Inputs projection passes mean exactly this process and nothing more unless the user explicitly expands the request.**
+
+Full projection standard: `core/MARKET_PROJECTIONS.md`.  
+Cross-sport workflow: `core/MARKET_INPUTS.md`.  
+MLB projection-only override: `sports/mlb_market_inputs_projection_override.md`.
