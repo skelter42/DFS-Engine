@@ -25,6 +25,9 @@ The goal is repeatable decision quality: ingest slate inputs, cross-check them a
 
 ---
 
+**New here?** [`RUNBOOK.md`](RUNBOOK.md) is the step-by-step version: install,
+sweep, build, upload.
+
 ## Quickstart
 
 ```bash
@@ -45,6 +48,7 @@ The demo writes the complete delivery package:
 | `projections.csv` | Vendor prior, market projection, coverage grade, engine projection |
 | `build.json` | Everything above, machine-readable |
 | `audit.md` | The written build report (`schemas/LINEUP_OUTPUT.md` contract) |
+| `dk_entries.csv` | DraftKings' entry template, roster columns filled (with `--dk-template`) |
 | `report.html` | Self-contained dashboard |
 
 > The demo slate is **synthetic**. It generates plausible latent player rates and

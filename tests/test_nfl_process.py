@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 
 from dfs_engine.markets.catalog import CONTINUOUS_CV
-from dfs_engine.models import GameEnvironment, Player, PlayerProjection
+from dfs_engine.models import Player, PlayerProjection
 from dfs_engine.odds.conversions import american_to_prob, devig, devig_two_way
 from dfs_engine.odds.distributions import (
     GammaDistribution,
@@ -133,7 +133,6 @@ def _player(pid, name, pos, salary=5000, team="KC"):
 
 
 def _with_components(player, **means):
-    from dfs_engine.odds.distributions import make_count
     from dfs_engine.projections.components import counted
 
     proj = PlayerProjection(player=player)

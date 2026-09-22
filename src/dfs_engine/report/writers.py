@@ -368,9 +368,10 @@ def write_audit_markdown(result: BuildResult, path: Path) -> Path:
     return path
 
 
-def write_all(result: BuildResult, out_dir: str | Path) -> dict[str, Path]:
+def write_all(result: BuildResult, out_dir: str | Path,
+              dk_template: str | Path | None = None) -> dict[str, Path]:
     out = _ensure(Path(out_dir))
-    return {
+    paths = {
         "upload": write_upload_csv(result, out / "lineups.csv"),
         "lineups_detail": write_lineups_detail(result, out / "lineups_detail.csv"),
         "exposures": write_exposures_csv(result, out / "exposures.csv"),
@@ -379,6 +380,18 @@ def write_all(result: BuildResult, out_dir: str | Path) -> dict[str, Path]:
         "audit": write_audit_markdown(result, out / "audit.md"),
         "html": _write_html(result, out / "report.html"),
     }
+    if dk_template:
+        from .dk_upload import fill_dk_template
+
+        fill = fill_dk_template(result.portfolio.lineups, result.rules.slot_names,
+                                dk_template, out / "dk_entries.csv")
+        result.meta["dk_template_fill"] = {
+            "rows_filled": fill.rows_filled,
+            "rows_in_template": fill.rows_in_template,
+            "warnings": fill.warnings,
+        }
+        paths["dk_entries"] = fill.path
+    return paths
 
 
 def _write_html(result: BuildResult, path: Path) -> Path:

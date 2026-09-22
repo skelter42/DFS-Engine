@@ -162,3 +162,79 @@ def test_build_is_reproducible():
         return [lu.signature() for lu in result.portfolio.lineups]
 
     assert once() == once()
+
+
+# --- DraftKings upload ----------------------------------------------------
+
+DK_TEMPLATE = (
+    "Entry ID,Contest Name,Contest ID,Entry Fee,QB,RB,RB,WR,WR,WR,TE,FLEX,DST,,"
+    "Instructions\n"
+    "4100000001,Big,182736,$20,,,,,,,,,,,Fill each roster slot\n"
+    "4100000002,Big,182736,$20,,,,,,,,,,,\n"
+    "4100000003,Small,182737,$5,,,,,,,,,,,\n"
+)
+
+
+def test_dk_template_is_filled_without_disturbing_the_entry_columns(build, tmp_path):
+    import csv as _csv
+
+    from dfs_engine.report.dk_upload import fill_dk_template
+
+    template = tmp_path / "DKEntries.csv"
+    template.write_text(DK_TEMPLATE)
+    out = tmp_path / "filled.csv"
+    result = fill_dk_template(build.portfolio.lineups, build.rules.slot_names,
+                              template, out)
+
+    assert result.rows_in_template == 3
+    assert result.rows_filled == 3
+    rows = list(_csv.reader(out.open(newline="")))
+    header, body = rows[0], rows[1:]
+    assert header[:4] == ["Entry ID", "Contest Name", "Contest ID", "Entry Fee"]
+    for original, filled in zip(DK_TEMPLATE.splitlines()[1:], body):
+        assert filled[:4] == original.split(",")[:4]     # entry identity untouched
+    for row in body:
+        roster = row[4:13]
+        assert all(cell.strip() for cell in roster)      # every slot written
+        assert all("(" in cell for cell in roster)       # DraftKings Name (ID) form
+    assert header[-1] == "Instructions"                  # trailing columns preserved
+
+
+def test_dk_template_respects_contest_allocation(build, tmp_path):
+    import csv as _csv
+
+    from dfs_engine.report.dk_upload import fill_dk_template
+
+    template = tmp_path / "DKEntries.csv"
+    template.write_text(DK_TEMPLATE)
+    out = tmp_path / "filled.csv"
+    fill_dk_template(build.portfolio.lineups, build.rules.slot_names, template, out)
+
+    rows = list(_csv.reader(out.open(newline="")))[1:]
+    small_row = next(r for r in rows if r[1] == "Small")
+    small_names = {c.split(" (")[0] for c in small_row[4:13]}
+    small_lineups = [lu for lu in build.portfolio.lineups if lu.contest == "Small"]
+    assert any({p.name for p in lu.players} == small_names for lu in small_lineups)
+
+
+def test_dk_template_warns_when_the_counts_do_not_match(build, tmp_path):
+    from dfs_engine.report.dk_upload import fill_dk_template
+
+    template = tmp_path / "DKEntries.csv"
+    template.write_text("\n".join(DK_TEMPLATE.splitlines()[:2]) + "\n")
+    result = fill_dk_template(build.portfolio.lineups, build.rules.slot_names,
+                              template, tmp_path / "filled.csv")
+    assert result.rows_filled == 1
+    assert any("no template row" in w for w in result.warnings)
+
+
+def test_dk_template_rejects_the_salary_file(build, tmp_path):
+    import pytest as _pytest
+
+    from dfs_engine.report.dk_upload import fill_dk_template
+
+    wrong = tmp_path / "DKSalaries.csv"
+    wrong.write_text("Position,Name,ID,Salary\nQB,Josh Allen,1,8000\n")
+    with _pytest.raises(ValueError, match="entry template"):
+        fill_dk_template(build.portfolio.lineups, build.rules.slot_names,
+                         wrong, tmp_path / "out.csv")

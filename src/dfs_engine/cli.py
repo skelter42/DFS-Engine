@@ -68,6 +68,9 @@ def build_parser() -> argparse.ArgumentParser:
     build.add_argument("--vendor")
     build.add_argument("--markets", required=True)
     build.add_argument("--contests", help="contests JSON")
+    build.add_argument("--dk-template",
+                       help="DraftKings entry template CSV to fill in "
+                            "(download it from the contest lobby)")
     build.add_argument("--out", default="slates/latest")
     build.add_argument("--lineups", type=int, default=20)
     build.add_argument("--candidates", type=int, default=200)
@@ -110,10 +113,10 @@ def _load_contests(path: str | None, default_entries: int) -> list[Contest]:
     return contests
 
 
-def _report(result, out_dir: str) -> None:
+def _report(result, out_dir: str, dk_template: str | None = None) -> None:
     from .report.writers import write_all
 
-    paths = write_all(result, out_dir)
+    paths = write_all(result, out_dir, dk_template=dk_template)
     pm = result.portfolio.metrics
     fa = result.portfolio.diagnostics.get("final_audit", {})
     print()
@@ -124,6 +127,12 @@ def _report(result, out_dir: str) -> None:
     print(f"Final audit: {'PASSED' if fa.get('passed') else 'FAILED'}")
     for failure in fa.get("failures", []):
         print(f"  ! {failure}")
+    fill = result.meta.get("dk_template_fill")
+    if fill:
+        print(f"DraftKings template: {fill['rows_filled']} of "
+              f"{fill['rows_in_template']} entry rows filled")
+        for warning in fill["warnings"]:
+            print(f"  ! {warning}")
     print()
     for name, path in paths.items():
         print(f"  {name:16s} {path}")
@@ -257,7 +266,7 @@ def cmd_build(args) -> int:
         seed=args.seed, min_uniques=args.min_uniques, contest_profile=args.profile,
         selection_strategy=args.selection, config=EngineConfig.load())
     result = run_build(request, progress=_progress)
-    _report(result, args.out)
+    _report(result, args.out, dk_template=args.dk_template)
     return 0 if result.portfolio.diagnostics["final_audit"]["passed"] else 1
 
 
