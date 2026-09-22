@@ -4,6 +4,8 @@
 
 Authoritative override to `sports/mlb_market_inputs.md` for MLB market-input / Savant Prep / attached-file projection passes.
 
+Iteration addendum (2026-09-22): `sports/mlb_market_inputs_future_iteration.md` is required reading before the next MLB Market Inputs run.
+
 ## Standard
 
 The output `Proj` is a **pure numeric composite** that must meet the A+ bar defined in `core/MARKET_PROJECTIONS.md`:
@@ -20,16 +22,22 @@ Ownership (`Own`) is left unchanged unless the user explicitly requests an owner
 
 If source `Proj` is `0` (or blank treated as 0), leave `Proj = 0`. Do not research industry projections or Vegas props for that row. Keep the row in the file. Industry + Vegas work, the 10+ source target, coverage grades, and provenance mix apply only to the **positive-Proj pool**.
 
+**Unlock exception:** if the user says `unlock posted starters`, research players who are in the posted 1–9 or are the confirmed starter/bulk arm even when Savant Proj is 0. List every unlock. Do not unlock the rest of the zero pool.
+
 ## Required behavior
 
-1. Split the file: zeros stay zeros; research only the positive-Proj pool.
-2. Exhaust industry sources and sportsbook markets for `Proj` on that pool before delivery (keep going until A+ or sources are exhausted).
-3. Industry: pursue THE BAT / THE BAT X, RotoGrinders, Daily Fantasy Fuel, FantasyPros, LineStar, Stokastic/Awesemo, RotoWire, NumberFire, Sabersim, and any other current **numeric** MLB DFS projection systems. Do not stop at one or two sources.
-4. Vegas: **board-level first** — PropCruncher, Covers, Action Network, PropPrizm, FanDuel Research, then deep-dive gaps. Multi-book props (K, outs, ER, hits/walks, win for pitchers; hits, TB, HR, RBI, runs, walks, H+R+RBI, SB for hitters) + game totals / ML / team totals. De-vig and consensus across books.
-5. Form the composite from both layers numerically; reconcile player totals to the game environment with data only.
-6. Preserve Name, DFS ID, Own, and row order. Replace only `Proj` on researched (positive-Proj) rows.
-7. Track provenance: `VEGAS_DIRECT`, `VEGAS_SUPPORTED`, `INDUSTRY_BLEND`, `SAVANT_FALLBACK`, plus industry source count. Zero-Proj rows are not counted in the active-pool fallback percentage.
-8. Report grade, industry source count, Vegas coverage, and largest composite vs original Savant deltas **for the positive-Proj pool**.
+1. Split the file: zeros stay zeros unless unlock-posted-starters was requested; research only the positive-Proj pool plus any unlocked posted starters.
+2. Identify the exact slate window first. Do not use Main-slate vendor rows on a Turbo file.
+3. Request attached vendor CSVs (THE BAT X, RG projected-stats, Stokastic/SaberSim, DFF matching slate, LineStar/RotoWire/NumberFire) before calling the industry layer complete.
+4. Exhaust industry sources and sportsbook markets for `Proj` on that pool before delivery (keep going until A+ or sources are exhausted).
+5. Industry: pursue THE BAT / THE BAT X, RotoGrinders, Daily Fantasy Fuel, FantasyPros, LineStar, Stokastic/Awesemo, RotoWire, NumberFire, Sabersim, and any other current **numeric** MLB DFS projection systems. Do not stop at one or two sources. Do not count First Look copy as a source.
+6. Vegas: **board-level first** — PropCruncher, Covers, Action Network, PropPrizm, FanDuel Research, then deep-dive gaps. Multi-book props (K, outs, ER, hits/walks, win for pitchers; hits, TB, HR, RBI, runs, walks, H+R+RBI, SB for hitters) + game totals / ML / team totals. De-vig and consensus across books.
+7. Form the composite from both layers numerically; reconcile player totals to the game environment with data only.
+8. Role facts only: posted order, opener vs bulk vs full start, PH/bench. Bulk-behind-opener is not a full-start prior.
+9. Preserve Name, DFS ID, Own, and row order. Replace only `Proj` on researched rows.
+10. Track provenance: `VEGAS_DIRECT`, `VEGAS_SUPPORTED`, `INDUSTRY_BLEND`, `SAVANT_FALLBACK`, plus industry source count. Zero-Proj rows are not counted in the active-pool fallback percentage.
+11. Report grade, industry source count, Vegas coverage, posted-but-zero names, and largest composite vs original Savant deltas **for the positive-Proj pool**.
+12. If vendor CSVs are missing, cap the grade at A- unless the user accepts the cap or attaches files for a rerun.
 
 ## Grade gate
 
@@ -37,6 +45,7 @@ If source `Proj` is `0` (or blank treated as 0), leave `Proj = 0`. Do not resear
 - `Overall projection-input grade: <grade>`
 - Target: **A or A+**
 - Below A → more industry and/or Vegas research required unless user accepts lower grade.
+- Missing same-slate vendor CSVs → A- ceiling until those files exist.
 
 ## Core philosophy
 
