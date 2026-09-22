@@ -22,6 +22,54 @@ Examples:
 - `Market Inputs — NCAAF`
 - `Market Inputs — Tennis`
 
+## Projection-only invocation — mandatory
+
+Use **`Market Inputs — [SPORT] — projections only`** when the user wants the projection pull without ownership research or any downstream lineup work.
+
+Projection-only mode must:
+1. Preserve the exact source row order, player names, DFS IDs, and import columns.
+2. Research and replace only the projection fields. For Showdown, set CPT projection to exactly 1.5 times FLEX projection unless the source schema requires a different representation.
+3. Leave source ownership unchanged. Do not research, rebuild, normalize, or reinterpret ownership.
+4. Stop after the projection CSV and projection audit are complete. Do not simulate, optimize, rank, select, or allocate lineups.
+5. Use the same Vegas-first hierarchy, active-role validation, sportsbook sweep, scoring conversion, confidence grading, and audit rules defined below.
+
+### Efficient projection-pull execution
+
+Projection quality is the primary input objective. Speed and token efficiency come from staged retrieval and reuse, not from skipping validation.
+
+Use this order:
+
+1. **Intake once.** Parse the entire source file in one pass. Build one canonical player table containing exact identity fields, sport, site, slate, game, team, opponent, position, salary when available, source projection, and eligibility status.
+2. **Validate the active universe first.** Resolve confirmed inactive/out players, starters, likely rotation roles, and zero or missing source projections before prop research. Exclude confirmed inactive players and retain an explicit exclusion reason.
+3. **Cache slate-level markets.** Pull each game total, spread/moneyline, and implied team total once. Reuse those values for every player in that game.
+4. **Run one broad prop sweep.** Batch searches by game and prop family across aggregators and books. Record all usable lines, both-side prices, alternate lines, book, timestamp, and source URL in a structured market board.
+5. **Deep-search only material gaps.** Make a second targeted pass only for likely active DFS-relevant players lacking the role-specific minimum prop bundle or showing a material disagreement between books, game markets, role, and the source projection.
+6. **Normalize before calculating.** Match external names to the canonical player table internally, deduplicate identical markets, reject stale/wrong-game/wrong-player lines, and never change the source identity text.
+7. **Convert once.** De-vig paired prices where feasible, form robust multi-book component expectations, infer distributions from alternate ladders when useful, reconcile overlapping markets, then apply the target site's scoring once.
+8. **Shrink by evidence quality.** Let high-confidence market estimates dominate. Increase prior weight only as prop breadth, book count, freshness, role certainty, or cross-book agreement deteriorates. Do not use a fixed blend for every player.
+9. **Reconcile the slate.** Compare player component totals with game and team markets. Investigate material contradictions instead of forcing a mechanical rescale.
+10. **Audit in batches.** Review zero projections, largest source-to-Engine changes, low-confidence DFS-relevant players, identity preservation, projection coverage, and scoring totals together.
+11. **Reuse fresh evidence.** Within the same slate and run, do not repeat unchanged searches. Refresh only markets affected by a material line, injury, role, weather, or availability change.
+12. **Stop at adequacy.** Research is adequate when every likely active DFS-relevant player has either a coherent role-specific market bundle or a clearly labeled fallback, game/team reconciliation passes, and all material outliers are resolved. More searches after this point add cost without improving the input.
+
+### Projection-pull data contract
+
+Maintain an internal audit record per player with:
+- exact source name and DFS ID
+- eligibility status and evidence
+- source/vendor projection
+- market-derived component expectations
+- market-derived fantasy projection
+- final DFS Engine projection
+- source-to-Engine difference
+- books and distinct prop families used
+- market timestamp/freshness
+- confidence tier and fallback weight
+- major source URLs
+- unresolved uncertainty
+
+Report active-pool coverage separately as Vegas-rich, Vegas-supported, industry-supported, and fallback-heavy. Raw-pool coverage may be included, but bench and inactive players must not distort the active-pool grade.
+
 ## Core target — mandatory
 
 The default target for every Market Inputs run is:
