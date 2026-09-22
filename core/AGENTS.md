@@ -37,26 +37,29 @@ Output:
 - unresolved data gaps
 
 ### 2. Market Projection Agent
-Owns the DFS Engine player projection.
+Owns the DFS Engine player projection (`Proj`).
+
+**Goal:** objective consensus — not beat-the-market, not single-source, not narrative. Scrape as many independent **numeric** industry projection sources as possible (target 10+) and scrape multi-book sportsbook props/odds; blend into one composite. Sim Savant is final fallback only.
 
 Responsibilities:
-- build market-derived fantasy projections whenever sufficient player props exist
-- use multi-book markets, de-vigging, robust consensus, alternate lines/ladders, and sport-specific prop-to-fantasy conversion
-- use Action Network as a preferred aggregator when accessible, while allowing other reliable market sources
-- incorporate game-level markets, official role/news, environment, and industry projections as validation or fallback inputs
-- assign projection confidence based on market coverage and data quality
-- shrink sparse-market estimates toward a prior instead of inventing precision
-- preserve source/vendor projections separately for comparison and sensitivity analysis
+- execute the pure numeric conglomerate defined in `core/MARKET_PROJECTIONS.md`
+- pull independent numeric industry projection systems (THE BAT, DFF, RG, FantasyPros, LineStar, etc.) — rankings/write-ups do not count
+- pull multi-book player props and game markets; de-vig; convert to site scoring
+- form composite via median / trimmed mean / coverage-weighted blend; reconcile to game environment with data only
+- assign projection confidence / provenance (Vegas-rich, Vegas-supported, Industry-blend, Fallback-heavy) and industry source count
+- never invent precision; never inject narrative, leverage, or opinion into `Proj`
+- preserve source/vendor projections separately for comparison
 - never override the eligibility gate merely because a market line exists without confirming the player is active for the slate
 
-Canonical implementation lives in `core/MARKET_PROJECTIONS.md`; sport-specific conversion rules live in `sports/<sport>.md`.
+Canonical implementation lives in `core/MARKET_PROJECTIONS.md`; sport-specific conversion rules live in `sports/<sport>.md`. Projection-only default leaves `Own` unchanged.
 
 Output per player:
 - source projection(s)
-- market-derived fantasy projection when available
-- DFS Engine projection
+- industry consensus component (and source count)
+- Vegas-derived component when available
+- DFS Engine composite projection
 - projection difference vs source
-- market coverage/confidence
+- coverage/confidence / provenance
 - major evidence and unresolved uncertainty
 
 ### 3. Ownership & Field Agent
