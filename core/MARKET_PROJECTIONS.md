@@ -2,140 +2,166 @@
 
 ## Purpose
 
-The DFS Engine produces a **composite projection** as the source of truth for expected fantasy scoring.
+The DFS Engine produces a **composite projection** as the single source of truth for expected fantasy scoring.
 
-A composite projection is built from:
-1. **Multi-book Vegas / sportsbook player props and game markets** (primary)
-2. **Multiple independent industry projection leaders** (active cross-check and gap-fill)
-3. **Sim Savant / vendor projection** only as the final fallback when both market and industry coverage are genuinely insufficient
+A composite projection is built from two evidence layers that must both be researched to an A+ standard whenever the slate allows it:
 
-The goal is to stop trusting any single projection source. The final `Proj` value that is returned to Sim Savant is the composite number, not the original Savant number and not a single sportsbook line.
+1. **Industry layer** — a broad blend of independent projection sources (target: **10+** when publicly available for the sport/slate).
+2. **Vegas layer** — multi-book player props and game markets, used both as primary statistical expectation and as a sanity check / reconciliation constraint on the industry blend.
 
-The market-derived layer converts sportsbook probabilities into expected fantasy scoring components, then into site-specific fantasy points. Industry projections are used as independent numeric evidence, not merely narrative sanity checks. Savant is retained only when external coverage is thin.
+Sim Savant / any single vendor is **not** the source of truth. It is the final fallback only when both the industry blend and Vegas coverage are genuinely thin.
 
-## Canonical Projection Hierarchy (mandatory)
+The final `Proj` returned to Sim Savant is always the composite number.
 
-1. **Vegas / multi-book player props and game markets** — primary projection evidence.
-2. **Broader industry projections** (multiple independent leaders) — active cross-check, consensus ingredient, and gap-fill when props are sparse.
-3. **Sim Savant / trusted vendor projection** — final fallback prior only when both Vegas and multi-industry coverage are weak or absent.
-4. **Verified role/news/context** — required validity layer that can override stale market assumptions when a player's role changes materially.
+## Quality bar — A+ required
 
-**Order matters.** The Engine must not begin from Savant and then lightly adjust with Vegas. It begins from the best available external evidence (Vegas first, then multi-industry) and only increases Savant weight as that external evidence deteriorates.
+Every projection-only (or full Market Inputs) pass must aim for an **A or A+** on the composite.
 
-## What "composite" means in practice
+An A+ pass means:
+- Industry: as many independent numeric projection sources as are realistically accessible for that sport/slate were pulled and blended (explicit target **10+** when the public ecosystem supports it; never stop at 1–2 sources).
+- Vegas: multi-book props and game markets were swept; juice/de-vig used where available; player-level expectations reconciled to team/game totals.
+- The two layers were cross-checked; material disagreements were investigated, not ignored.
+- Coverage and provenance are reported honestly (Vegas-rich / Vegas-supported / Industry-blend / Fallback-heavy).
+- No single source was treated as authoritative.
 
-- **High Vegas coverage (multi-book props + stable game markets):** Vegas dominates. Industry numbers are used for outlier detection and minor reconciliation. Savant weight is near zero.
-- **Partial Vegas coverage:** Available props still lead. Missing components are filled from multi-industry consensus (median / trimmed mean / reliability-weighted), then reconciled to game/team markets.
-- **Sparse or no usable props:** Build an industry consensus from multiple independent projection systems first. Only if that consensus is also thin do we fall back to the original Savant value.
-- **Never** treat a single industry source or a single sportsbook as the composite. Prefer multi-book and multi-provider agreement.
+Anything below A requires more research or an explicit user acceptance of the lower grade.
 
-## Cross-Sport Flow
+## Canonical hierarchy (mandatory)
 
-1. Collect available player props, alternate/ladder props, team/game totals, moneylines, and related markets from preferred aggregators and books.
-2. Remove vig from paired/two-sided markets when possible.
-3. Aggregate across books using robust consensus statistics rather than a single book.
-4. Infer expected player stat components and, when data supports it, component distributions.
-5. Pull multiple independent industry projection systems for the same slate/site (THE BAT / THE BAT X, RotoGrinders, Daily Fantasy Fuel, FantasyPros, LineStar, Stokastic/Awesemo public content, RotoWire, and other current reputable sources).
-6. Convert expected stat components into the target site's fantasy scoring.
-7. Form the composite: weight by evidence quality (Vegas-rich > Vegas-supported > multi-industry consensus > single-industry > Savant fallback).
-8. Assign a market-coverage/confidence grade for each player.
-9. Set the DFS Engine projection to the composite value.
-10. Preserve the original Savant/vendor projection separately for comparison and post-slate calibration.
-11. Use the resulting DFS Engine (composite) projection for simulation, leverage, candidate generation, and portfolio construction.
-12. Apply ownership modeling, game theory, correlation, duplication, and portfolio judgment on top of the projection layer (or leave ownership as pass-through when running projection-only mode).
+1. **Industry multi-source blend** (target 10+) + **Vegas multi-book layer** — co-primary evidence. Build both; form the composite from them.
+2. **Role / lineup / news / context** — validity layer that can override stale assumptions.
+3. **Sim Savant (or other single vendor)** — final fallback only when both industry breadth and Vegas coverage fail.
 
-## Coverage-Weighted Fallback Principle
+**Order of work, not order of weight:**
+- Always research industry breadth and Vegas in parallel (or staged for efficiency).
+- Weight the final composite by evidence quality:
+  - Strong multi-book props → Vegas carries more weight; industry is cross-check and gap-fill.
+  - Sparse props but deep industry (many sources agreeing) → industry blend carries more weight; Vegas game totals still constrain the environment.
+  - Thin on both → Savant fallback, labeled as such.
 
-Do not use rigid universal blend percentages. Weighting must respond to the quality of the available evidence.
+Never begin from Savant and lightly adjust. Begin from the external composite.
 
-Conceptual defaults:
+## Industry layer — breadth target
 
-- **High market confidence:** Vegas dominates; industry is cross-check only; Savant receives little or no weight unless it catches a verified market/data anomaly.
-- **Medium market confidence:** Vegas remains primary; industry consensus fills gaps and provides shrinkage; Savant weight stays low.
-- **Low market confidence:** Multi-industry consensus becomes the main driver; Savant is a secondary anchor.
-- **No usable market + thin industry:** Use the Savant fallback and label the projection as fallback-driven.
+**Goal: A+ read on what the industry is saying.**
 
-Confidence should consider at minimum:
+- Target **at least 10 independent projection sources** when the sport/slate publicly supports it.
+- Minimum acceptable for a non-fallback player on a mature slate: several independent numeric systems (do not stop after one or two).
+- Prefer numeric, site/slate-specific fantasy-point or component-stat projections over narrative rankings.
+- Blend method: median, trimmed mean, or reliability-weighted consensus. Do not cherry-pick the highest or lowest.
+- Convert component stats to the target site scoring when needed instead of blindly averaging fantasy-point outputs from different scoring systems.
 
-- number of distinct relevant prop markets
-- number of books
-- presence of alternate/ladder markets
-- market freshness
-- liquidity when inferable
-- agreement/disagreement across books
-- number and agreement of independent industry projection sources
-- whether overlapping markets and industry numbers reconcile coherently
-- confirmed player role / starting status
+### Industry sources to pursue (expand this list whenever more become available)
 
-## Preferred Sources
-
-**Vegas / odds aggregators**
-- Action Network (preferred multi-book aggregator)
-- PropCruncher or comparable multi-book prop tools
-- Direct DraftKings, FanDuel, BetMGM, Caesars, BetRivers, Hard Rock, Circa, theScore and other books when publicly accessible
-
-**Industry projection leaders (use multiple)**
+Core / high-priority:
 - THE BAT / THE BAT X
-- RotoGrinders
+- RotoGrinders projections
 - Daily Fantasy Fuel
-- FantasyPros daily projections
+- FantasyPros daily / consensus projections
 - LineStar
 - Stokastic / Awesemo public projection content
 - RotoWire DFS / projection tools
-- Other current, site-specific, reputable systems
+- NumberFire (when accessible)
+- Sabersim or similar simulation-based public numbers (when accessible)
+- FantasyLabs / other reputable optimizer-linked projections when public numbers exist
 
-Action Network is preferred for market aggregation because it centralizes multi-book odds, props, consensus pricing, and movement. It is not the sole authority. Direct sportsbook lines and alternate sources are used for triangulation.
+Additional / sport-specific:
+- Any other current, independent, numeric DFS or advanced-stats projection system for that sport
+- Public expert consensus boards that publish actual projected points (not just rankings)
 
-## Market Processing Rules
+**Rule:** If fewer than ~5–6 solid numeric sources are found on a major-sport main slate, keep searching before calling the industry layer complete. Document which sources were used and which could not be reached.
 
-- Do not add overlapping prop expectations together without reconciliation.
-- De-vig paired markets before converting odds to event probabilities when feasible.
-- Prefer median/robust consensus across books to an outlier book.
-- Use alternate/ladder markets to estimate tail probabilities and expected counts when helpful.
-- Prefer multi-industry numeric consensus over any single industry source.
-- Preserve timestamps and note stale/missing markets when material.
-- Market coverage should be classified at minimum as High, Medium, Low, or None (or the tier labels Vegas-rich / Vegas-supported / Industry-supported / Fallback-heavy).
-- High coverage should normally make the market projection dominant.
-- Low/None coverage should move weight to multi-industry consensus, then to Savant only as last resort.
-- Do not fabricate a prop or market line to complete a projection.
+## Vegas layer — primary + sanity check
 
-## Separation of Projection, Ownership, and Exposure
+Vegas is not optional window dressing. It is a full evidence layer.
 
-These are distinct outputs:
+**Primary use**
+- Multi-book player props (with juice / both sides when available)
+- Alternate / ladder markets when useful for expectation and distribution
+- Game totals, spreads/moneylines, implied team totals
 
-- **DFS Engine Projection (composite)** = our best multi-source estimate of expected fantasy scoring.
-- **DFS Engine Expected Ownership** = our best estimate of field roster rate (or pass-through when running projection-only).
-- **DFS Engine Exposure** = how much the portfolio should roster the player after game theory, correlation, duplication, uncertainty, and script analysis.
+**Sanity-check / reconciliation use**
+- Industry blend must not collectively imply a game environment that materially contradicts the betting market without a documented reason.
+- Player component totals are checked against team implied totals and game totals.
+- Large industry-vs-Vegas disagreements trigger investigation (role change, stale line, park/weather, etc.), not automatic acceptance of either side.
 
-Projection quality does not determine exposure by itself. A strong composite projection can still deserve an underweight position when expected ownership or duplication is even more aggressive.
+### Preferred Vegas sources
+- Action Network (multi-book aggregator)
+- PropCruncher or comparable multi-book prop tools
+- Direct DraftKings, FanDuel, BetMGM, Caesars, BetRivers, Hard Rock, Circa, theScore and other books when publicly accessible
+- Additional reputable odds/prop aggregators
+
+De-vig paired markets. Prefer robust multi-book consensus over any single book. Never invent a line.
+
+## What the composite number is
+
+For each player:
+
+1. Build **industry consensus** from as many independent numeric sources as obtained (target 10+).
+2. Build **Vegas-derived expectation** from available props + game context (de-vigged, multi-book).
+3. Form the **composite**:
+   - High Vegas confidence → Vegas-led, industry used for outlier detection and missing components.
+   - Medium Vegas → blend; industry fills gaps; game markets still constrain.
+   - Low/no Vegas → industry blend leads; still reconcile to game totals if they exist.
+   - Thin industry + thin Vegas → Savant fallback only, labeled Fallback-heavy.
+4. Apply site scoring once.
+5. Record provenance: Vegas-rich / Vegas-supported / Industry-blend / Savant-fallback (and how many industry sources fed the blend).
+
+## Cross-sport flow (efficient)
+
+1. Intake the attached file once (names, DFS IDs, source Proj, Own, slate context).
+2. Validate active universe (starters / likely roles / out players).
+3. Cache game-level Vegas markets for every game.
+4. Broad prop sweep across aggregators/books.
+5. Parallel (or staged) pull of industry projection sources — keep going until the breadth target is met or sources are exhausted.
+6. Normalize names; reject stale/wrong-game lines.
+7. Convert and form per-player composite.
+8. Reconcile player totals to team/game markets; investigate material breaks.
+9. Audit: coverage counts, largest source-to-composite moves, low-breadth players, zeros.
+10. Return file (Proj updated only, unless ownership pass requested) + grade + coverage summary.
+11. Stop.
+
+## Coverage-weighted weighting (no fixed % for every player)
+
+- **High Vegas + deep industry:** Vegas primary; industry tightens and cross-checks.
+- **High Vegas + thin industry:** Vegas primary; note thin industry.
+- **Low Vegas + deep industry (many sources):** Industry blend primary; Vegas game totals still used as environment constraint.
+- **Low on both:** Savant fallback; label clearly.
+
+Confidence inputs: prop count, book count, alternate markets, freshness, book agreement, **number of industry sources and their agreement**, role certainty, game-market reconciliation.
 
 ## Default workflow when a file is sent
 
-When the user attaches a Sim Savant (or similar) projection file:
+1. Projection-only unless user asks for ownership.
+2. Preserve Name, DFS ID, Own, row order exactly.
+3. Replace only `Proj` with the composite.
+4. Return updated file + audit:
+   - Projection grade (target A / A+)
+   - Industry source count used (and list when useful)
+   - Vegas coverage summary
+   - Provenance mix (Vegas-rich / Vegas-supported / Industry-blend / Fallback-heavy)
+   - Largest composite vs original Savant deltas
+5. Do not build lineups or change ownership unless asked.
 
-1. Treat the request as **projection-only** unless the user explicitly asks for an ownership pass.
-2. Preserve exact player names, DFS IDs, row order, and the `Own` column.
-3. Replace only the `Proj` column with the composite projection.
-4. Return the updated file plus a short coverage/audit summary (Vegas-rich / Vegas-supported / Industry-supported / Fallback-heavy counts, largest changes, remaining uncertainty).
-5. Stop. Do not build lineups or change ownership unless asked.
+## Separation of outputs
 
-## Post-Slate Calibration
+- **Composite Proj** = multi-source expected fantasy points (industry + Vegas).
+- **Own** = field ownership estimate (or pass-through in projection-only mode).
+- **Exposure** = portfolio decision after game theory — not the same as Proj.
 
-For each player, preserve and later compare:
+## Post-slate calibration
 
-- original Savant/vendor projection
-- market-derived component
+Preserve for learning:
+- original Savant Proj
 - industry consensus component
-- final composite (DFS Engine) projection
-- market coverage/confidence
-- source/vendor ownership
-- DFS Engine expected ownership (if computed)
-- actual field ownership when available
-- actual fantasy score
-- DFS Engine exposure
+- Vegas-derived component
+- final composite
+- industry source count / list
+- Vegas coverage tier
+- actual fantasy score and actual ownership when available
 
-Track whether higher-confidence composite projections actually outperform single-source priors over a meaningful sample. Recalibrate the hierarchy if they do not.
+If A+ composites do not outperform single-source priors over a meaningful sample, recalibrate weights — do not protect the assumption.
 
-## Sport Modules
+## Sport modules
 
-Each `sports/<sport>.md` file should define the specific prop markets, stat inference logic, scoring conversion, and fallback implementation for that sport. Cross-sport hierarchy belongs here; sport-specific formulas should not be duplicated into core files.
+Each `sports/<sport>.md` defines prop families, scoring conversion, and sport-specific industry sources. This file owns the cross-sport composite standard and the A+ / 10+ industry breadth target.
