@@ -42,7 +42,7 @@ Use this order:
 1. **Intake once.** Parse the entire source file in one pass. Build one canonical player table containing exact identity fields, sport, site, slate, game, team, opponent, position, salary when available, source projection, and eligibility status.
 2. **Validate the active universe first.** Resolve confirmed inactive/out players, starters, likely rotation roles, and zero or missing source projections before prop research. Exclude confirmed inactive players and retain an explicit exclusion reason.
 3. **Cache slate-level markets.** Pull each game total, spread/moneyline, and implied team total once. Reuse those values for every player in that game.
-4. **Run one broad prop sweep.** Batch searches by game and prop family across aggregators and books. Record all usable lines, both-side prices, alternate lines, book, timestamp, and source URL in a structured market board.
+4. **Run one broad prop sweep (preferred method).** Prefer **board-level / aggregator-first** retrieval over player-by-player searches. Hit multi-player prop boards and aggregators that surface many lines at once (PropCruncher, Covers matchup prop sections, Action Network boards, PropPrizm, FanDuel Research, OddsShopper-style pages, etc.). Batch by game and prop family. Record all usable lines, both-side prices, alternate lines, book, timestamp, and source URL in a structured market board. Only after the board sweep should individual deep-dives be used for material gaps.
 5. **Deep-search only material gaps.** Make a second targeted pass only for likely active DFS-relevant players lacking the role-specific minimum prop bundle or showing a material disagreement between books, game markets, role, and the source projection.
 6. **Normalize before calculating.** Match external names to the canonical player table internally, deduplicate identical markets, reject stale/wrong-game/wrong-player lines, and never change the source identity text.
 7. **Convert once.** De-vig paired prices where feasible, form robust multi-book component expectations, infer distributions from alternate ladders when useful, reconcile overlapping markets, then apply the target site's scoring once.
@@ -211,11 +211,15 @@ Use only when direct market coverage and broader industry coverage are both insu
 
 ## Sportsbook sweep standard — mandatory
 
+**Preferred method: board-level / aggregator-first.** Do not default to player-by-player prop searches. First hit multi-player prop boards and aggregators that surface many lines at once (PropCruncher, Covers matchup prop sections, Action Network boards, PropPrizm, FanDuel Research, comparable multi-book pages). Extract mass data, then deep-dive only material gaps. This is the default efficiency path and must be used on every full run unless a board is inaccessible.
+
 Do not assume missing sportsbook data after checking only one source or one prop category.
 
 For each likely active player, systematically search the available sportsbook/aggregator ecosystem before assigning Tier 3 or Tier 4. Relevant sources may include:
-- Action Network player/game prop pages
-- PropCruncher or comparable multi-book prop aggregators
+- PropCruncher or comparable multi-book prop aggregators (preferred first stop for mass data)
+- Action Network player/game prop pages and boards
+- Covers matchup prop sections
+- PropPrizm and similar slate boards
 - RotoWire betting/player-prop comparison tools
 - direct DraftKings Sportsbook markets when publicly accessible
 - direct FanDuel Sportsbook markets when publicly accessible
@@ -317,54 +321,3 @@ The goal is:
 **`Own = best estimate of actual site/slate field roster percentage`**
 
 It must be objective. Never change ownership to create leverage, force Savant toward a player, or manufacture a desired portfolio.
-
-### Step 1 — Numeric ownership consensus
-Collect as many current, legitimate, site-specific ownership projections as accessible.
-
-Rules:
-- Savant is one source, not the authority.
-- Prefer several independent numeric sources.
-- Match the exact site and slate.
-- Weight fresher updates more heavily as lock approaches.
-- Use a median, trimmed consensus, or reliability-weighted consensus so one outlier cannot dominate.
-- Prefer current site/slate-specific data over generic season-long ownership.
-
-### Step 2 — Behavioral field model
-When numeric sources are thin, model field behavior from:
-- salary and value relative to slate
-- projection rank and consensus
-- stack/correlation structure of the slate
-- news/role confirmation timing
-- public content and optimizer bias patterns
-
-This is still an estimate of what the field will do, not a preferred portfolio.
-
-### Step 3 — Savant as ownership anchor only when needed
-Use Savant ownership as a conservative anchor when external signals are weak, not as the default authority.
-
-## Ownership research standard
-
-Search for current ownership projections from available industry tools and content for the exact site and slate. Prefer numeric ownership percentages over qualitative "chalk" labels.
-
-Ownership confidence tiers:
-- **A — multi-source numeric**
-- **B — one strong numeric + corroboration**
-- **C — behavioral model + Savant anchor**
-- **D — Savant-only fallback**
-
-Never invent ownership precision. Never move ownership to create leverage.
-
-## Output contract
-
-Return:
-1. Updated CSV with the same structure as the input (Name, DFS ID, Proj, Own by default).
-2. Audit summary: projection grade, ownership grade (if ownership pass), coverage tiers, largest deltas, unresolved gaps.
-3. Stop. No lineups unless the user asks.
-
-## Relation to other docs
-
-- `core/MARKET_PROJECTIONS.md` is authoritative for how `Proj` is built (pure numeric conglomerate, 10+ industry target, Vegas layer, A+ bar, no narrative).
-- Sport modules under `sports/` define prop families and scoring conversion.
-- Ownership logic lives here; projection logic is centralized in MARKET_PROJECTIONS.
-
-Keep projection quality, ownership quality, and portfolio game theory separate so each layer can be evaluated honestly.
