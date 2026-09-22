@@ -4,16 +4,25 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dfs-engine"
-version = "0.1.0"
-description = "Versioned DFS portfolio construction and learning engine"
+version = "0.2.0"
+description = "Vegas-first DFS projection, simulation and portfolio construction engine"
 requires-python = ">=3.11"
-dependencies = ["pulp>=2.8"]
+dependencies = [
+    "numpy>=1.24",
+    "pulp>=2.8",
+]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+live = ["requests>=2.31"]
+dev = ["pytest>=8.0", "requests>=2.31"]
 
 [project.scripts]
 dfs-engine = "dfs_engine.cli:main"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning:pulp.*"]

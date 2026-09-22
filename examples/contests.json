@@ -1,0 +1,32 @@
+[
+  {
+    "name": "NFL Millionaire Maker",
+    "entries": 12,
+    "field_size": 150000,
+    "entry_fee": 20,
+    "profile": "large_field_gpp",
+    "payout_top_fraction": 0.20,
+    "priority": 1,
+    "max_entries_per_user": 150
+  },
+  {
+    "name": "NFL Sunday Special",
+    "entries": 6,
+    "field_size": 11000,
+    "entry_fee": 10,
+    "profile": "small_field_gpp",
+    "payout_top_fraction": 0.24,
+    "priority": 2,
+    "max_entries_per_user": 20
+  },
+  {
+    "name": "NFL Single Entry",
+    "entries": 2,
+    "field_size": 5000,
+    "entry_fee": 25,
+    "profile": "single_entry",
+    "payout_top_fraction": 0.20,
+    "priority": 3,
+    "max_entries_per_user": 1
+  }
+]

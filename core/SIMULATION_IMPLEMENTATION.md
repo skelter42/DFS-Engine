@@ -125,6 +125,24 @@ When executable code is added, prefer a structure such as:
 
 Exact filenames may evolve, but ownership must remain centralized.
 
+## Implementation status
+
+The shared runtime described above now exists in code:
+
+- `src/dfs_engine/simulation/core.py` — iteration engine, latent factor model, shared slate state
+- `src/dfs_engine/simulation/field.py` — field generation, lineup ranking, payout/duplication metrics
+- `src/dfs_engine/simulation/portfolio.py` — portfolio metrics, hidden concentration, champion-challenger gate
+- `src/dfs_engine/simulation/adapters/` — one file per sport, dependence structure only
+
+Marginals are the market-implied fantasy-point distributions produced by
+`src/dfs_engine/projections/`, so the simulator inherits skew, zero-inflation and
+bonus behaviour from the market rather than assuming a shape. Correlation is a
+factor model, so `corr(i, j)` is the dot product of two loading vectors and is
+asserted against plausible ranges in `tests/test_simulation.py`.
+
+Calibrated volatility and correlation remain **modeled, not observed**. Loadings
+are hand-specified priors. The backtest called for below has not been run.
+
 ## Validation
 
 Before native simulation is considered production-ready:
