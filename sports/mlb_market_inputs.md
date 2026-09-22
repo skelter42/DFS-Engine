@@ -2,24 +2,24 @@
 
 ## Purpose
 
-This file defines one narrow responsibility for the DFS Engine: **produce slate-ready player projections and ownership estimates from betting-market and industry information for import into Sim Savant.**
+This file defines one narrow responsibility for the DFS Engine: **produce slate-ready player projections from betting-market and industry information for import into Sim Savant.**
 
 Sim Savant remains responsible for simulation, lineup generation, 1% finish-rate ranking, exposure spreading, stack settings, and contest setup. This process does **not** build or optimize lineups.
 
-**Projection standard (authoritative):** `core/MARKET_PROJECTIONS.md` — pure numeric conglomerate (industry scrape + Vegas scrape → composite). Goal is objective consensus, not beating the market. For projection-only passes, `sports/mlb_market_inputs_projection_override.md` takes precedence on Proj rules.
+**Projection standard (authoritative):** `core/MARKET_PROJECTIONS.md` — pure numeric conglomerate (industry scrape + Vegas scrape → composite). Goal is objective consensus, not beating the market. For these passes, `sports/mlb_market_inputs_projection_override.md` takes precedence on Proj rules.
 
 ## Easy trigger keywords
 
 Use these short commands in chat:
 
-- **`Savant Prep`** = run this market-input process only on the attached Sim Savant projection CSV.
+- **`Savant Prep`** or **`Market Inputs — MLB`** = run this process on the attached Sim Savant projection CSV. **Default is projections only** (`Proj` updated, `Own` passed through). Sim Savant does not consume Engine ownership edits. Ownership research only if explicitly requested.
 - **`Savant Check`** = audit a completed Sim Savant lineup/export file for final exposure, salary, correlation, Vegas-story, ownership, and game-theory issues. Do not rebuild lineups unless explicitly asked.
 
 ## Strict operating contract
 
 ### `Savant Prep` means exactly
 
-When the user attaches a Sim Savant projection file and says **`Savant Prep`**:
+When the user attaches a Sim Savant projection file and says **`Savant Prep`** or **`Market Inputs — MLB`**:
 
 1. Read the attached Sim Savant projection CSV.
 2. Identify the site (DraftKings or FanDuel), slate, player pool, player names, and DFS IDs.
@@ -30,8 +30,8 @@ When the user attaches a Sim Savant projection file and says **`Savant Prep`**:
 6. Use the odds/juice and multiple books where available. A posted line without price context is weaker evidence than a market with both sides/juice.
 7. Always pull the industry numeric layer (target 10+) **and** the Vegas prop layer for the positive-Proj pool, then build the objective consensus composite per `core/MARKET_PROJECTIONS.md` and convert into the correct site scoring system. Industry is co-primary, not a fallback.
 8. Reconcile player-level projections to game totals, implied team totals, lineup slot, park/weather/roof status, matchup and expected workload/plate appearances (data only; no narrative).
-9. Build the best current site-specific ownership estimate from multiple reputable DFS-industry ownership sources/signals (or leave Own unchanged on projection-only passes).
-10. Use the original Sim Savant `Proj` and/or `Own` only as a true fallback after the market/industry sweep is exhausted for that **positive-Proj** player. Zero-Proj players stay at 0 by rule, not as researched fallback.
+9. Leave `Own` unchanged by default. Sim Savant does not consume Engine ownership edits. Research ownership only if the user explicitly requests an ownership pass.
+10. Use the original Sim Savant `Proj` only as a true fallback after the market/industry sweep is exhausted for that **positive-Proj** player. Zero-Proj players stay at 0 by rule, not as researched fallback.
 11. Preserve the exact Savant import structure and DFS IDs.
 12. Run all import/mapping/duplicate/zero-value audit checks.
 13. Run the **AI quality-grade gate** described below. A market-input pass graded below **A** is incomplete and must continue researching/refining before delivery unless the user explicitly asks to stop.
@@ -75,11 +75,9 @@ Every Savant Prep run must report the projection-source counts for the **active 
 - number and percentage `SAVANT_FALLBACK`
 - industry source count used (target 10+)
 
-Also report ownership-source coverage where practical: industry consensus vs Savant fallback.
-
 ### AI quality-grade gate — mandatory
 
-Before any market-input CSV is called final, the AI must grade the pass on **projection quality** (and ownership quality when ownership is in scope) using current evidence.
+Before any market-input CSV is called final, the AI must grade the pass on **projection quality** using current evidence.
 
 Use letter grades: `A+`, `A`, `A-`, `B+`, `B`, `B-`, `C`, or `Incomplete`.
 
@@ -118,6 +116,7 @@ A final pass must receive an **overall grade of A or A+**. Anything below A is a
 - apply portfolio game theory
 - duplicate any task Sim Savant already handles in its interface
 - research Savant-zero players
+- change `Own` unless the user explicitly requested an ownership pass
 
 The user handles lineup generation, 1% finish-rate sorting, exposure spreading, stack settings, and contest setup inside Sim Savant.
 
@@ -137,7 +136,7 @@ For each site/slate, output exactly:
 `Name, DFS ID, Proj, Own`
 
 - `Proj` = site-specific fantasy points (DraftKings or FanDuel) from the objective composite
-- `Own` = expected field ownership percentage for that site/slate (or pass-through on projection-only)
+- `Own` = passed through from the source file by default
 - Preserve the source Sim Savant player names and DFS IDs so imports map cleanly.
 
 ## Source hierarchy
@@ -175,7 +174,7 @@ Form `Proj` from industry consensus + Vegas expectation. Weight by coverage qual
 
 ### Ownership inputs
 
-Ownership should be a consensus estimate, not a single-source number. (Projection-only passes leave Own unchanged.)
+Ownership is off by default and passed through unchanged. If the user explicitly requests an ownership pass, ownership should be a consensus estimate, not a single-source number.
 
 ## Market-to-fantasy conversion
 
@@ -211,10 +210,11 @@ Ownership should be a consensus estimate, not a single-source number. (Projectio
 5. Coverage / provenance / industry source count reported for the **positive-Proj pool**.
 6. Grade gate: overall A or A+ unless user accepts lower.
 7. No narrative adjustments in Proj.
+8. `Own` unchanged unless an ownership pass was requested.
 
 ## Core philosophy
 
-**Industry numeric projections + sportsbook odds are scraped and blended into one objective consensus `Proj`. Ownership estimates what the field will play. Sim Savant builds the lineups.**
+**Industry numeric projections + sportsbook odds are scraped and blended into one objective consensus `Proj`. Sim Savant builds the lineups and handles ownership internally.**
 
 We are not trying to beat the market. We are minimizing single-source risk and delivering the best available consensus projection. No narrative enters `Proj`.
 
