@@ -2,11 +2,11 @@
 
 ## Trigger
 
-When the user says **"Savant prep"** (or attaches a projection CSV under Market Inputs / projections only), run this workflow only. Do not build lineups, optimize portfolios, run full DFS Engine construction, or add extra slate strategy unless explicitly asked.
+When the user says **"Savant prep"** (or attaches a projection CSV under Market Inputs), run this workflow only. Do not build lineups, optimize portfolios, run full DFS Engine construction, or add extra slate strategy unless explicitly asked.
 
 ## Purpose
 
-Take the user's Sim/Savant projection CSV and return the same import-ready file structure with **`Proj` recalibrated to an objective consensus** and, when requested, **`Own` recalibrated toward actual field ownership**.
+Take the user's Sim/Savant projection CSV and return the same import-ready file structure with **`Proj` recalibrated to an objective consensus**. **Default: leave `Own` unchanged.** Sim Savant does not consume Engine ownership edits. Recalibrate `Own` only when the user explicitly requests an ownership pass.
 
 **Projection goal (mandatory):**  
 Get the best available **objective consensus projection** by scraping as many independent **numeric** industry projection sources as possible and scraping multi-book sportsbook odds/props, then blending them. We are **not** trying to beat the market or invent edge. We are minimizing reliance on any single projection source (including Savant).
@@ -53,7 +53,9 @@ Never force a fake Vegas or industry number when the data does not exist.
 
 ## Ownership Workflow
 
-Ownership is **not** derived from Vegas alone. Estimate expected field ownership using as many current touch points as practical, including:
+Ownership research is **opt-in**. Default is pass-through because Sim Savant does not consume Engine ownership edits.
+
+If the user explicitly requests an ownership pass, ownership is **not** derived from Vegas alone. Estimate expected field ownership using as many current touch points as practical, including:
 
 - available industry ownership projections / consensus;
 - Savant ownership as one input, not the authority;
@@ -67,7 +69,7 @@ Ownership is **not** derived from Vegas alone. Estimate expected field ownership
 
 The goal is the best estimate of **actual contest ownership**, not an optimizer target exposure and not a leverage recommendation.
 
-**Default for projection-only passes:** leave `Own` unchanged.
+**Default for every Savant Prep / Market Inputs call:** leave `Own` unchanged. Ownership research is opt-in only.
 
 Do not research ownership for Savant-zero players.
 
