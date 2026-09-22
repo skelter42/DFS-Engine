@@ -2,45 +2,37 @@
 
 ## Status
 
-This file is an authoritative override to `sports/mlb_market_inputs.md` for future MLB market-input / Savant Prep passes.
+Authoritative override to `sports/mlb_market_inputs.md` for MLB market-input / Savant Prep / attached-file projection passes.
 
-## User workflow decision
+## Standard
 
-Sim Savant allows ownership to be changed separately, so the DFS Engine market-input pass focuses its research and refinement effort on **projections only** by default.
+The output `Proj` is a **composite projection** that must meet the A+ bar defined in `core/MARKET_PROJECTIONS.md`:
 
-The output `Proj` is a **composite projection** (multi-book Vegas + multiple industry leaders). The original Sim Savant projection is used only as the final fallback when external coverage is genuinely insufficient.
+1. **Industry layer** — blend as many independent numeric projection sources as are realistically available (target **10+** on a normal MLB main slate).
+2. **Vegas layer** — multi-book player props + game markets, used as primary expectation and as sanity check / reconciliation against the industry blend.
+3. **Sim Savant** — final fallback only when both layers are thin.
+
+Ownership (`Own`) is left unchanged unless the user explicitly requests an ownership pass.
 
 ## Required behavior
 
-1. `@GitHub market inputs mlb` / `Savant Prep` / any attached projection file must exhaust sportsbook and multi-industry information for `Proj` before delivery.
-2. Build the composite in this order:
-   - Direct player props and prices across multiple books (primary)
-   - Game/team markets and context
-   - Multiple independent industry projection systems (THE BAT, RotoGrinders, Daily Fantasy Fuel, FantasyPros, LineStar, etc.)
-   - Original Sim Savant projection only as final fallback
-3. Preserve the original Sim Savant `Own` values unchanged in the returned import CSV unless the user explicitly requests an ownership pass or ownership audit.
-4. Do not spend the normal market-input research budget trying to estimate or replace ownership by default.
-5. The final CSV retains the standard import schema `Name, DFS ID, Proj, Own` for compatibility; `Own` is pass-through data by default.
-6. Track projection provenance: `VEGAS_DIRECT`, `VEGAS_SUPPORTED`, `INDUSTRY_BLEND`, `SAVANT_FALLBACK`.
-7. Report projection-source coverage and material Savant-vs-composite projection differences.
+1. Exhaust industry sources and sportsbook markets for `Proj` before delivery.
+2. Industry: pursue THE BAT / THE BAT X, RotoGrinders, Daily Fantasy Fuel, FantasyPros, LineStar, Stokastic/Awesemo, RotoWire, NumberFire, Sabersim, and any other current numeric MLB DFS projection systems. Do not stop at one or two sources.
+3. Vegas: multi-book props (K, outs, ER, hits/walks, win for pitchers; hits, TB, HR, RBI, runs, walks, H+R+RBI, SB for hitters) + game totals / ML / team totals. De-vig and consensus across books.
+4. Form the composite from both layers; reconcile player totals to the game environment.
+5. Preserve Name, DFS ID, Own, and row order. Replace only `Proj`.
+6. Track provenance: `VEGAS_DIRECT`, `VEGAS_SUPPORTED`, `INDUSTRY_BLEND`, `SAVANT_FALLBACK`, plus industry source count.
+7. Report grade, industry source count, Vegas coverage, and largest composite vs original Savant deltas.
 
-## AI grade gate
-
-The mandatory A-or-better gate applies to **projection quality** for the standard MLB market-input pass.
-
-Required report:
+## Grade gate
 
 - `Projection grade: <grade>`
 - `Overall projection-input grade: <grade>`
-- main reasons for the grade
-- remaining projection fallback/uncertainty
-
-A standard projection-only pass is final only at `A` or `A+`. Anything below `A` requires more sportsbook/market and industry research unless the user explicitly accepts the lower grade.
-
-Ownership does **not** reduce the standard pass grade because ownership is no longer part of this workflow by default. If the user explicitly requests an ownership pass, then ownership receives its own evidence sweep and grade.
+- Target: **A or A+**
+- Below A → more industry and/or Vegas research required unless user accepts lower grade.
 
 ## Core philosophy
 
-**Multi-book Vegas + multi-industry consensus create the fantasy-point expectation. Sim Savant receives the improved composite projections and handles ownership separately unless the user asks otherwise.**
+**Broad industry consensus + multi-book Vegas create the fantasy-point expectation. Sim Savant receives the composite and handles ownership separately unless asked otherwise.**
 
-Never alter projections to manufacture leverage or force a preferred lineup outcome. Composite projections must remain objective and independent from portfolio construction.
+Never alter projections to manufacture leverage. Keep the composite objective and independent from lineup construction.
