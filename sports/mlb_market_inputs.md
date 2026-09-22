@@ -23,14 +23,15 @@ When the user attaches a Sim Savant projection file and says **`Savant Prep`**:
 
 1. Read the attached Sim Savant projection CSV.
 2. Identify the site (DraftKings or FanDuel), slate, player pool, player names, and DFS IDs.
-3. Run an **exhaustive sportsbook sweep and industry numeric-source sweep** before accepting fallback. **Preferred method: board-level / aggregator-first.** Hit multi-player prop boards and aggregators that surface many lines at once (PropCruncher, Covers matchup prop sections, Action Network boards, PropPrizm, FanDuel Research, etc.) before falling back to player-by-player searches. Only deep-dive individual players for material gaps after the board sweep.
-4. For pitchers, actively search every practical component market: strikeouts, outs recorded, earned runs allowed, hits allowed, walks allowed, win probability/moneyline, and any quality-start-relevant markets.
-5. For hitters, actively search every practical component market: hits, total bases, home runs, RBI, runs, walks/HBP, stolen bases, H+R+RBI, and similar combo markets.
+2a. **Trust Savant zeros (mandatory).** If source `Proj` is `0` (or blank treated as 0), leave `Proj = 0`. Do not research props, industry projections, or ownership for those players. Keep the rows in the output file so import structure is preserved. Industry numeric + Vegas prop work applies only to the **positive-Proj pool**. Coverage grades and the 10+ industry target are measured against that positive pool, not the raw 1,000-row file.
+3. Run an **exhaustive sportsbook sweep and industry numeric-source sweep** on the positive-Proj pool before accepting fallback. **Preferred method: board-level / aggregator-first.** Hit multi-player prop boards and aggregators that surface many lines at once (PropCruncher, Covers matchup prop sections, Action Network boards, PropPrizm, FanDuel Research, etc.) before falling back to player-by-player searches. Only deep-dive individual players for material gaps after the board sweep.
+4. For pitchers in the positive-Proj pool, actively search every practical component market: strikeouts, outs recorded, earned runs allowed, hits allowed, walks allowed, win probability/moneyline, and any quality-start-relevant markets.
+5. For hitters in the positive-Proj pool, actively search every practical component market: hits, total bases, home runs, RBI, runs, walks/HBP, stolen bases, H+R+RBI, and similar combo markets.
 6. Use the odds/juice and multiple books where available. A posted line without price context is weaker evidence than a market with both sides/juice.
 7. Build the objective consensus composite projection (industry numeric + Vegas) per `core/MARKET_PROJECTIONS.md` and convert into the correct site scoring system.
 8. Reconcile player-level projections to game totals, implied team totals, lineup slot, park/weather/roof status, matchup and expected workload/plate appearances (data only; no narrative).
 9. Build the best current site-specific ownership estimate from multiple reputable DFS-industry ownership sources/signals (or leave Own unchanged on projection-only passes).
-10. Use the original Sim Savant `Proj` and/or `Own` only as a true fallback after the market/industry sweep is exhausted for that player.
+10. Use the original Sim Savant `Proj` and/or `Own` only as a true fallback after the market/industry sweep is exhausted for that **positive-Proj** player. Zero-Proj players stay at 0 by rule, not as researched fallback.
 11. Preserve the exact Savant import structure and DFS IDs.
 12. Run all import/mapping/duplicate/zero-value audit checks.
 13. Run the **AI quality-grade gate** described below. A market-input pass graded below **A** is incomplete and must continue researching/refining before delivery unless the user explicitly asks to stop.
@@ -39,9 +40,9 @@ When the user attaches a Sim Savant projection file and says **`Savant Prep`**:
 
 ### Non-negotiable market-coverage rule
 
-Do **not** stop after finding a small convenient subset of props. The fact that direct props were found for a few pitchers or star hitters is not evidence that the rest of the slate is market-thin.
+Do **not** stop after finding a small convenient subset of props. The fact that direct props were found for a few pitchers or star hitters is not evidence that the rest of the **positive-Proj** slate is market-thin.
 
-Before labeling a player as fallback, the process must make a real effort to exhaust the available market surface **and** independent numeric industry sources:
+Before labeling a **positive-Proj** player as fallback, the process must make a real effort to exhaust the available market surface **and** independent numeric industry sources:
 
 - multi-player prop boards and aggregators first (PropCruncher, Covers, Action Network, PropPrizm, etc.)
 - direct sportsbooks
@@ -62,11 +63,11 @@ Use these labels:
 - **VEGAS_DIRECT** — projection materially built from one or more direct player props with pricing/juice.
 - **VEGAS_SUPPORTED** — limited direct props plus game/team market and industry support.
 - **INDUSTRY_BLEND** — deep industry numeric consensus with thin or no direct props; game markets still used for reconciliation.
-- **SAVANT_FALLBACK** — insufficient market and independent industry coverage; original Savant projection retained conservatively.
+- **SAVANT_FALLBACK** — insufficient market and independent industry coverage; original Savant projection retained conservatively. Zero-Proj rows that were never researched stay `0` and are not counted in the active-pool fallback percentage.
 
 ### Mandatory coverage summary before delivery
 
-Every Savant Prep run must report the projection-source counts for the active positive-projection player pool:
+Every Savant Prep run must report the projection-source counts for the **active positive-projection player pool** (Savant `Proj` > 0):
 
 - number and percentage `VEGAS_DIRECT`
 - number and percentage `VEGAS_SUPPORTED`
@@ -116,6 +117,7 @@ A final pass must receive an **overall grade of A or A+**. Anything below A is a
 - inject narrative into projections
 - apply portfolio game theory
 - duplicate any task Sim Savant already handles in its interface
+- research Savant-zero players
 
 The user handles lineup generation, 1% finish-rate sorting, exposure spreading, stack settings, and contest setup inside Sim Savant.
 
@@ -162,8 +164,9 @@ Build a pure numeric composite per `core/MARKET_PROJECTIONS.md`. Industry numeri
    - Confirmed batting order / starter status, lineup slot, handedness, park, weather/roof, expected PA / workload.
 
 5. **Sim Savant projection fallback**
-   - Use only when public betting markets and independent numeric projection coverage are both insufficient after the exhaustive sweep.
+   - Use only when public betting markets and independent numeric projection coverage are both insufficient after the exhaustive sweep **of the positive-Proj pool**.
    - Never invent precision for poorly covered players.
+   - Savant zeros stay zero without research.
 
 ### Ownership inputs
 
@@ -200,7 +203,7 @@ Ownership should be a consensus estimate, not a single-source number. (Projectio
 2. Correct site scoring system used.
 3. No duplicate DFS IDs.
 4. `Proj` numeric and non-negative; `Own` numeric 0–100 when present.
-5. Coverage / provenance / industry source count reported.
+5. Coverage / provenance / industry source count reported for the **positive-Proj pool**.
 6. Grade gate: overall A or A+ unless user accepts lower.
 7. No narrative adjustments in Proj.
 
