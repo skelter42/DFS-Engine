@@ -28,7 +28,7 @@ When the user attaches a Sim Savant projection file and says **`Savant Prep`**:
 4. For pitchers in the positive-Proj pool, actively search every practical component market: strikeouts, outs recorded, earned runs allowed, hits allowed, walks allowed, win probability/moneyline, and any quality-start-relevant markets.
 5. For hitters in the positive-Proj pool, actively search every practical component market: hits, total bases, home runs, RBI, runs, walks/HBP, stolen bases, H+R+RBI, and similar combo markets.
 6. Use the odds/juice and multiple books where available. A posted line without price context is weaker evidence than a market with both sides/juice.
-7. Build the objective consensus composite projection (industry numeric + Vegas) per `core/MARKET_PROJECTIONS.md` and convert into the correct site scoring system.
+7. Always pull the industry numeric layer (target 10+) **and** the Vegas prop layer for the positive-Proj pool, then build the objective consensus composite per `core/MARKET_PROJECTIONS.md` and convert into the correct site scoring system. Industry is co-primary, not a fallback.
 8. Reconcile player-level projections to game totals, implied team totals, lineup slot, park/weather/roof status, matchup and expected workload/plate appearances (data only; no narrative).
 9. Build the best current site-specific ownership estimate from multiple reputable DFS-industry ownership sources/signals (or leave Own unchanged on projection-only passes).
 10. Use the original Sim Savant `Proj` and/or `Own` only as a true fallback after the market/industry sweep is exhausted for that **positive-Proj** player. Zero-Proj players stay at 0 by rule, not as researched fallback.
@@ -144,29 +144,34 @@ For each site/slate, output exactly:
 
 ### Projection inputs
 
-Build a pure numeric composite per `core/MARKET_PROJECTIONS.md`. Industry numeric sources and sportsbook props are **co-primary**; neither is ignored when available. Practical order of collection:
+Build a pure numeric composite per `core/MARKET_PROJECTIONS.md`. Industry numeric sources and sportsbook props are **co-primary**. Always collect both for every positive-Proj player. Industry is **not** a fallback used only when Vegas is missing.
 
-1. **Sportsbook player props and prices** (Vegas layer) — **prefer board-level / aggregator-first**
+Always collect, then blend:
+
+1. **Independent numeric DFS projection systems** (Industry layer — target 10+)
+   - THE BAT / THE BAT X, RotoGrinders, Daily Fantasy Fuel, FantasyPros, LineStar, Stokastic/Awesemo, RotoWire, NumberFire, Sabersim, and others with actual projected points or component stats.
+   - Rankings and narrative write-ups do not count.
+   - Pull this layer for every positive-Proj player, not only when props are thin.
+
+2. **Sportsbook player props and prices** (Vegas layer) — **prefer board-level / aggregator-first**
    - Hit multi-player boards (PropCruncher, Covers, Action Network, PropPrizm, etc.) for mass data before player-by-player lookups.
    - Pitchers: strikeouts, outs recorded, earned runs allowed, hits allowed, walks allowed, win probability, and any quality-start-relevant markets.
    - Hitters: hits, total bases, home runs, RBI, runs, walks/HBP where available, stolen bases, and H+R+RBI / similar combo markets.
    - Use the odds/juice on both sides when available, not only the posted line.
    - Prefer consensus across multiple books rather than one sportsbook.
 
-2. **Game-level Vegas markets**
-   - Moneyline, run line, game total, implied team totals — reconciliation constraints.
-
-3. **Independent numeric DFS projection systems** (Industry layer — target 10+)
-   - THE BAT / THE BAT X, RotoGrinders, Daily Fantasy Fuel, FantasyPros, LineStar, Stokastic/Awesemo, RotoWire, NumberFire, Sabersim, and others with actual projected points or component stats.
-   - Rankings and narrative write-ups do not count.
+3. **Game-level Vegas markets**
+   - Moneyline, run line, game total, implied team totals — reconciliation constraints on both layers.
 
 4. **Context needed to allocate team expectation** (facts only)
    - Confirmed batting order / starter status, lineup slot, handedness, park, weather/roof, expected PA / workload.
 
 5. **Sim Savant projection fallback**
-   - Use only when public betting markets and independent numeric projection coverage are both insufficient after the exhaustive sweep **of the positive-Proj pool**.
+   - Use only when public betting markets **and** independent numeric projection coverage are both insufficient after the exhaustive sweep **of the positive-Proj pool**.
    - Never invent precision for poorly covered players.
    - Savant zeros stay zero without research.
+
+Form `Proj` from industry consensus + Vegas expectation. Weight by coverage quality. Do not skip the industry pull because props were found, and do not skip the Vegas pull because industry numbers were found.
 
 ### Ownership inputs
 
