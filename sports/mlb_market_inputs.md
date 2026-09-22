@@ -23,7 +23,7 @@ When the user attaches a Sim Savant projection file and says **`Savant Prep`**:
 
 1. Read the attached Sim Savant projection CSV.
 2. Identify the site (DraftKings or FanDuel), slate, player pool, player names, and DFS IDs.
-3. Run an **exhaustive sportsbook sweep and industry numeric-source sweep** before accepting fallback.
+3. Run an **exhaustive sportsbook sweep and industry numeric-source sweep** before accepting fallback. **Preferred method: board-level / aggregator-first.** Hit multi-player prop boards and aggregators that surface many lines at once (PropCruncher, Covers matchup prop sections, Action Network boards, PropPrizm, FanDuel Research, etc.) before falling back to player-by-player searches. Only deep-dive individual players for material gaps after the board sweep.
 4. For pitchers, actively search every practical component market: strikeouts, outs recorded, earned runs allowed, hits allowed, walks allowed, win probability/moneyline, and any quality-start-relevant markets.
 5. For hitters, actively search every practical component market: hits, total bases, home runs, RBI, runs, walks/HBP, stolen bases, H+R+RBI, and similar combo markets.
 6. Use the odds/juice and multiple books where available. A posted line without price context is weaker evidence than a market with both sides/juice.
@@ -43,8 +43,8 @@ Do **not** stop after finding a small convenient subset of props. The fact that 
 
 Before labeling a player as fallback, the process must make a real effort to exhaust the available market surface **and** independent numeric industry sources:
 
+- multi-player prop boards and aggregators first (PropCruncher, Covers, Action Network, PropPrizm, etc.)
 - direct sportsbooks
-- multi-book prop aggregators
 - pitcher component markets
 - hitter component markets
 - combo markets
@@ -144,7 +144,8 @@ For each site/slate, output exactly:
 
 Build a pure numeric composite per `core/MARKET_PROJECTIONS.md`. Industry numeric sources and sportsbook props are **co-primary**; neither is ignored when available. Practical order of collection:
 
-1. **Sportsbook player props and prices** (Vegas layer)
+1. **Sportsbook player props and prices** (Vegas layer) — **prefer board-level / aggregator-first**
+   - Hit multi-player boards (PropCruncher, Covers, Action Network, PropPrizm, etc.) for mass data before player-by-player lookups.
    - Pitchers: strikeouts, outs recorded, earned runs allowed, hits allowed, walks allowed, win probability, and any quality-start-relevant markets.
    - Hitters: hits, total bases, home runs, RBI, runs, walks/HBP where available, stolen bases, and H+R+RBI / similar combo markets.
    - Use the odds/juice on both sides when available, not only the posted line.
