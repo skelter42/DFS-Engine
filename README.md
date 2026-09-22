@@ -102,9 +102,16 @@ A prop is a probability statement about a distribution, not a point estimate.
 - **De-vig**: multiplicative, additive, power, or Shin.
 - **Consensus**: median across books per line, with cross-book dispersion kept as
   a confidence input. One outlier book cannot move the number.
-- **Inversion**: counts fit Poisson/negative-binomial, yardage fits lognormal.
-  With three or more ladder lines the *shape* is identifiable, so mean and
-  dispersion are fitted jointly by weighted least squares in probability space.
+- **Inversion**: yardage fits a Gamma (`shape = 1/CV²`), counts fit
+  Poisson/negative-binomial by root-solving the half-integer line. Integer lines
+  can push, so they are rejected rather than reinterpreted. With three or more
+  ladder lines the *shape* is identifiable, so mean and dispersion are fitted
+  jointly by weighted least squares in probability space.
+- **Consensus rule**: fit an expected value per independent book, then take the
+  median of those fitted means — robust to one book hanging a different line.
+- **One-sided prices**: a lone posted side cannot be de-vigged, so the haircut
+  is an explicit parameter (0.92 for NFL anytime-TD markets), not a silent
+  constant.
 
 ### 3. Projections — `projections/`
 
@@ -118,11 +125,31 @@ draws from. Ceiling and floor are measured, not assumed.
 Overlapping markets are reconciled rather than added: hits, total bases and home
 runs describe one hit-type distribution and are solved together.
 
+**Team reconciliation (football).** Nothing makes a team's receiving-yard props
+sum to its quarterback's passing-yard prop — books post what gets bet, not a
+coherent box score. So after the player pass, each team's active receiving pool
+is scaled once: `yard_factor = QB passing yards / Σ raw receiving yards`, and the
+same for the receiving share of touchdowns. Receivers with no posted market get
+an explicitly-labelled salary-weighted share of the unexplained production first,
+otherwise the covered players absorb it. Factors are always computed from **raw**
+means so reruns cannot compound, and a factor outside a guardrail band is
+clamped and flagged rather than applied.
+
+**Kickers and defenses** have no useful props; they are derived from the game
+line after reconciliation. A kicker's field goals are the residual of his team's
+implied points that touchdowns do not explain; a defense's sacks, turnovers and
+points allowed come from the opponent's implied total and the spread.
+
 Each player gets a coverage grade (A Vegas-rich → D fallback-heavy) from market
 breadth, book depth, two-sided pricing and cross-book agreement. The engine
 projection is the market projection shrunk toward the vendor prior by exactly as
 much as the coverage deserves — no fixed blend. With no usable market, the prior
 carries and the player is labelled fallback-driven.
+
+The NFL specifics — which prop families to collect, the Gamma CVs, the
+anytime-TD haircut, the receiving-TD shares, the kicker residual model and the
+defense event rates — are documented in `sports/nfl.md` and implemented in
+`projections/components.py`, `reconcile.py` and `team_units.py`.
 
 ### 4. Ownership — `projections/ownership.py`
 
@@ -160,9 +187,18 @@ perturbations of the same median lineup. Hard constraints are limited to roster
 legality, contest rules, confirmed inactives and the source-zero eligibility
 gate.
 
-Selection is greedy on *marginal* portfolio value — new tail worlds covered,
-payout added where the portfolio is weak, minus correlation with what is already
-in. Every pick is traced. The report includes the diagnostic that matters most:
+Two selection strategies, both traced:
+
+- `marginal_value` (default) is greedy on what a lineup *adds* — new tail worlds
+  covered, payout where the portfolio is weak, minus correlation with what is
+  already in.
+- `uniqueness_ladder` is the documented pregame flow: keep the high-projection
+  pool, maximise average pairwise uniqueness, retain ≥90% of that peak, then
+  recover projection.
+
+On the demo slate the ladder lands ~1.5% higher average projection and the
+marginal-value pass ~7% higher tail coverage, which is the trade you would
+expect. The report includes the diagnostic that matters most either way:
 **effective independent lineups**, which collapses toward 1 when twenty
 different-looking rosters are all betting on the same world.
 
@@ -201,6 +237,7 @@ src/dfs_engine/
   odds/             American odds, de-vig, consensus, distribution inversion
   markets/          sportsbook sources, catalog, aggregation, coverage reporting
   projections/      component inference, site scoring, engine projections, ownership
+                    reconcile.py (receiving -> QB), team_units.py (K and DST)
   simulation/       shared runtime, sport adapters, field model, portfolio metrics
   optimize/         site roster rules, MILP solver, candidate generation
   portfolio/        selection, multi-contest allocation, exposure diagnostics
@@ -229,6 +266,11 @@ Every lineup build should include:
   that DraftKings reshapes periodically.
 - **The field model is a model.** Duplication and first-place rates are proxies
   scaled from a sampled field, and they are labelled as proxies throughout.
+- **The NFL model constants are assumptions, not measurements.** The yardage
+  CVs, the anytime-TD haircut, the receiving-TD shares, the field-goal distance
+  mix and the defensive event rates all come from the documented process and
+  describe a model, not a sportsbook rule. Calibrate them against realized
+  outcomes before treating them as optimal.
 - **Correlation loadings are hand-specified priors**, tuned to plausible ranges
   rather than fitted to historical scoring data. `core/SIMULATION.md` asks for
   calibration against realised outcomes over repeated slates; that backtest is
@@ -241,13 +283,19 @@ Every lineup build should include:
 
 ```bash
 pip install -e ".[dev]"
-pytest -q                    # 86 tests, ~50s
+pytest -q                    # 107 tests, ~2.5 min
 ```
 
 Tests cover odds math against known identities, distribution fits against
 synthetic truth, projection recovery (fantasy-point error under 10% MAE with no
 systematic bias), simulation determinism and correlation targets, roster
-legality across sports, portfolio selection beating naive top-N, and the full
-build being byte-reproducible for a given seed.
+legality across sports and showdown, portfolio selection beating naive top-N,
+and the full build being byte-reproducible for a given seed.
+
+`tests/test_nfl_process.py` is an exact regression against the worked example in
+the NFL pregame methodology — receiving yards `58.500543`, receptions
+`4.670909`, TD count `0.366244`, DK points `13.100113` — plus the reconciliation
+identities (team receiving yards equal QB passing yards; allocated receiving TDs
+equal QB passing TDs) and the kicker/defense formulas.
 
 This repository is the canonical DFS Engine brain. New chats should read the relevant files before making slate-specific decisions, and durable improvements should be written back here. The process manager should decide whether new ideas belong in core logic, a sport module, the learning registry, or nowhere, and should actively prevent duplicate or overfit logic from accumulating.

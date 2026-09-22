@@ -89,14 +89,16 @@ def _dk_nba_double_bonus(comps: Components, n: int) -> np.ndarray:
 
 def _dk_dst_points_allowed(comps: Components, n: int) -> np.ndarray:
     """DraftKings defense points-allowed tiers."""
+    # Half-point boundaries: points allowed is sampled continuously, so the
+    # discrete band edges (0, 6, 13, ...) are evaluated at their midpoints.
     pa = np.asarray(comps.get("points_allowed", np.full(n, 21.0)), dtype=float)
     out = np.full(n, -4.0)
-    out = np.where(pa <= 34, -1.0, out)
-    out = np.where(pa <= 27, 0.0, out)
-    out = np.where(pa <= 20, 1.0, out)
-    out = np.where(pa <= 13, 4.0, out)
-    out = np.where(pa <= 6, 7.0, out)
-    out = np.where(pa <= 0, 10.0, out)
+    out = np.where(pa < 34.5, -1.0, out)
+    out = np.where(pa < 27.5, 0.0, out)
+    out = np.where(pa < 20.5, 1.0, out)
+    out = np.where(pa < 13.5, 4.0, out)
+    out = np.where(pa < 6.5, 7.0, out)
+    out = np.where(pa < 0.5, 10.0, out)
     return out
 
 
@@ -141,6 +143,12 @@ DK_NFL_DST = ScoringRule(
     },
     specials=(_dk_dst_points_allowed,),
     notes="DraftKings NFL defense: event scoring plus points-allowed tiers.",
+)
+
+DK_NFL_KICKER = ScoringRule(
+    site="dk", sport="nfl", slot="k",
+    linear={"extra_points": 1.0, "fg_0_39": 3.0, "fg_40_49": 4.0, "fg_50_plus": 5.0},
+    notes="DraftKings NFL kicker: field goals pay by distance, extra points 1.",
 )
 
 DK_NBA = ScoringRule(
@@ -235,6 +243,7 @@ DK_TENNIS_BO3 = ScoringRule(
 RULES: dict[tuple[str, str, str], ScoringRule] = {
     ("dk", "nfl", "all"): DK_NFL,
     ("dk", "nfl", "dst"): DK_NFL_DST,
+    ("dk", "nfl", "k"): DK_NFL_KICKER,
     ("dk", "ncaaf", "all"): DK_NFL,
     ("fd", "nfl", "all"): FD_NFL,
     ("dk", "nba", "all"): DK_NBA,

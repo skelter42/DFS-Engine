@@ -35,21 +35,58 @@ def test_market_components_recover_the_latent_truth(mlb_slate):
 
 
 def test_nfl_projection_recovers_fantasy_points(nfl_slate, nfl_projections):
+    """Market-covered players must come back close to the truth the props encode.
+
+    The synthetic slate posts yardage quotes from a lognormal while the engine
+    fits a Gamma, so this measures robustness to a misspecified family, not the
+    engine inverting its own assumption.
+    """
     from dfs_engine.projections.scoring import get_rule
 
     errors = []
     for pid, proj in nfl_projections.items():
         truth = nfl_slate.truth.get(pid)
-        if not truth or proj.coverage == "D":
+        if not truth or proj.coverage not in {"A", "B"} or proj.modeled_from_team:
             continue
         rule = get_rule("dk", "nfl", proj.player.roster_role)
         expected = rule.score_expectation(truth)
         if expected > 5:
             errors.append((proj.engine_projection - expected) / expected)
     errors = np.array(errors)
-    assert len(errors) > 50
-    assert abs(float(errors.mean())) < 0.05          # no systematic bias
-    assert float(np.abs(errors).mean()) < 0.10
+    assert len(errors) > 40
+    assert abs(float(errors.mean())) < 0.04          # no systematic bias
+    assert float(np.abs(errors).mean()) < 0.06
+
+
+def test_players_modeled_from_team_markets_are_labelled_and_looser(
+        nfl_slate, nfl_projections):
+    """A player with no props of his own is modeled, and says so.
+
+    His production is derived from a teammate's market (the QB's passing total,
+    the team rushing prior), which is a real basis but a much weaker one. He is
+    graded tier C rather than D, and in a real build the vendor prior carries
+    most of his weight.
+    """
+    from dfs_engine.projections.scoring import get_rule
+
+    modeled = [p for p in nfl_projections.values() if p.modeled_from_team]
+    assert modeled, "the synthetic slate should leave some players uncovered"
+    for proj in modeled:
+        assert proj.coverage in {"A", "B", "C"}
+        assert any("modeled" in note or "no posted" in note for note in proj.notes)
+
+    errors = []
+    for proj in modeled:
+        truth = nfl_slate.truth.get(proj.player.player_id)
+        if not truth:
+            continue
+        expected = get_rule("dk", "nfl", proj.player.roster_role).score_expectation(truth)
+        if expected > 5:
+            errors.append(abs(proj.engine_projection - expected) / expected)
+    if errors:
+        # Much looser than the market-covered population, and that gap is the
+        # point of the coverage grade.
+        assert float(np.mean(errors)) < 0.45
 
 
 def test_samples_carry_skew_not_symmetric_noise(nfl_projections):

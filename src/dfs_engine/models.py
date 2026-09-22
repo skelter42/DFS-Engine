@@ -252,6 +252,12 @@ class PlayerProjection:
     engine_ownership: float | None = None
     source_ownership: float | None = None
     ownership_confidence: str = "D"
+    #: True when components were derived from a team-level market (a
+    #: quarterback's passing total, a game line) rather than the player's own
+    #: props. Such a projection is modeled, not fallback -- tier C, not D.
+    modeled_from_team: bool = False
+    #: raw market means preserved from before team reconciliation
+    extra_raw: dict[str, float] = field(default_factory=dict)
 
     @property
     def coverage_label(self) -> str:

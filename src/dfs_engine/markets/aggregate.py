@@ -9,11 +9,16 @@ that the projection layer uses to grade confidence.
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Iterable, Sequence
 
 from ..models import MarketSnapshot, PropMarket
-from ..odds.conversions import BookQuote, ConsensusPoint, consensus_over_prob
+from ..odds.conversions import (
+    DEFAULT_ONE_SIDED_MULTIPLIER,
+    BookQuote,
+    ConsensusPoint,
+    consensus_over_prob,
+)
 from .base import MarketSource
 
 log = logging.getLogger("dfs_engine.markets.aggregate")
@@ -90,12 +95,19 @@ def sweep(sport: str, sources: Sequence[MarketSource], **kwargs) -> MarketSnapsh
 
 @dataclass
 class MarketConsensus:
-    """All de-vigged consensus points for one player/stat, across lines."""
+    """De-vigged market state for one player/stat.
+
+    ``points`` collapses every book at each line (probability-space consensus).
+    ``by_book`` keeps each book's own ladder intact so the projection layer can
+    instead fit a mean per book and take the median of those means -- the
+    documented consensus rule in ``sports/nfl.md``.
+    """
 
     stat: str
     points: list[ConsensusPoint]
     books: set[str]
     sources: set[str]
+    by_book: dict[str, list[ConsensusPoint]] = field(default_factory=dict)
 
     @property
     def n_books(self) -> int:
@@ -117,11 +129,14 @@ class MarketConsensus:
 
 
 def consensus_for_market(market: PropMarket, method: str = "multiplicative",
-                         trim: float = 0.0, min_books: int = 1) -> MarketConsensus | None:
+                         trim: float = 0.0, min_books: int = 1,
+                         one_sided_multiplier: float = DEFAULT_ONE_SIDED_MULTIPLIER
+                         ) -> MarketConsensus | None:
     """Collapse one player/stat into robust per-line fair probabilities."""
     points: list[ConsensusPoint] = []
     for line, quotes in sorted(market.lines().items()):
-        point = consensus_over_prob(quotes, method=method, trim=trim)
+        point = consensus_over_prob(quotes, method=method, trim=trim,
+                                    one_sided_multiplier=one_sided_multiplier)
         if point is None or point.n_books < min_books:
             continue
         if not 0.001 < point.prob_over < 0.999:
@@ -129,17 +144,29 @@ def consensus_for_market(market: PropMarket, method: str = "multiplicative",
         points.append(point)
     if not points:
         return None
-    return MarketConsensus(stat=market.stat, points=points,
-                           books=market.books, sources=set(market.sources))
+
+    by_book: dict[str, list[ConsensusPoint]] = {}
+    for quote in market.quotes:
+        fair = quote.fair_over(method, one_sided_multiplier)
+        if fair is None or not 0.001 < fair < 0.999:
+            continue
+        by_book.setdefault(quote.book.lower(), []).append(ConsensusPoint(
+            line=quote.line, prob_over=fair, n_books=1, books=[quote.book],
+            two_sided_books=int(quote.two_sided)))
+
+    return MarketConsensus(stat=market.stat, points=points, books=market.books,
+                           sources=set(market.sources), by_book=by_book)
 
 
 def consensus_by_player(snapshot: MarketSnapshot, method: str = "multiplicative",
-                        trim: float = 0.0, min_books: int = 1
+                        trim: float = 0.0, min_books: int = 1,
+                        one_sided_multiplier: float = DEFAULT_ONE_SIDED_MULTIPLIER
                         ) -> dict[str, dict[str, MarketConsensus]]:
     """``{player_key: {stat: MarketConsensus}}`` for the whole slate."""
     out: dict[str, dict[str, MarketConsensus]] = {}
     for (pkey, stat), market in snapshot.props.items():
-        cons = consensus_for_market(market, method=method, trim=trim, min_books=min_books)
+        cons = consensus_for_market(market, method=method, trim=trim, min_books=min_books,
+                                    one_sided_multiplier=one_sided_multiplier)
         if cons is not None:
             out.setdefault(pkey, {})[stat] = cons
     return out

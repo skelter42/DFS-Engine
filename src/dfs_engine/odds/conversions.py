@@ -101,15 +101,21 @@ _DEVIG = {
 }
 
 
-def devig(raw_probs: Sequence[float], method: DevigMethod = "multiplicative") -> list[float]:
+#: Default haircut applied to a lone posted side (a typical single-side hold).
+#: A one-sided price cannot be de-vigged -- there is nothing to balance it
+#: against -- so this is an explicit modeling assumption, not a measurement.
+DEFAULT_ONE_SIDED_MULTIPLIER = 1.0 / 1.045
+
+
+def devig(raw_probs: Sequence[float], method: DevigMethod = "multiplicative",
+          one_sided_multiplier: float = DEFAULT_ONE_SIDED_MULTIPLIER) -> list[float]:
     """Strip the bookmaker margin from a complete set of mutually exclusive outcomes."""
     if not raw_probs:
         return []
     if any(p <= 0 for p in raw_probs):
         raise ValueError("Raw implied probabilities must be positive")
     if len(raw_probs) == 1:
-        # One-sided market: nothing to balance against, shave a typical single-side hold.
-        return [min(0.999, raw_probs[0] / 1.045)]
+        return [min(0.999, raw_probs[0] * one_sided_multiplier)]
     fn = _DEVIG.get(method)
     if fn is None:
         raise ValueError(f"Unknown de-vig method: {method}")
@@ -120,14 +126,17 @@ def devig_two_way(
     over_american: float | None,
     under_american: float | None,
     method: DevigMethod = "multiplicative",
+    one_sided_multiplier: float = DEFAULT_ONE_SIDED_MULTIPLIER,
 ) -> float | None:
     """Fair probability of the *over* from a two-sided price (or a lone side)."""
     if over_american is None and under_american is None:
         return None
     if under_american is None:
-        return devig([american_to_prob(float(over_american))], method)[0]
+        return devig([american_to_prob(float(over_american))], method,
+                     one_sided_multiplier)[0]
     if over_american is None:
-        under_fair = devig([american_to_prob(float(under_american))], method)[0]
+        under_fair = devig([american_to_prob(float(under_american))], method,
+                           one_sided_multiplier)[0]
         return 1.0 - under_fair
     raw = [american_to_prob(float(over_american)), american_to_prob(float(under_american))]
     return devig(raw, method)[0]
@@ -148,8 +157,10 @@ class BookQuote:
     under: float | None = None
     timestamp: str | None = None
 
-    def fair_over(self, method: DevigMethod = "multiplicative") -> float | None:
-        return devig_two_way(self.over, self.under, method)
+    def fair_over(self, method: DevigMethod = "multiplicative",
+                  one_sided_multiplier: float = DEFAULT_ONE_SIDED_MULTIPLIER
+                  ) -> float | None:
+        return devig_two_way(self.over, self.under, method, one_sided_multiplier)
 
     @property
     def two_sided(self) -> bool:
@@ -178,6 +189,7 @@ def consensus_over_prob(
     quotes: Iterable[BookQuote],
     method: DevigMethod = "multiplicative",
     trim: float = 0.0,
+    one_sided_multiplier: float = DEFAULT_ONE_SIDED_MULTIPLIER,
 ) -> ConsensusPoint | None:
     """Median/trimmed-mean consensus of de-vigged over probabilities at one line.
 
@@ -195,7 +207,7 @@ def consensus_over_prob(
     books: list[str] = []
     two_sided = 0
     for q in quotes:
-        p = q.fair_over(method)
+        p = q.fair_over(method, one_sided_multiplier)
         if p is None or not 0.0 < p < 1.0:
             continue
         fair.append(p)

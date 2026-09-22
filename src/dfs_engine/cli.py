@@ -76,6 +76,9 @@ def build_parser() -> argparse.ArgumentParser:
     build.add_argument("--min-uniques", type=int, default=2)
     build.add_argument("--profile", default="large_field_gpp")
     build.add_argument("--variant", default="classic", choices=["classic", "showdown"])
+    build.add_argument("--selection", default="marginal_value",
+                       choices=["marginal_value", "uniqueness_ladder"],
+                       help="portfolio selection strategy")
     build.add_argument("--seed", type=int, default=20260101)
 
     scoring = sub.add_parser("scoring", help="print site scoring rules")
@@ -252,7 +255,7 @@ def cmd_build(args) -> int:
         site=args.site, variant=args.variant, n_lineups=args.lineups,
         n_candidates=args.candidates, n_worlds=args.worlds, field_entries=args.field,
         seed=args.seed, min_uniques=args.min_uniques, contest_profile=args.profile,
-        config=EngineConfig.load())
+        selection_strategy=args.selection, config=EngineConfig.load())
     result = run_build(request, progress=_progress)
     _report(result, args.out)
     return 0 if result.portfolio.diagnostics["final_audit"]["passed"] else 1

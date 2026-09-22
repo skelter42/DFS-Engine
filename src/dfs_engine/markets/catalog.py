@@ -39,8 +39,10 @@ CANONICAL_STATS: dict[str, tuple[str, ...]] = {
 # Sports share canonical stat names (NBA and NHL both post "blocks" and
 # "assists"), so genuinely different shapes live in COUNT_DISPERSION_BY_SPORT.
 COUNT_DISPERSION: dict[str, float | None] = {
-    "receptions": 12.0, "rush_attempts": 20.0, "pass_attempts": 40.0,
-    "pass_completions": 30.0, "pass_td": 6.0, "rush_td": None, "rec_td": None,
+    # NFL counts follow the pregame process: Poisson, fitted by root-solving the
+    # half-integer line, not a negative binomial with an assumed dispersion.
+    "receptions": None, "rush_attempts": 20.0, "pass_attempts": 40.0,
+    "pass_completions": 30.0, "pass_td": None, "rush_td": None, "rec_td": None,
     "interception": None, "fumble_lost": None,
     "points": 25.0, "rebounds": 14.0, "assists": 10.0, "threes": 6.0,
     "steals": None, "blocks": None, "turnovers": 8.0,
@@ -72,11 +74,22 @@ def dispersion_for(stat: str, sport: str | None = None) -> float | None:
     return COUNT_DISPERSION.get(stat)
 
 
-# Continuous stats modelled lognormally, with a coefficient of variation prior.
+# Continuous yardage stats, modelled as Gamma with an explicit coefficient of
+# variation. These CVs are the documented NFL pregame-process defaults
+# (sports/nfl.md): they are modeling assumptions, not fitted parameters.
 CONTINUOUS_CV: dict[str, float] = {
-    "pass_yards": 0.32,
-    "rush_yards": 0.62,
-    "rec_yards": 0.68,
+    "pass_yards": 0.30,
+    "rush_yards": 0.55,
+    "rec_yards": 0.65,
+}
+
+#: Per-sport assumption for a lone posted price. The NFL pregame process uses a
+#: flat 8% probability reduction on an unpaired anytime-TD style quote.
+ONE_SIDED_MULTIPLIER: dict[str, float] = {"nfl": 0.92, "ncaaf": 0.92}
+
+#: Yardage bonus thresholds (DraftKings pays 3 points for reaching each).
+BONUS_THRESHOLDS: dict[str, float] = {
+    "pass_yards": 300.0, "rush_yards": 100.0, "rec_yards": 100.0,
 }
 
 # Binary markets: the de-vigged "yes" price is the expectation directly.

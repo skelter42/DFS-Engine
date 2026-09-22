@@ -58,6 +58,105 @@ def norm_ppf(p: float) -> float:
 
 
 # --------------------------------------------------------------------------
+# Incomplete gamma (no SciPy dependency)
+# --------------------------------------------------------------------------
+
+
+def _gammainc_series(a: float, x: float, iters: int = 400, tol: float = 1e-14) -> float:
+    """Regularized lower incomplete gamma P(a, x) by series. Converges for x < a+1."""
+    if x <= 0:
+        return 0.0
+    ap = a
+    total = delta = 1.0 / a
+    for _ in range(iters):
+        ap += 1.0
+        delta *= x / ap
+        total += delta
+        if abs(delta) < abs(total) * tol:
+            break
+    return total * math.exp(-x + a * math.log(x) - math.lgamma(a))
+
+
+def _gammainc_cf(a: float, x: float, iters: int = 400, tol: float = 1e-14) -> float:
+    """Regularized upper incomplete gamma Q(a, x) by continued fraction (x > a+1)."""
+    tiny = 1e-300
+    b = x + 1.0 - a
+    c = 1.0 / tiny
+    d = 1.0 / b
+    h = d
+    for i in range(1, iters + 1):
+        an = -i * (i - a)
+        b += 2.0
+        d = an * d + b
+        if abs(d) < tiny:
+            d = tiny
+        c = b + an / c
+        if abs(c) < tiny:
+            c = tiny
+        d = 1.0 / d
+        delta = d * c
+        h *= delta
+        if abs(delta - 1.0) < tol:
+            break
+    return h * math.exp(-x + a * math.log(x) - math.lgamma(a))
+
+
+def gammainc_p(a: float, x: float) -> float:
+    """Regularized lower incomplete gamma P(a, x) = Gamma(a, scale=1).cdf(x)."""
+    if x <= 0:
+        return 0.0
+    if a <= 0:
+        raise ValueError("shape must be positive")
+    if x < a + 1.0:
+        return min(1.0, _gammainc_series(a, x))
+    return max(0.0, 1.0 - _gammainc_cf(a, x))
+
+
+def gamma_sf(x: float, shape: float, scale: float = 1.0) -> float:
+    """P(X > x) for a Gamma(shape, scale) variable."""
+    if x <= 0:
+        return 1.0
+    return max(0.0, 1.0 - gammainc_p(shape, x / scale))
+
+
+def gamma_ppf(q: float, shape: float, scale: float = 1.0) -> float:
+    """Gamma quantile by bracketed bisection on the regularized CDF."""
+    if not 0.0 < q < 1.0:
+        raise ValueError("gamma_ppf requires 0 < q < 1")
+    lo, hi = 0.0, max(shape, 1.0)
+    while gammainc_p(shape, hi) < q and hi < 1e6:
+        hi *= 2.0
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        if gammainc_p(shape, mid) < q:
+            lo = mid
+        else:
+            hi = mid
+        if hi - lo < 1e-12 * max(hi, 1.0):
+            break
+    return 0.5 * (lo + hi) * scale
+
+
+#: Quantile grid: dense in both tails so bonus thresholds stay accurate.
+_GAMMA_U_GRID = np.concatenate([
+    np.logspace(-5, -2, 120),
+    np.linspace(0.0105, 0.9895, 760),
+    1.0 - np.logspace(-2, -5, 120),
+])
+_GAMMA_QUANTILE_CACHE: dict[float, np.ndarray] = {}
+
+
+def _standard_gamma_quantiles(shape: float) -> np.ndarray:
+    """Cached Gamma(shape, 1) quantiles; scale is a pure multiplier."""
+    key = round(float(shape), 6)
+    cached = _GAMMA_QUANTILE_CACHE.get(key)
+    if cached is None:
+        cached = np.array([gamma_ppf(float(u), key) for u in _GAMMA_U_GRID])
+        _GAMMA_QUANTILE_CACHE[key] = cached
+    return cached
+
+
+# --------------------------------------------------------------------------
 # Observations
 # --------------------------------------------------------------------------
 
@@ -176,6 +275,70 @@ class LognormalDistribution(StatDistribution):
 
 
 @dataclass
+class GammaDistribution(StatDistribution):
+    """Right-skewed non-negative continuous stat, parameterised by mean and CV.
+
+    This is the yardage model in the NFL pregame process: ``shape = 1/CV**2``
+    and ``scale = mean * CV**2``. Its mean sits above its median, which is why a
+    balanced-price yardage line implies an expectation above the line.
+    """
+
+    shape: float
+    scale: float
+    name: str = "gamma"
+
+    @classmethod
+    def from_mean_cv(cls, mean: float, cv: float) -> "GammaDistribution":
+        shape = 1.0 / (cv * cv)
+        return cls(shape=shape, scale=max(mean, 1e-9) * cv * cv)
+
+    @classmethod
+    def from_line(cls, line: float, prob_over: float, cv: float) -> "GammaDistribution":
+        """Fit so that ``P(X > line) == prob_over`` at the supplied CV."""
+        shape = 1.0 / (cv * cv)
+        scale = line / gamma_ppf(1.0 - prob_over, shape)
+        return cls(shape=shape, scale=scale)
+
+    @property
+    def mean(self) -> float:
+        return float(self.shape * self.scale)
+
+    @property
+    def cv(self) -> float:
+        return float(1.0 / math.sqrt(self.shape))
+
+    def sf(self, line: float) -> float:
+        return gamma_sf(line, self.shape, self.scale)
+
+    def ppf(self, u: np.ndarray) -> np.ndarray:
+        grid = _standard_gamma_quantiles(self.shape)
+        return np.interp(np.clip(u, 1e-9, 1 - 1e-9), _GAMMA_U_GRID, grid) * self.scale
+
+
+@dataclass
+class NormalDistribution(StatDistribution):
+    """Symmetric continuous stat (team points allowed in the DST model)."""
+
+    mu: float
+    sigma: float
+    name: str = "normal"
+    floor: float | None = None
+
+    @property
+    def mean(self) -> float:
+        return float(self.mu)
+
+    def sf(self, line: float) -> float:
+        return float(1.0 - norm_cdf((line - self.mu) / self.sigma))
+
+    def ppf(self, u: np.ndarray) -> np.ndarray:
+        out = self.mu + self.sigma * _norm_ppf_vec(np.clip(u, 1e-9, 1 - 1e-9))
+        if self.floor is not None:
+            out = np.maximum(out, self.floor)
+        return out
+
+
+@dataclass
 class BernoulliDistribution(StatDistribution):
     """Binary market (anytime TD, pitcher win, shutout)."""
 
@@ -247,11 +410,23 @@ def _norm_ppf_vec(u: np.ndarray) -> np.ndarray:
 # --------------------------------------------------------------------------
 
 
+_LOG_FACTORIAL_CACHE: np.ndarray = np.array([0.0])
+
+
+def _log_factorial(max_k: int) -> np.ndarray:
+    """Cached log(k!) table; rebuilding it per pmf dominated the fitting loop."""
+    global _LOG_FACTORIAL_CACHE
+    if len(_LOG_FACTORIAL_CACHE) <= max_k:
+        size = max(max_k + 1, 2 * len(_LOG_FACTORIAL_CACHE))
+        _LOG_FACTORIAL_CACHE = np.concatenate(
+            [[0.0], np.cumsum(np.log(np.arange(1, size)))])
+    return _LOG_FACTORIAL_CACHE[:max_k + 1]
+
+
 def poisson_pmf(mean: float, max_k: int) -> np.ndarray:
     mean = max(mean, 1e-6)
     ks = np.arange(max_k + 1)
-    log_pmf = -mean + ks * math.log(mean) - np.array([math.lgamma(k + 1) for k in ks])
-    return np.exp(log_pmf)
+    return np.exp(-mean + ks * math.log(mean) - _log_factorial(max_k))
 
 
 def negbin_pmf(mean: float, dispersion: float, max_k: int) -> np.ndarray:
@@ -260,12 +435,9 @@ def negbin_pmf(mean: float, dispersion: float, max_k: int) -> np.ndarray:
     r = max(dispersion, 1e-3)
     p = r / (r + mean)
     ks = np.arange(max_k + 1)
-    log_pmf = (
-        np.array([math.lgamma(k + r) - math.lgamma(r) - math.lgamma(k + 1) for k in ks])
-        + r * math.log(p)
-        + ks * math.log1p(-p)
-    )
-    return np.exp(log_pmf)
+    log_binom = (np.array([math.lgamma(k + r) for k in ks]) - math.lgamma(r)
+                 - _log_factorial(max_k))
+    return np.exp(log_binom + r * math.log(p) + ks * math.log1p(-p))
 
 
 def make_count(mean: float, dispersion: float | None = None, max_k: int | None = None,
@@ -322,6 +494,12 @@ def fit_count(points: Sequence[ProbPoint], dispersion: float | None = None,
     if len(pts) == 1:
         target = pts[0].prob_over
         line = pts[0].line
+        k = math.floor(line) + 1
+        if dispersion is None and k >= 1:
+            # Exact: for X ~ Poisson(mean), P(X >= k) is the regularized lower
+            # incomplete gamma P(k, mean), so inverting it solves the fit in one
+            # bracketed search instead of rebuilding a pmf per bisection step.
+            return make_count(gamma_ppf(target, float(k)), None, max_k)
         a, b = lo, hi
         for _ in range(80):
             mid = 0.5 * (a + b)
@@ -372,7 +550,27 @@ def fit_lognormal(points: Sequence[ProbPoint], cv: float = 0.55,
     return LognormalDistribution(mu=math.log(mean) - 0.5 * sigma ** 2, sigma=sigma)
 
 
-def _golden(f, lo: float, hi: float, iters: int = 120) -> float:
+def fit_gamma(points: Sequence[ProbPoint], cv: float) -> GammaDistribution:
+    """Fit a Gamma yardage distribution to one or many ``P(X > line)`` points.
+
+    A single line is an exact solve (the NFL process's ``yardage_mean``); a
+    ladder is fitted by weighted least squares on the mean at the supplied CV.
+    """
+    pts = [p for p in points if 0.0 < p.prob_over < 1.0 and p.line > 0]
+    if not pts:
+        raise ValueError("fit_gamma needs at least one usable probability point")
+    if len(pts) == 1:
+        return GammaDistribution.from_line(pts[0].line, pts[0].prob_over, cv)
+
+    def loss(mean: float) -> float:
+        dist = GammaDistribution.from_mean_cv(mean, cv)
+        return sum(p.weight * (dist.sf(p.line) - p.prob_over) ** 2 for p in pts)
+
+    mean = _golden(loss, 0.05, 700.0)
+    return GammaDistribution.from_mean_cv(mean, cv)
+
+
+def _golden(f, lo: float, hi: float, iters: int = 60) -> float:
     invphi = (math.sqrt(5.0) - 1.0) / 2.0
     a, b = lo, hi
     c = b - invphi * (b - a)

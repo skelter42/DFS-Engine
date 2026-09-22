@@ -53,7 +53,9 @@ def test_marginal_selection_beats_taking_the_top_n_by_ev(evaluated):
         _subset(evaluation, chosen.indices), [candidates[i] for i in chosen.indices])
     naive_corr = portfolio_metrics(
         _subset(evaluation, greedy_top), [candidates[i] for i in greedy_top])
-    assert picked_corr.effective_lineups >= naive_corr.effective_lineups
+    # When both strategies land on the same set the two figures differ only by
+    # floating-point row ordering, so compare with a tolerance.
+    assert picked_corr.effective_lineups >= naive_corr.effective_lineups - 1e-9
 
 
 def _subset(evaluation, indices):

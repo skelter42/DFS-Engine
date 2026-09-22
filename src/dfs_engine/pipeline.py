@@ -67,6 +67,7 @@ class BuildRequest:
     contest_profile: str = "large_field_gpp"
     industry_ownership: Mapping[str, Sequence[float]] | None = None
     synthetic: bool = False
+    selection_strategy: str = "marginal_value"
     label: str = ""
     config: EngineConfig | None = None
 
@@ -117,7 +118,9 @@ def run_build(request: BuildRequest, progress=None) -> BuildResult:
     # 3-7. Market-derived projections -------------------------------------
     t = step("project", "de-vigging markets and building projections")
     proj_cfg = ProjectionConfig(site=request.site, seed=request.seed)
-    projections = project_slate(eligible, request.snapshot, proj_cfg)
+    projection_diagnostics: dict = {}
+    projections = project_slate(eligible, request.snapshot, proj_cfg,
+                                diagnostics=projection_diagnostics)
     if not projections:
         raise ValueError("no eligible players survived the projection stage")
     timings["project"] = time.time() - t
@@ -169,7 +172,8 @@ def run_build(request: BuildRequest, progress=None) -> BuildResult:
     total_entries = sum(c.entries for c in contests) or request.n_lineups
     selection = select_portfolio(pool.lineups, evaluation,
                                  SelectionConfig(n_lineups=total_entries,
-                                                 min_uniques=request.min_uniques))
+                                                 min_uniques=request.min_uniques,
+                                                 strategy=request.selection_strategy))
     portfolio = Portfolio(lineups=selection.lineups, contests=contests)
     timings["select"] = time.time() - t
 
@@ -204,6 +208,7 @@ def run_build(request: BuildRequest, progress=None) -> BuildResult:
         "allocation_audit": allocation_audit(allocation, contests, ownership),
         "risk_flags": risk_flags(projections, portfolio, request.snapshot),
         "final_audit": final_audit(portfolio, projections, rules),
+        "reconciliation": projection_diagnostics.get("reconciliation"),
         "excluded_players": [{"name": n, "reason": r} for n, r in excluded],
         "selection_trace": selection.trace,
     }
@@ -218,6 +223,7 @@ def run_build(request: BuildRequest, progress=None) -> BuildResult:
         "engine_version": cfg.engine.get("version", "unknown"),
         "players_in_pool": len(request.players),
         "players_eligible": len(eligible),
+        "selection_strategy": request.selection_strategy,
         "candidates_generated": len(pool.lineups),
         "candidate_failures": pool.failures,
         "simulation": sim.meta,

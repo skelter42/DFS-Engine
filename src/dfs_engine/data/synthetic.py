@@ -248,29 +248,41 @@ def _build_nfl_team(snap, players, truth, rng, team, game, team_total, pass_shar
                 skill.append((player, comps))
             idx += 1
 
+    # Keep the synthetic slate internally coherent: a team's receiving
+    # touchdowns should sum to its quarterback's passing touchdowns, the same
+    # identity the reconciliation stage enforces on real markets.
+    qb_comps = next((c for _, c in skill if "pass_td" in c), None)
+    if qb_comps is not None:
+        receivers = [(pl, c) for pl, c in skill if c.get("receptions", 0) > 0]
+        raw_rec_td = sum(c["rec_td"] for _, c in receivers)
+        if raw_rec_td > 0:
+            scale = qb_comps["pass_td"] / raw_rec_td
+            for _, c in receivers:
+                c["rec_td"] *= scale
+
     for player, comps in skill:
         if rng.random() > coverage:
             continue  # some players genuinely have no posted market
         n_books = int(rng.integers(3, 6))
         if "pass_yards" in comps:
             _post_continuous_market(snap, player.name, "pass_yards", comps["pass_yards"],
-                                    0.32, rng, player.team, game.game_id, n_books, ladder=2)
+                                    0.30, rng, player.team, game.game_id, n_books, ladder=2)
             _post_count_market(snap, player.name, "pass_td", comps["pass_td"], rng,
-                               player.team, game.game_id, 6.0, n_books, ladder=1)
+                               player.team, game.game_id, None, n_books, ladder=1)
             _post_count_market(snap, player.name, "pass_attempts", comps["pass_attempts"],
                                rng, player.team, game.game_id, 40.0, n_books)
             _post_count_market(snap, player.name, "interception", comps["interception"],
                                rng, player.team, game.game_id, None, n_books)
         if comps.get("receptions", 0) > 0.6:
             _post_count_market(snap, player.name, "receptions", comps["receptions"], rng,
-                               player.team, game.game_id, 12.0, n_books, ladder=1)
+                               player.team, game.game_id, None, n_books, ladder=1)
             _post_continuous_market(snap, player.name, "rec_yards", comps["rec_yards"],
-                                    0.68, rng, player.team, game.game_id, n_books, ladder=1)
+                                    0.65, rng, player.team, game.game_id, n_books, ladder=1)
         if comps.get("rush_attempts", 0) > 2:
             _post_count_market(snap, player.name, "rush_attempts", comps["rush_attempts"],
                                rng, player.team, game.game_id, 20.0, n_books)
             _post_continuous_market(snap, player.name, "rush_yards", comps["rush_yards"],
-                                    0.62, rng, player.team, game.game_id, n_books, ladder=1)
+                                    0.55, rng, player.team, game.game_id, n_books, ladder=1)
         td_rate = comps.get("rush_td", 0) + comps.get("rec_td", 0)
         if td_rate > 0.03 and "pass_yards" not in comps:
             _post_binary_market(snap, player.name, "anytime_td", 1 - math.exp(-td_rate),

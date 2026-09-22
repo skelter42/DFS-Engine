@@ -70,8 +70,11 @@ def _roster_role(sport: str, positions: Sequence[str]) -> str:
         return "pitcher" if pos & {"P", "SP", "RP"} else "hitter"
     if sport == "nhl":
         return "goalie" if "G" in pos else "skater"
-    if sport in {"nfl", "ncaaf"} and pos & {"DST", "DEF", "D"}:
-        return "dst"
+    if sport in {"nfl", "ncaaf"}:
+        if pos & {"DST", "DEF", "D"}:
+            return "dst"
+        if "K" in pos:
+            return "k"
     return "all"
 
 

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
+from statistics import median
 from typing import Mapping
 
 from ..markets.aggregate import MarketConsensus
@@ -24,30 +25,80 @@ from ..odds.distributions import (
     BernoulliDistribution,
     ConstantDistribution,
     FittedStat,
+    GammaDistribution,
     ProbPoint,
     fit_count,
-    fit_lognormal,
+    fit_gamma,
     make_count,
 )
 
 
-def _points(cons: MarketConsensus) -> list[ProbPoint]:
+def _points(points) -> list[ProbPoint]:
     return [ProbPoint(line=p.line, prob_over=p.prob_over, weight=max(p.weight, 1e-3))
-            for p in cons.points]
+            for p in points]
 
 
-def fit_stat(stat: str, cons: MarketConsensus, sport: str | None = None) -> FittedStat:
-    """Fit the distribution family appropriate to ``stat`` from its consensus points."""
-    pts = _points(cons)
+def _usable_count_points(points: list[ProbPoint]) -> list[ProbPoint]:
+    """Drop integer lines from count markets.
+
+    An integer line can push, so ``P(X > L)`` from a two-way price is not the
+    quantity a no-push fit assumes. The NFL process rejects these outright
+    rather than silently treating them as half-integer lines.
+    """
+    return [p for p in points if abs(p.line % 1 - 0.5) < 1e-9]
+
+
+def _fit_family(stat: str, points: list[ProbPoint], sport: str | None):
+    """Fit the distribution family appropriate to ``stat``."""
+    if stat in CONTINUOUS_CV:
+        return fit_gamma(points, cv=CONTINUOUS_CV[stat])
+    counts = _usable_count_points(points) or points
+    return fit_count(counts, dispersion=dispersion_for(stat, sport))
+
+
+def _rebuild_at_mean(stat: str, mean: float, sport: str | None):
+    """Rebuild a distribution of the same family at a consensus mean."""
+    if stat in CONTINUOUS_CV:
+        return GammaDistribution.from_mean_cv(mean, CONTINUOUS_CV[stat])
+    return make_count(max(mean, 1e-6), dispersion_for(stat, sport))
+
+
+def fit_stat(stat: str, cons: MarketConsensus, sport: str | None = None,
+             mode: str = "book_median") -> FittedStat:
+    """Fit a stat distribution from its de-vigged market state.
+
+    ``mode="book_median"`` follows the documented consensus rule: fit an
+    expected value per independent book, then take the median of those fitted
+    means. It is robust to one book hanging a different line, which a
+    probability-space average is not. ``mode="pooled"`` fits every book's points
+    jointly instead, which is preferable when books post partial ladders.
+    """
     if stat in BINARY_STATS:
-        # A "yes/no" market: the de-vigged yes price is the probability.
         prob = max(0.001, min(0.999, cons.points[0].prob_over))
-        dist = BernoulliDistribution(p=prob)
-    elif stat in CONTINUOUS_CV:
-        dist = fit_lognormal(pts, cv=CONTINUOUS_CV[stat])
-    else:
-        dist = fit_count(pts, dispersion=dispersion_for(stat, sport))
-    return FittedStat(stat=stat, dist=dist, n_points=len(pts), n_books=cons.n_books,
+        return FittedStat(stat=stat, dist=BernoulliDistribution(p=prob),
+                          n_points=len(cons.points), n_books=cons.n_books,
+                          sources=sorted(cons.sources))
+
+    pooled = _points(cons.points)
+    dist = None
+    if mode == "book_median" and len(cons.by_book) >= 2:
+        means: list[float] = []
+        for book_points in cons.by_book.values():
+            book_pts = _points(book_points)
+            if stat not in CONTINUOUS_CV:
+                book_pts = _usable_count_points(book_pts)
+            if not book_pts:
+                continue
+            try:
+                means.append(_fit_family(stat, book_pts, sport).mean)
+            except ValueError:
+                continue
+        if len(means) >= 2:
+            dist = _rebuild_at_mean(stat, float(median(means)), sport)
+    if dist is None:
+        dist = _fit_family(stat, pooled, sport)
+
+    return FittedStat(stat=stat, dist=dist, n_points=len(pooled), n_books=cons.n_books,
                       sources=sorted(cons.sources))
 
 
@@ -119,6 +170,17 @@ class ComponentBuilder:
 
 
 class FootballComponents(ComponentBuilder):
+    """NFL / NCAAF components, following the documented pregame process.
+
+    Yardage is Gamma with explicit CVs, counts are Poisson fitted off
+    half-integer lines, and an anytime-TD market becomes an expected *count*
+    via a Poisson scoring model rather than a single-score probability.
+
+    Kickers and defenses have no per-player props worth speaking of; they are
+    built from the game market in ``projections/team_units.py`` once team
+    touchdown means exist.
+    """
+
     sport = "nfl"
     correlations = (
         ("pass_yards", "pass_td", 0.52), ("pass_yards", "pass_attempts", 0.55),
@@ -127,90 +189,75 @@ class FootballComponents(ComponentBuilder):
         ("rec_yards", "receptions", 0.74), ("rec_yards", "rec_td", 0.50),
         ("receptions", "rec_td", 0.35), ("rush_yards", "rec_yards", 0.10),
     )
-    #: how an anytime-TD market splits into rushing vs receiving scores, by position
-    TD_SPLIT = {"QB": (1.0, 0.0), "RB": (0.78, 0.22), "WR": (0.12, 0.88),
-                "TE": (0.05, 0.95), "K": (0.0, 0.0), "DST": (0.0, 0.0)}
+    #: Share of a player's anytime-TD mean that is a *receiving* score. These
+    #: match projections/reconcile.py so the two stages cannot disagree.
+    RECEIVING_TD_SHARE = {"QB": 0.0, "RB": 0.12, "WR": 1.0, "TE": 1.0}
+    #: League fumble rates. The skill-position form is a workload proxy.
+    SKILL_FUMBLE_RECEPTION_RATE = 0.0035
+    SKILL_FUMBLE_RUSH_YARD_RATE = 0.0035 * 0.22
+    QB_LOST_FUMBLE_DEFAULT = 0.055
+    LEAGUE_INT_RATE = 0.024
 
     def build(self, player: Player, cons, game):
         pos0 = (player.positions[0] if player.positions else "").upper()
-        if player.roster_role == "dst" or pos0 in {"DST", "DEF", "D"}:
-            return self._defense(player, cons, game)
+        if player.roster_role in {"dst", "k"} or pos0 in {"DST", "DEF", "D", "K"}:
+            # Team units are derived from the game market after the offensive
+            # pass; see projections/team_units.py.
+            return ComponentResult()
+
         res = ComponentResult()
         self._direct(res, cons, "pass_yards", "pass_td", "pass_attempts",
                      "pass_completions", "interception", "rush_yards", "rush_attempts",
                      "rush_td", "receptions", "rec_yards", "rec_td")
 
-        pos = (player.positions[0] if player.positions else "WR").upper()
-
-        # Anytime TD fills missing rushing/receiving TD components.
-        atd = cons.get("anytime_td")
-        if atd is not None and not res.has("rush_td", "rec_td"):
-            lam = poisson_rate_from_prob(atd.points[0].prob_over)
-            rush_share, rec_share = self.TD_SPLIT.get(pos, (0.3, 0.7))
-            if "rush_td" not in res.components and rush_share > 0:
-                res.add(counted("rush_td", lam * rush_share, note="anytime_td split"))
-            if "rec_td" not in res.components and rec_share > 0:
-                res.add(counted("rec_td", lam * rec_share, note="anytime_td split"))
-            res.note(f"anytime TD {atd.points[0].prob_over:.0%} split {rush_share:.0%}/{rec_share:.0%} rush/rec")
+        pos = pos0 or "WR"
+        self._touchdowns(res, cons, pos)
 
         # A passer with yardage but no TD market: anchor TDs to the team total.
         if res.has("pass_yards") and "pass_td" not in res.components and game:
-            tt = game.team_total(player.team)
-            if tt:
-                res.add(counted("pass_td", max(0.4, 0.62 * tt / 7.0), dispersion=6.0,
+            team_total = game.team_total(player.team)
+            if team_total:
+                res.add(counted("pass_td", max(0.4, 0.62 * team_total / 7.0),
                                 note="team total -> pass TD"))
-                res.note("passing TDs inferred from implied team total")
+                res.note("passing TDs inferred from the implied team total")
         if res.has("pass_attempts") and "interception" not in res.components:
-            res.add(counted("interception", 0.024 * res.mean("pass_attempts"),
+            res.add(counted("interception",
+                            self.LEAGUE_INT_RATE * res.mean("pass_attempts"),
                             note="league INT rate x attempts"))
 
-        # Fumbles are rarely priced; hold a small role-scaled expectation.
-        touches = res.mean("rush_attempts") + res.mean("receptions")
-        if touches > 0:
-            res.add(constant("fumble_lost", 0.006 * touches, note="league fumble rate"))
+        self._fumbles(res, pos)
         return res
 
+    def _touchdowns(self, res: ComponentResult, cons, pos: str) -> None:
+        """Turn an anytime-TD price into an expected rushing/receiving TD count.
 
-    def _defense(self, player: Player, cons, game) -> ComponentResult:
-        """Defenses have no player props; their market is the game line itself.
-
-        Opponent implied total drives the points-allowed tier, and the spread
-        drives sack/turnover volume (trailing teams pass more).
+        ``P(at least one) = p`` under a Poisson scoring model implies
+        ``lambda = -ln(1 - p)``. Using ``6 x p`` instead would cap the player at
+        one score and understate multi-TD games.
         """
-        res = ComponentResult()
-        if game is None:
-            res.note("no game market for this defense; nothing to derive")
-            return res
-        opp = game.opponent_of(player.team)
-        opp_total = game.team_total(opp or "") or (game.total or 44.0) / 2.0
-        res.add(FittedStat(
-            "points_allowed",
-            _points_allowed_dist(opp_total),
-            inferred=True, sources=["opponent implied team total"]))
-        spread = game.spread_home if player.team == game.home_team else -(game.spread_home or 0.0)
-        favoured_by = -(spread or 0.0)  # positive when this defense's team is favoured
-        pass_pressure = 1.0 + 0.045 * max(favoured_by, -7.0)
-        res.add(counted("sacks", 2.35 * pass_pressure, dispersion=8.0,
-                        note="league sack rate scaled by game script"))
-        res.add(counted("def_interceptions", 0.78 * pass_pressure,
-                        note="league INT rate scaled by game script"))
-        res.add(counted("fumble_recoveries", 0.62, note="league fumble-recovery rate"))
-        res.add(counted("def_td", 0.10 * pass_pressure, note="league defensive TD rate"))
-        res.add(counted("special_teams_td", 0.02, note="league return TD rate"))
-        res.add(counted("safeties", 0.015, note="league safety rate"))
-        res.add(counted("blocked_kicks", 0.04, note="league blocked-kick rate"))
-        res.note(f"defense derived from game market (opponent implied {opp_total:.1f})")
-        return res
+        atd = cons.get("anytime_td")
+        if atd is None or res.has("rush_td", "rec_td"):
+            return
+        prob = atd.points[0].prob_over
+        lam = poisson_rate_from_prob(prob)
+        rec_share = self.RECEIVING_TD_SHARE.get(pos, 0.7)
+        rush_share = 1.0 - rec_share
+        if "rec_td" not in res.components and rec_share > 0:
+            res.add(counted("rec_td", lam * rec_share, note="anytime TD x receiving share"))
+        if "rush_td" not in res.components and rush_share > 0:
+            res.add(counted("rush_td", lam * rush_share, note="anytime TD x rushing share"))
+        res.note(f"anytime TD {prob:.0%} -> {lam:.3f} expected scores, "
+                 f"{rec_share:.0%} receiving")
 
-
-def _points_allowed_dist(opp_total: float):
-    """Points allowed: over-dispersed count centred on the opponent implied total."""
-    from ..odds.distributions import make_count
-
-    mean = max(float(opp_total), 3.0)
-    # NFL team scores have variance well above Poisson; r ~ 4 reproduces the
-    # observed spread of single-game team totals.
-    return make_count(mean, dispersion=4.0, max_k=70)
+    def _fumbles(self, res: ComponentResult, pos: str) -> None:
+        if pos == "QB":
+            res.add(constant("fumble_lost", self.QB_LOST_FUMBLE_DEFAULT,
+                             note="QB lost-fumble default"))
+            return
+        touches = (self.SKILL_FUMBLE_RECEPTION_RATE * res.mean("receptions")
+                   + self.SKILL_FUMBLE_RUSH_YARD_RATE * res.mean("rush_yards"))
+        if touches > 0:
+            res.add(constant("fumble_lost", touches, note="workload fumble proxy"))
 
 
 # --------------------------------------------------------------------------

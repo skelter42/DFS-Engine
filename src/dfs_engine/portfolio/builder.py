@@ -24,6 +24,14 @@ from ..simulation.field import EvaluationResult, LineupSimMetrics
 
 @dataclass
 class SelectionConfig:
+    #: "marginal_value" ranks by what a lineup adds to the portfolio's tail
+    #: coverage; "uniqueness_ladder" is the documented pregame flow (high-
+    #: projection pool -> maximise pairwise uniqueness -> recover projection).
+    strategy: str = "marginal_value"
+    #: uniqueness_ladder: share of the candidate pool retained on projection
+    pool_fraction: float = 0.10
+    #: uniqueness_ladder: fraction of peak average uniqueness that must survive
+    uniqueness_retention: float = 0.90
     n_lineups: int = 20
     tail: float = 0.01
     ev_weight: float = 1.0
@@ -47,6 +55,8 @@ class SelectionResult:
 def select_portfolio(candidates: Sequence[Lineup], evaluation: EvaluationResult,
                      config: SelectionConfig | None = None) -> SelectionResult:
     cfg = config or SelectionConfig()
+    if cfg.strategy == "uniqueness_ladder":
+        return select_by_uniqueness_ladder(candidates, evaluation, cfg)
     payouts = evaluation.payouts
     beaten = evaluation.beaten_by
     scores = evaluation.scores
@@ -108,6 +118,98 @@ def select_portfolio(candidates: Sequence[Lineup], evaluation: EvaluationResult,
         lu.metrics.update(evaluation.metrics[i].as_dict())
         lineups.append(lu)
     return SelectionResult(lineups=lineups, indices=chosen, trace=trace)
+
+
+def select_by_uniqueness_ladder(candidates: Sequence[Lineup],
+                                evaluation: EvaluationResult,
+                                config: SelectionConfig | None = None
+                                ) -> SelectionResult:
+    """The documented pregame portfolio flow.
+
+    Retain the high-projection pool, maximise average pairwise uniqueness inside
+    it, keep at least ``uniqueness_retention`` of that peak, then recover as much
+    projection as that constraint allows. Projections are consumed here, never
+    modified -- correlation and exposure preferences belong to lineup
+    construction, not to player means.
+    """
+    cfg = config or SelectionConfig()
+    n = min(cfg.n_lineups, len(candidates))
+    if n == 0:
+        return SelectionResult([], [])
+
+    ranked = sorted(range(len(candidates)), key=lambda i: -candidates[i].projection)
+    keep = max(n, int(round(len(candidates) * cfg.pool_fraction)))
+    pool = ranked[:min(keep, len(ranked))]
+
+    roster = len(candidates[pool[0]].players)
+    uniq = np.zeros((len(pool), len(pool)))
+    for a, i in enumerate(pool):
+        for b, j in enumerate(pool):
+            if a < b:
+                value = roster - candidates[i].overlap(candidates[j])
+                uniq[a, b] = uniq[b, a] = value
+
+    best_uniqueness = _greedy_uniqueness(uniq, n)
+    floor = cfg.uniqueness_retention * best_uniqueness
+
+    # Second pass: take projection wherever the uniqueness floor still holds.
+    order = sorted(range(len(pool)), key=lambda a: -candidates[pool[a]].projection)
+    chosen: list[int] = []
+    for a in order:
+        if len(chosen) >= n:
+            break
+        trial = chosen + [a]
+        if len(trial) < 2 or _average_uniqueness(uniq, trial) >= floor:
+            chosen = trial
+    for a in order:                      # top up if the floor was too tight
+        if len(chosen) >= n:
+            break
+        if a not in chosen:
+            chosen.append(a)
+
+    indices = [pool[a] for a in chosen]
+    lineups = []
+    trace = []
+    for rank, i in enumerate(indices, start=1):
+        lu = candidates[i]
+        lu.index = rank
+        lu.metrics.update(evaluation.metrics[i].as_dict())
+        lineups.append(lu)
+        trace.append({"pick": rank, "candidate": i,
+                      "projection": round(lu.projection, 3)})
+    achieved = _average_uniqueness(uniq, chosen) if len(chosen) > 1 else 0.0
+    trace.append({"strategy": "uniqueness_ladder",
+                  "pool_size": len(pool),
+                  "peak_average_uniqueness": round(best_uniqueness, 3),
+                  "achieved_average_uniqueness": round(achieved, 3),
+                  "retention": round(achieved / best_uniqueness, 3)
+                  if best_uniqueness else None})
+    return SelectionResult(lineups=lineups, indices=indices, trace=trace)
+
+
+def _average_uniqueness(uniq: np.ndarray, members: Sequence[int]) -> float:
+    if len(members) < 2:
+        return 0.0
+    idx = np.array(members)
+    sub = uniq[np.ix_(idx, idx)]
+    pairs = len(members) * (len(members) - 1) / 2
+    return float(sub.sum() / 2.0 / pairs)
+
+
+def _greedy_uniqueness(uniq: np.ndarray, n: int) -> float:
+    """Greedy estimate of the most mutually-different set of ``n`` lineups."""
+    size = uniq.shape[0]
+    if size <= 1 or n <= 1:
+        return 0.0
+    a, b = np.unravel_index(int(np.argmax(uniq)), uniq.shape)
+    chosen = [int(a), int(b)]
+    while len(chosen) < min(n, size):
+        remaining = [i for i in range(size) if i not in chosen]
+        if not remaining:
+            break
+        best = max(remaining, key=lambda i: float(uniq[i, chosen].sum()))
+        chosen.append(best)
+    return _average_uniqueness(uniq, chosen)
 
 
 def _standardise(scores: np.ndarray) -> np.ndarray:
