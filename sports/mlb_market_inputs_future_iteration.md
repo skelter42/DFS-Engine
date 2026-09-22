@@ -1,99 +1,92 @@
 # MLB Market Inputs — Future Iteration Fixes
 
-Status: validated process correction from the 2026-09-22 DraftKings Turbo Market Inputs pass (grade A-).
-Applies to every future `Savant Prep` / `Market Inputs — MLB` run.
-Does not change the composite philosophy in `core/MARKET_PROJECTIONS.md`.
+Status: validated process correction from the 2026-09-22 DraftKings Turbo Market Inputs pass, plus user-approved default (2026-09-22):
 
-## What failed on 2026-09-22
+**The user does not attach paid vendor CSVs. The assistant scrapes public industry numbers and public Vegas props and does its best.**
 
-- Industry layer was real for starting pitchers (RG on-page FPTS, THE BAT X Wheeler 50th, FantasyPros components, Action/Dimers/PropCruncher K models) and thin for hitters.
-- Full vendor grids were paywalled or on the wrong slate (DFF showed the later main slate, not Turbo).
-- Chat HTML snippets are not 10 independent numeric sources.
-- Savant-zero rule left posted starters at 0 (Greene, Story, Willson Contreras, Joey Ortiz, Frelick, Nick Gonzales, and others).
-- Bench names with starter-sized Savant Proj were cut using lineup facts. That is allowed only as a role allocation, not as a narrative fade.
-- Relievers with Own 0 stayed on Savant. Correct, but they must not be counted as researched coverage.
+Do not stall a run waiting for THE BAT X / Stokastic / DFF / RG CSV uploads.
 
-An A- pass is an honest stop when the user accepts it. It is not an A+ composite.
+## Default operating mode
 
-## Mandatory intake order (next run)
+`Savant Prep` / `Market Inputs — MLB` means:
 
-1. Identify site, slate window, and game list from the attached Savant file **before** any vendor pull. Turbo ≠ Main ≠ Night ≠ Showdown.
-2. Ask for attached vendor CSVs if they are not already in the thread:
-   - THE BAT / THE BAT X DK export
-   - RotoGrinders projected-stats CSV for **this exact slate**
-   - Stokastic or SaberSim export
-   - Daily Fantasy Fuel CSV with the matching slate selected
-   - LineStar / RotoWire / NumberFire if available
-3. Do not start the industry blend from preview articles, First Look blurbs, or a single RG lineup-page FPTS cell and then call it 10 sources.
-4. Run the Vegas board sweep in parallel (PropCruncher, Covers, Action, PropPrizm, FD Research, game ML/totals).
-5. Convert components with site scoring. Do not average Yahoo/FD/DK outputs as if they were the same number.
-6. Grade honestly. If vendor CSVs are missing, the ceiling is A- unless the user attaches them or explicitly accepts the grade.
+1. Attached Savant file only.
+2. Identify site + exact slate window + game list.
+3. Trust Savant zeros unless the user says `unlock posted starters`.
+4. Exhaust **public** industry numeric pages and **public** Vegas boards.
+5. Convert to site scoring. Blend. Reconcile to game totals with data only.
+6. Write `Name, DFS ID, Proj, Own`. Own unchanged unless requested.
+7. Grade honestly against the public-source ceiling. Deliver. Stop.
 
-## Slate-lock rule
+Paid vendor grids are optional upside if they appear in public HTML. They are not a prerequisite.
 
-Every industry number must be tagged with slate identity (site + start window + game list). Reject a DFF/RG/Stokastic row that belongs to a different window. Mixing Main-slate projections onto a Turbo file is a process error.
+## Public industry sources to hit every run
 
-## Industry source counting rule
+Board / page first, same slate only:
 
-Count a source only if it supplies a **numeric DK (or convertible component) value for that player on this slate**.
+- RotoGrinders lineup pages and any public FPTS / projected-stats HTML for this slate
+- FantasyPros daily hitters and pitchers component tables
+- NumberFire public MLB projections if the page loads
+- Daily Fantasy Fuel public table **only if the slate selector matches** (Turbo vs Main vs Night)
+- THE BAT / BAT X numbers only when a public percentile or table is actually visible
+- Action Network / Dimers / PropCruncher model projections when they publish numeric K/IP/FP
+- Any other public numeric DK or convertible component table found in the sweep
 
-Counts:
-- THE BAT X player DK or component row
-- RG projected-stats FPTS row
-- DFF DK FP row
-- Stokastic / SaberSim / LineStar / NumberFire / RotoWire numeric row
-- FantasyPros components converted with DK weights
+Does not count: rankings, First Look adjectives, podcasts, paywalled grids that do not render.
 
-Does not count:
-- Rankings, write-ups, podcasts, First Look adjectives
-- A K-only model used as if it were a full DK projection (that is Vegas/model support, not a full industry FP source)
-- Savant itself
-- The same vendor quoted twice
+## Public Vegas sources to hit every run
 
-Report `industry_source_count` as the number of distinct vendors that produced at least one usable numeric value on the positive-Proj pool, and separately report median sources **per researched player**. A slate with 8 vendor logos but 2 numbers per hitter is not A+.
+Aggregator-first:
+
+- PropCruncher multi-book K / outs
+- Covers matchup prop sections
+- Action Network player props
+- PropPrizm
+- FanDuel Research game + player pages
+- Sportsbook game ML, total, team total
+
+Pitchers: K, outs/IP, ER, H, BB, win/ML.
+Hitters: hits, TB, HR, RBI, runs, BB, SB, H+R+RBI.
+Use juice and both sides when posted.
+
+## Grade ceiling without vendor files
+
+Honest public-scrape ceiling is usually **A-** on a short Turbo slate:
+- SP industry + Vegas can be thick
+- hitter industry is often thin
+- that is expected and allowed
+
+Do not hold the file hostage for an A+ that requires paywalled CSVs the user will not attach.
+Deliver the best public composite, report source counts, list posted-but-zero names, and stop.
+
+A / A+ is still the target **when public boards actually produce that coverage**. It is not a reason to refuse delivery.
 
 ## Role / lineup allocation (facts only)
 
-Use posted batting order and pitcher role to allocate expectation. Do not invent points.
+- Confirmed 1–9: research public industry + Vegas. Do not cut to bench range.
+- Not in posted 1–9: reserve/PH only if a public industry source still projects him. Otherwise cut starter-sized Savant leftovers.
+- Opener vs bulk vs full start is a role fact. Bulk-behind-opener uses bulk workload.
+- Relievers with Own 0: Savant fallback unless a public save/K/outs market exists.
 
-- Confirmed 1–9 hitter: research industry + Vegas. Do not cut to bench range.
-- Not in posted 1–9: keep a reserve/PH number only if an industry source still projects that player today. If no industry source has him and he is not starting, do not leave a starter-sized Savant number in place.
-- Opener vs bulk vs full start: this is a role fact. Kent-style bulk-behind-opener must use bulk workload (outs/IP/K/win%) not a full-start prior.
-- Relievers with Savant Proj > 0 and Own 0: default Savant fallback unless a save/K/outs market exists. Exclude them from the active-pool coverage denominator used for the A/A+ gate if they were never realistically DFS-startable.
+## Savant-zero rule
 
-## Savant-zero vs posted starter
+Default: source `Proj = 0` stays 0.
+Exception only on `unlock posted starters`.
+Always list posted-but-zero names in the audit.
 
-Default remains: source `Proj = 0` stays 0.
+## Required delivery report
 
-Future iteration exception — only when the user says **`unlock posted starters`**:
-- If a player is in the official/posted 1–9 or is the confirmed starter/bulk arm **and** Savant Proj is 0, research that player and write a composite Proj.
-- Document each unlock in the audit.
-- Do not unlock the rest of the zero pool.
+- Projection grade (honest public-scrape grade)
+- Public industry sources actually used (names, not a hoped-for 10)
+- Vegas boards used
+- Provenance mix on the positive-Proj pool
+- Largest composite vs Savant deltas
+- Posted starters still at Savant 0
 
-Without that phrase, leave zeros at 0 and list the posted-but-zero names in the audit so the user can opt in.
+## What not to do
 
-## DK conversion (keep using)
-
-Hitters: 1B 3, 2B 5, 3B 8, HR 10, RBI 2, R 2, BB/HBP 2, SB 5.
-Pitchers: IP 2.25, K 2, W 4, ER -2, H -0.6, BB/HBP -0.6, CG 2.5, SHO +2.5, NH 5.
-
-When a vendor already publishes DK FPTS, use that column. When it publishes components, convert once. Never blend raw Yahoo points with DK points.
-
-## A+ checklist (must all be true)
-
-- [ ] Attached or live-exported numeric industry files for this exact slate (target 5+ vendor CSVs, 10+ if the public/paid ecosystem supports it)
-- [ ] Vegas board sweep covering every confirmed SP (K + outs + one run-prevention market + ML) and every posted 1–9 hitter (hits or TB + HR + R or RBI + one more family)
-- [ ] Juice / both sides used where posted
-- [ ] Player totals reconciled to implied team totals / game totals
-- [ ] Posted-but-Savant-zero starters either left at 0 with an explicit list, or unlocked by user request
-- [ ] Per-player source count reported; hitter industry not faked from SP-only boards
-- [ ] Output still `Name, DFS ID, Proj, Own`; Own unchanged unless ownership pass requested
-- [ ] Stop. No lineups.
-
-## User prompt that raises the grade
-
-Attach vendor CSVs and/or say:
-
-`Market Inputs — MLB — projections only. Unlock posted starters. Vendor files attached.`
-
-If no vendor files are attached, the assistant must say so in the first research beat and cap the grade at A- unless the user accepts that cap.
+- Do not ask the user to drop BAT X / Stokastic / DFF files as a gate.
+- Do not mix Main-slate public tables onto a Turbo file.
+- Do not count a K-only model as a full DK projection source.
+- Do not write narrative into Proj.
+- Do not build lineups.
