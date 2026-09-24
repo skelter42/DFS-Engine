@@ -22,8 +22,17 @@ The engine should not depend on one third-party simulator or ownership source as
 ## Vegas-First Market Inputs
 For every NFL `market inputs` pass, projection creation is Vegas-first. Do not use an industry fantasy projection as the primary replacement when sportsbook markets are available.
 
+**Retrieval method is board-first.** Follow `core/VEGAS_BOARD_SWEEP.md`. Required order per game:
+1. cache spread / total / implied team totals once,
+2. pull the full-game anytime-TD / first-TD / 2+ TD ladder,
+3. pull the full-game pass / rush / rec yards-and-volume table,
+4. convert the positive-Proj pool from those boards,
+5. named player searches only for missing components.
+
+Do not walk stars one prop at a time. A projection pass that cannot name a TD board and a yards board has not finished the Vegas layer.
+
 Projection source priority:
-1. Sportsbook/player-prop markets across as many books as practical (DraftKings, FanDuel, BetMGM, Caesars, bet365, Fanatics and other credible books/odds aggregators).
+1. Sportsbook/player-prop **boards** across as many books as practical (DraftKings, FanDuel, BetMGM event pages; Covers / Action Network / PropCruncher matchup boards; Caesars, bet365, Fanatics and other credible books/odds aggregators).
 2. Convert the betting market directly into DraftKings fantasy expectation using the canonical sportsbook projection methodology. Use the fullest available prop bundle by role: passing yards/TDs/INTs and rushing for QBs; rushing attempts/yards, receptions, receiving yards and TD probability for RBs; receptions, receiving yards, rushing usage and TD probability for WR/TE; game spread/total and team scoring expectation for DST/kickers where appropriate.
 3. Use vig-free probabilities and consensus/median lines when multiple books are available. Line movement is actionable information and should influence the projection rather than being ignored.
 4. If a player has only partial Vegas coverage, anchor the covered components to Vegas and use industry/model information only to fill the missing components.
