@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from dfs_engine.projections.scoring import DK_NBA, DK_NFL, DK_NFL_DST, get_rule
+from dfs_engine.projections.scoring import DK_NBA, DK_NFL, DK_NFL_DST, FD_NFL, get_rule
 
 
 def test_dk_nfl_bonus_is_a_tail_event_not_a_mean():
@@ -15,6 +15,21 @@ def test_dk_nfl_bonus_is_a_tail_event_not_a_mean():
     assert sampled > linear                       # bonuses add value
     bonus_share = (sampled - linear) / sampled
     assert 0.01 < bonus_share < 0.15              # and it is a plausible share
+
+
+def test_fd_nfl_yardage_bonuses_match_current_rules():
+    comps = {
+        "pass_yards": np.array([299.0, 300.0]),
+        "rush_yards": np.array([99.0, 100.0]),
+        "rec_yards": np.array([99.0, 100.0]),
+    }
+    scores = FD_NFL.score(comps)
+    linear = np.array([
+        299 * 0.04 + 99 * 0.1 + 99 * 0.1,
+        300 * 0.04 + 100 * 0.1 + 100 * 0.1,
+    ])
+    assert scores[0] == pytest.approx(linear[0])
+    assert scores[1] == pytest.approx(linear[1] + 9.0)
 
 
 def test_dk_dst_points_allowed_tiers():

@@ -132,7 +132,12 @@ FD_NFL = ScoringRule(
         "receptions": 0.5, "rec_yards": 0.1, "rec_td": 6.0,
         "fumble_lost": -2.0, "two_point": 2.0, "return_td": 6.0,
     },
-    notes="FanDuel NFL, half PPR, no yardage bonuses.",
+    bonuses=(
+        ThresholdBonus("pass_yards", 300, 3.0),
+        ThresholdBonus("rush_yards", 100, 3.0),
+        ThresholdBonus("rec_yards", 100, 3.0),
+    ),
+    notes="FanDuel NFL, half PPR with 100/300-yard bonuses.",
 )
 
 DK_NFL_DST = ScoringRule(
