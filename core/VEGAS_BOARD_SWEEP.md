@@ -82,6 +82,27 @@ Even then, prefer another **board** (different book/aggregator event page) over 
 - Do not skip the ATTD ladder because yards already exist. TDs are a separate DK component.
 - Do not research Savant-zero rows just because they appear on a TD board.
 
+## Persist the boards
+
+The audit artifact is the **board**, not a list of player-page visits.
+
+After every NFL/NCAAF Market Inputs or Savant Prep pass, write:
+
+`history/YYYY-MM-DD-<SLATE>-vegas-boards.md`
+
+Required sections, in this order:
+
+1. Game board (spread / total / ML / implied team totals)
+2. Full-game ATTD / FTD / 2+ ladder with prices
+3. Full-game yards / receptions / attempts table with consensus lines
+4. Which boards were hit (URL or book + timestamp)
+5. Gap-fill named searches, if any, and why
+6. Pointer to the import CSV
+
+Example for this slate: `history/2026-09-24-ATL-GB-vegas-boards.md`.
+
+If that file does not exist, the Vegas layer is not finished — even if composites were written.
+
 ## Audit requirement
 
 Every projection pass must report:
@@ -108,3 +129,4 @@ If the audit cannot list a TD board and a yards board, the Vegas layer is not do
 - `core/SAVANT_PREP.md` — projection-only Savant import contract
 - `sports/<sport>.md` — scoring conversion and sport-specific prop families
 - This file — **how Vegas data is collected**
+- `history/YYYY-MM-DD-<slate>-vegas-boards.md` — **the boards that were actually used**
