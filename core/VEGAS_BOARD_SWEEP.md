@@ -13,7 +13,9 @@ This file owns the retrieval method for the Vegas layer.
 
 **Board first. Name second.**
 
-Required order on every projection-only or full Market Inputs run:
+The numbered TD / yards order below is the **NFL/NCAAF default**. Other sports use the board package in Sport notes. The invariant is board-first, not the football market list.
+
+Required order on every NFL/NCAAF projection-only or full Market Inputs run:
 
 1. Cache game markets once (spread, total, ML, implied team totals, team totals).
 2. Pull the **anytime TD / first TD / 2+ TD ladder** for the whole game in one board.
@@ -108,12 +110,11 @@ If that file does not exist, the Vegas layer is not finished — even if composi
 Every projection pass must report:
 
 - which boards were hit (URL / book / timestamp)
-- whether the ATTD ladder was captured for the game
-- whether a yards/volume table was captured for the game
+- whether the sport-appropriate board package was captured
 - which positive-Proj players still lacked a board component after the sweep
 - which named searches were used as gap-fill, and why
 
-If the audit cannot list a TD board and a yards board, the Vegas layer is not done.
+For NFL/NCAAF, that board package is a TD ladder plus a yards/volume table. For other sports, use Sport notes. If the audit cannot name those boards, the Vegas layer is not done.
 
 ## Sport notes
 
@@ -121,9 +122,11 @@ If the audit cannot list a TD board and a yards board, the Vegas layer is not do
 - **NFL/NCAAF classic:** one board pair **per game**, not per player. Loop games, not names.
 - **MLB:** board = pitcher prop family table + hitter prop family table per game, not 20 sequential hitter searches. Details remain in `sports/mlb.md` / Market Inputs MLB sweep rules.
 - **NBA/NHL:** board = points/rebounds/assists or shots/saves tables for the game, then gap-fill.
+- **Tennis:** do not hunt football TD/yards boards. Board = match moneyline + set/game totals + ace / double-fault / break markets when posted for the match. If those boards do not exist, label the Vegas layer thin and use industry/match-odds conversion. Never invent a TD ladder for tennis.
 
 ## Relationship to other files
 
+- `core/MARKET_INPUTS_RUN.md` — executable card
 - `core/MARKET_PROJECTIONS.md` — what the composite number is
 - `core/MARKET_INPUTS.md` — full Market Inputs workflow
 - `core/SAVANT_PREP.md` — projection-only Savant import contract
