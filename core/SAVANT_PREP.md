@@ -2,6 +2,8 @@
 
 ## Trigger
 
+Read `core/MARKET_INPUTS_RUN.md` first. That card is the executable order of work.
+
 When the user says **"Savant prep"** (or attaches a projection CSV under Market Inputs), run this workflow only. Do not build lineups, optimize portfolios, run full DFS Engine construction, or add extra slate strategy unless explicitly asked.
 
 ## Purpose
@@ -107,4 +109,5 @@ Before returning the file:
 
 Full projection standard: `core/MARKET_PROJECTIONS.md`.  
 Cross-sport workflow: `core/MARKET_INPUTS.md`.  
+Executable card: `core/MARKET_INPUTS_RUN.md`.  
 MLB projection-only override: `sports/mlb_market_inputs_projection_override.md`.
