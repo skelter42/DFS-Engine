@@ -21,10 +21,28 @@ The goal is repeatable decision quality: ingest slate inputs, cross-check them a
 9. Prefer explicit rules, schemas, and versioned logic over chat-only memory.
 10. Prefer fewer strong rules over many narrow rules; remove redundancy and avoid overfitting.
 
+## Market Inputs (Savant import)
+
+When the user attaches a Sim Savant CSV and asks for market inputs / Savant prep, the job is **one objective composite projection**, not lineups.
+
+Executable card: `core/MARKET_INPUTS_RUN.md`  
+Standard: `core/MARKET_PROJECTIONS.md`  
+Vegas retrieval: `core/VEGAS_BOARD_SWEEP.md`  
+Savant contract: `core/SAVANT_PREP.md`
+
+`Proj` = industry numeric scrape + Vegas scrape, blended. No narrative.  
+`Own` stays unchanged unless an ownership pass is requested.  
+Savant zeros stay 0. Showdown CPT = 1.5 × FLEX. Persist boards in `history/`, not the import CSV.
+
 ## Repository Map
 
 - `core/ENGINE.md` — master slate workflow and portfolio rules
 - `core/AGENTS.md` — agent responsibilities and handoffs
+- `core/MARKET_INPUTS_RUN.md` — executable Market Inputs / Savant Prep card
+- `core/MARKET_INPUTS.md` — full Market Inputs workflow
+- `core/MARKET_PROJECTIONS.md` — composite projection standard (industry + Vegas)
+- `core/VEGAS_BOARD_SWEEP.md` — board-first Vegas retrieval
+- `core/SAVANT_PREP.md` — Savant import contract (Proj in, Own pass-through)
 - `core/SIMULATION.md` — cross-sport outcome-distribution and Monte Carlo framework
 - `core/PROCESS_GOVERNANCE.md` — process management, rule placement, promotion/deprecation, and end-to-end workflow governance
 - `core/LEARNING.md` — post-slate learning framework
@@ -33,8 +51,9 @@ The goal is repeatable decision quality: ingest slate inputs, cross-check them a
 - `sports/tennis.md` — tennis construction logic
 - `sports/nba.md` — NBA construction logic
 - `sports/nhl.md` — NHL construction logic
-- `sports/nfl.md` — NFL construction logic
+- `sports/nfl.md` — NFL construction logic and board-to-DK conversion
 - `schemas/` — durable input/output contracts
+- `history/` — locked Vegas boards and contest history
 - `learning/` — dated hypotheses and durable learnings awaiting or documenting promotion
 
 ## Standard Output Contract
