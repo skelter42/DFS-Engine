@@ -1,16 +1,36 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "default_interface": "chat",
   "routes": [
     {
       "intent": "run_engine",
       "triggers": ["run the dfs engine", "run engine", "build lineups", "build the lineups"],
-      "pipeline": ["load_brain", "ingest", "validate", "cross_check", "sport_analysis", "contest_analysis", "portfolio_build", "exposure_audit", "deliver"]
+      "pipeline": ["load_brain", "ingest", "validate", "cross_check", "sport_analysis", "contest_analysis", "portfolio_build", "exposure_audit", "deliver"],
+      "brain": []
     },
     {
       "intent": "industry_compare",
       "triggers": ["full industry compare", "cross check industry", "compare across industry"],
       "pipeline": ["load_brain", "cross_check", "projection_consensus", "ownership_consensus", "market_context", "thesis_update"]
+    },
+    {
+      "intent": "market_inputs",
+      "triggers": [
+        "market inputs",
+        "market inputs projections only",
+        "savant prep",
+        "projection pull",
+        "github market inputs"
+      ],
+      "pipeline": ["load_brain", "ingest", "validate", "market_research", "projection_build", "import_audit", "deliver"],
+      "brain": [
+        "core/MARKET_INPUTS_RUN.md",
+        "core/MARKET_INPUTS.md",
+        "core/MARKET_PROJECTIONS.md",
+        "core/VEGAS_BOARD_SWEEP.md",
+        "core/SAVANT_PREP.md"
+      ],
+      "notes": "Default is projection-only: one composite Proj, Own unchanged. Do not load these files on run_engine. Ownership research only if the user explicitly asks."
     },
     {
       "intent": "exposure_report",
@@ -47,6 +67,7 @@
     "auto_load_relevant_brain": true,
     "auto_persist_durable_learning": true,
     "persist_raw_chat": false,
-    "persist_single_slate_noise": false
+    "persist_single_slate_noise": false,
+    "market_input_docs_are_intent_scoped": true
   }
 }
