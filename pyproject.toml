@@ -9,7 +9,7 @@ description = "Vegas-first DFS projection, simulation and portfolio construction
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=1.24",
-    "pulp>=2.8",
+    "pulp>=2.8,<4",
 ]
 
 [project.optional-dependencies]
