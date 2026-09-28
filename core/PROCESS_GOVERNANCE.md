@@ -8,6 +8,7 @@ Authoritative ownership:
 - `core/ENGINE.md` = canonical end-to-end operating contract
 - `core/AGENTS.md` = ownership of reasoning stages and handoffs
 - `core/MARKET_PROJECTIONS.md` = shared market-derived projection framework
+- `core/MARKET_INPUTS_RUN.md` = executable Market Inputs card
 - `core/SIMULATION.md` = shared simulation framework
 - `core/LEARNING.md` = post-slate learning and calibration rules
 - `sports/<sport>.md` = sport-specific mechanics only
@@ -111,26 +112,33 @@ At a high level only:
 
 Material late news or market movement loops back to the affected upstream stage and all dependent outputs.
 
-## Market-First Projection Governance
+## Composite Projection Governance
 
-The preferred projection hierarchy is now market-first when sufficient player-level props exist.
+The Market Inputs / Savant Prep projection is **one composite number**.
 
-- Use multi-book player props to derive expected fantasy scoring when coverage is strong.
-- De-vig and aggregate markets robustly rather than trusting one book.
+Industry numeric projections and multi-book sportsbook markets are **co-primary**. Neither layer is a fallback for the other.
+
+- Scrape independent numeric industry sources and scrape multi-book props/game markets.
+- De-vig and aggregate markets rather than trusting one book.
 - Translate expected stat events into site scoring using sport-specific rules.
-- Assign a market coverage/confidence grade.
-- When coverage is sparse, shrink toward an independent prior such as vendor/industry projection plus verified role/context.
+- Blend by evidence quality into a single `Proj`.
+- Assign a coverage/provenance grade on the positive-Savant-Proj pool.
+- When both layers are thin, shrink to the Savant prior and label fallback.
 - Never manufacture missing prop information.
+- Never average in stale industry pages that still roster a confirmed inactive or the wrong slate.
 - Keep source/vendor projections immutable for comparison and sensitivity testing.
+- Default Market Inputs / Savant Prep leaves `Own` unchanged. Ownership research is opt-in.
 
-Detailed methodology belongs only in `core/MARKET_PROJECTIONS.md` and sport modules.
+Detailed methodology belongs only in `core/MARKET_PROJECTIONS.md` and sport modules. The executable card is `core/MARKET_INPUTS_RUN.md`.
+
+Do not change blend weights because one player beat or missed a locked composite. That is calibration archive (`core/LEARNING.md`), not a new rule.
 
 ## Projection, Ownership, Exposure Separation
 
 These are three different objects and must never be conflated:
 
-1. **DFS Engine Projection** = what the player is expected to score.
-2. **DFS Engine Expected Ownership** = what the field is expected to do.
+1. **DFS Engine Projection** = what the player is expected to score. Market Inputs returns this as the composite.
+2. **DFS Engine Expected Ownership** = what the field is expected to do. Not produced on a projection-only pass.
 3. **DFS Engine Exposure** = what our portfolio chooses to do.
 
 Projection feeds simulation. Expected ownership feeds leverage/field modeling. Exposure is the final portfolio decision after game theory and correlation.
@@ -147,7 +155,7 @@ GPT/AI should challenge:
 - fragile chalk assumptions
 - portfolios that contain many lineups but only one underlying bet
 
-GPT/AI must not invent data or override strong evidence with unsupported narrative.
+GPT/AI must not invent data or override strong evidence with unsupported narrative. GPT/AI must not write a story into `Proj`.
 
 ## Portfolio Governance
 
