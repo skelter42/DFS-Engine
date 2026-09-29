@@ -1,6 +1,6 @@
 # Vegas Consensus — the projection
 
-Do this every time. The first action is the prop board.
+Do this every time. The first action is the prop board. Vegas is the main engine.
 
 ## Order
 
@@ -11,13 +11,15 @@ Do this every time. The first action is the prop board.
 5. No site number either: Savant, unchanged.
 6. Savant 0 stays 0.
 
-The blend is across sportsbooks. A DFS site does not get averaged into a priced player. Savant does not get a weight.
+A two-sided prop is a Vegas projection. A hits price converts. Do not throw it out because runs or RBI were on a different tab. Sweep the game board, convert every priced player, and only then count who had no prop.
+
+The blend is across sportsbooks. A DFS site does not get averaged into a priced player.
 
 ## Board
 
-Loop games, not names. One event page covers the game. Pull every priced pitcher and every priced hitter. Both sides. A one-sided price is not a consensus. A hits price alone is not a full projection. Keep sweeping before a player falls through.
+Loop games, not names. One event page covers the game. Pull every priced pitcher and every priced hitter. Both sides.
 
-DraftKings points, when the component is posted: inning 2.25, strikeout 2, win 4, earned run −2, hit allowed −0.6, walk allowed −0.6. Single 3, double 5, triple 8, home run 10, RBI 2, run 2, walk 2, stolen base 5.
+DraftKings points, when the component is posted: inning 2.25, strikeout 2, win 4, earned run −2, hit allowed −0.6, walk allowed −0.6. Single 3, double 5, triple 8, home run 10, RBI 2, run 2, walk 2, stolen base 5. A hit price becomes expected hits, then those points.
 
 Do not invent a prop from a team total.
 
@@ -29,3 +31,5 @@ Every output, on the positive-Proj pool:
 - n industry, no prop (x%)
 - n Savant fallback (x%)
 - n zeros left at 0, not in the percentage
+
+Vegas should be the majority on a posted major-sport slate. If it is not, the board sweep is unfinished.
