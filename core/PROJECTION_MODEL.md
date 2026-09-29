@@ -1,62 +1,60 @@
 # Projection Model v3
 
-Status: production. Closed 2026-09-29. Replaces v2.
+Status: production. A run executes this. A run does not redesign it.
 
-A run executes this. A run does not redesign it.
-
-v2 blended a DFS-site median 50/50 with a prop. That commit is retired. The user corrected it the same day: the projection is Vegas-driven. Industry is the fill. Savant is the last resort, unchanged.
+The projection is Vegas-driven. Industry is the fill. Savant is the last resort, unchanged.
 
 ## Output
 
-One site-scoring number per positive-Savant-Proj player.
-
 ```
-Props exist     -> Proj = Vegas consensus, converted to site points
+Props exist     -> Proj = those prices, converted to site points
 No props        -> Proj = DFS-site median
 Neither         -> Proj = Savant, unchanged
 ```
 
 Own is unchanged. Savant 0 stays 0. Showdown CPT = 1.5 × the frozen FLEX number.
 
+## Odds
+
+Plus price: `100 / (odds + 100)`. +200 is 33%. +155 is 39%. +105 is 49%.
+
+Minus price: `odds / (odds + 100)`. −150 is 60%.
+
+Never use `odds / (odds + 100)` on a plus price. That flips it. +155 is not 61%.
+
+Both sides: divide each implied probability by the sum of the two. That removes the vig.
+
+One side: still convert. Haircut about 4.5% for the missing vig. A one-sided anytime goal is the goal piece. It is not thrown out.
+
+## Points
+
+A 0.5 price is the chance the event happens. Expected count is `-ln(1 - p)`.
+
+A counting line moves by the over probability. Expected value is the line plus the de-vigged over probability minus 0.5.
+
+Add the pieces that were priced. Do not average a DFS site into a priced piece. Do not invent a piece from a team total.
+
+A goal price alone is the goal piece, not the whole player. Add the shot line, or the outs line, before that name is finished.
+
+DraftKings, when posted. Goal 8.5, assist 5, shot 1.6, block 1.3. Save 0.7, goal against −3.5, win 6. Baseball inning 2.25, strikeout 2, win 4, earned run −2, hit allowed −0.6, walk allowed −0.6. Single 3, double 5, triple 8, home run 10, RBI 2, run 2, walk 2, stolen base 5. Football passing yard 0.04, passing touchdown 4, interception −1, rush or receiving yard 0.1, touchdown 6, reception 1.
+
 ## Order
 
-1. Lock the role. Confirmed inactive stays 0. Opener versus bulk versus full start is locked before the number.
-2. Hit the prop board, not the name. Multi-book. Every book that posts the market.
-3. If a convertible prop exists, that consensus is the projection. Do not average it with a DFS site.
-4. If the board has nothing on that player, use the DFS-site median.
-5. If there is no site number either, leave Savant as it came in.
+1. Savant 0 stays 0.
+2. Hit the prop board, not the name. DraftKings, FanDuel, BetMGM, and the other books.
+3. Convert every posted price. Median the books. That is Proj.
+4. No price: DFS-site median.
+5. No site number: Savant, unchanged.
 
-## Vegas consensus
-
-One number per player, not one number per book.
-
-1. American odds to implied probability. +150 is 40%. −150 is 60%.
-2. Remove the book edge. De-vig the two sides so they sum to 1. A one-sided price is not a consensus.
-3. Consensus is the median de-vigged probability across books, at the median line. Ten books are one number.
-4. Points come from that probability. A 0.5 over is the de-vigged chance the event happens, times the site points that event is worth. A counting line (strikeouts, outs, total bases) uses the de-vigged expectation, then the same site scoring.
-5. Add the components. Do not add a component that was not on the board.
-
-DraftKings MLB components, when posted: pitcher strikeouts, outs, earned runs, hits allowed, walks, win. Hitter hits, home runs, total bases, RBI, runs, walks, stolen bases.
-
-No prop means no Vegas number. Do not manufacture one from a team total.
-
-## Industry fill
-
-Only when the board has no convertible prop for that player.
-
-Numeric DFS projection sites only. Not articles, rankings, or betting write-ups. Collapse a site and a page copying it to one vote. Median of the votes. Tier A is THE BAT / BAT X, RotoGrinders, Daily Fantasy Fuel, FantasyPros consensus, NumberFire, Stokastic / Awesemo, Sabersim, FantasyLabs, RotoWire, and LineStar, when they publish a number.
+Try the whole positive file. The floor is the group the books price: baseball lineup and pitcher, football skill players and defense, hockey top lines, goalies, and priced defensemen.
 
 ## What v3 does not do
 
-- No 50/50 blend. Vegas is the projection when a prop exists, not half of it.
+- No 50/50 blend.
 - No Savant weight inside a Vegas or industry number.
-- No narrative adjustment.
 - No band.
+- No flipped plus-money formula.
 
 ## Log
 
-Every researched player is a row in `history/YYYY-MM-DD-<SLATE>-projection-log.md`: books used, de-vigged consensus, site points, and the label VEGAS, INDUSTRY, or SAVANT.
-
-## Version bump
-
-v2 was retired by explicit user correction on 2026-09-29, not by the three-slate error test. Change v3 only the same way, or after three logged slates if a different estimator beats Vegas-alone on absolute error.
+Every output reports the mix on the relevant group first, then the rest of the positive file: n Vegas, n industry, n Savant, as counts and percentages. Zeros are separate and not in the percentage.
