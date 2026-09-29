@@ -11,9 +11,13 @@ dependencies = ["pulp>=2.8"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+projections = ["requests>=2.31"]
 
 [project.scripts]
 dfs-engine = "dfs_engine.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
