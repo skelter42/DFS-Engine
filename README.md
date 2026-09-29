@@ -23,24 +23,27 @@ The goal is repeatable decision quality: ingest slate inputs, cross-check them a
 
 ## Market Inputs (Savant import)
 
-When the user attaches a Sim Savant CSV and asks for market inputs / Savant prep, the job is **one objective composite projection**, not lineups.
+When the user attaches a Sim Savant CSV and asks for market inputs / Savant prep, the job is **projection model v1**, not lineups.
 
+Model: `core/PROJECTION_MODEL.md`  
 Executable card: `core/MARKET_INPUTS_RUN.md`  
-Standard: `core/MARKET_PROJECTIONS.md`  
+Score: `core/PROJECTION_SCORE.md`  
 Vegas retrieval: `core/VEGAS_BOARD_SWEEP.md`  
 Savant contract: `core/SAVANT_PREP.md`
 
-`Proj` = industry numeric scrape + Vegas scrape, blended. No narrative.  
+Industry means other DFS projection sites. Consensus is their median. Vegas is the prop band around that median.  
 `Own` stays unchanged unless an ownership pass is requested.  
-Savant zeros stay 0. Showdown CPT = 1.5 × FLEX. Persist boards in `history/`, not the import CSV.
+Savant zeros stay 0. Showdown CPT = 1.5 × FLEX. Persist boards and the projection log in `history/`, not the import CSV.
 
 ## Repository Map
 
 - `core/ENGINE.md` — master slate workflow and portfolio rules
 - `core/AGENTS.md` — agent responsibilities and handoffs
+- `core/PROJECTION_MODEL.md` — production Market Inputs model v1
+- `core/PROJECTION_SCORE.md` — absolute-error score and required log
 - `core/MARKET_INPUTS_RUN.md` — executable Market Inputs / Savant Prep card
 - `core/MARKET_INPUTS.md` — full Market Inputs workflow
-- `core/MARKET_PROJECTIONS.md` — composite projection standard (industry + Vegas)
+- `core/MARKET_PROJECTIONS.md` — composite projection notes (estimator owner is the model file)
 - `core/VEGAS_BOARD_SWEEP.md` — board-first Vegas retrieval
 - `core/SAVANT_PREP.md` — Savant import contract (Proj in, Own pass-through)
 - `core/SIMULATION.md` — cross-sport outcome-distribution and Monte Carlo framework
@@ -53,7 +56,7 @@ Savant zeros stay 0. Showdown CPT = 1.5 × FLEX. Persist boards in `history/`, n
 - `sports/nhl.md` — NHL construction logic
 - `sports/nfl.md` — NFL construction logic and board-to-DK conversion
 - `schemas/` — durable input/output contracts
-- `history/` — locked Vegas boards and contest history
+- `history/` — locked Vegas boards, projection logs, and contest history
 - `learning/` — dated hypotheses and durable learnings awaiting or documenting promotion
 
 ## Standard Output Contract
