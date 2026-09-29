@@ -1,7 +1,6 @@
-"""python -m dfs_engine.projections --sport mlb --savant slate.csv --vegas vegas.csv --industry industry.csv --out upload.csv
+"""python -m dfs_engine.projections --sport mlb --date 2026-09-29 --savant slate.csv --pull --out upload.csv
 
-Pulls are Python. A chat summary of a prop page is not an input.
-This does not write an upload from Savant alone. A blend needs a pulled board.
+Same command every slate. The date and the Savant file change. The code does not.
 """
 
 from __future__ import annotations
@@ -12,7 +11,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 from dfs_engine.projections.blend import blend_frame
-from dfs_engine.projections.pull import MLB_PROP_MARKETS, NHL_PROP_MARKETS, pull_odds_api, write_rows
+from dfs_engine.projections.pull import pull_odds_api, write_rows
 
 
 def read_csv(path: Path) -> list[dict]:
@@ -31,30 +30,28 @@ def index_numbers(path: Path, value_field: str) -> dict[str, list[float]]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Pull industry + books in Python and blend to one Proj.")
+    parser = argparse.ArgumentParser(description="Pull industry + books for one slate and blend to one Proj.")
     parser.add_argument("--sport", required=True, choices=["mlb", "nhl", "nfl", "nba"])
+    parser.add_argument("--date", required=True, help="Slate date YYYY-MM-DD. Filters the book pull.")
     parser.add_argument("--savant", required=True, type=Path)
     parser.add_argument("--out", type=Path)
     parser.add_argument("--audit", type=Path)
-    parser.add_argument("--vegas", type=Path, help="CSV with Name and Vegas columns. Vegas is already site points.")
+    parser.add_argument("--vegas", type=Path, help="CSV with Name and Vegas columns, already in site points.")
     parser.add_argument("--industry", type=Path, help="CSV with Name and Proj columns, one row per site.")
-    parser.add_argument("--pull", action="store_true", help="Hit The Odds API. Requires ODDS_API_KEY.")
+    parser.add_argument("--pull", action="store_true", help="Hit The Odds API for --date. Requires ODDS_API_KEY.")
     parser.add_argument("--raw", type=Path, help="Where the raw prop rows are written.")
     args = parser.parse_args()
 
     if args.pull:
-        markets = MLB_PROP_MARKETS if args.sport == "mlb" else NHL_PROP_MARKETS
-        raw_rows = pull_odds_api(args.sport, markets)
-        dest = args.raw or Path(f"{args.sport}-props-raw.csv")
+        raw_rows = pull_odds_api(args.sport, args.date)
+        dest = args.raw or Path(f"{args.sport}-{args.date}-props-raw.csv")
         n = write_rows(dest, raw_rows)
         print(f"prop rows pulled: {n} -> {dest}")
-        if n < 100:
-            raise SystemExit("prop pull is too small to be a board. Do not blend a summarized fetch.")
 
     if args.out is None:
         return
     if args.vegas is None and args.industry is None:
-        raise SystemExit("refusing to write Proj from Savant alone. Pass --vegas and/or --industry from a Python pull.")
+        raise SystemExit("refusing to write Proj from Savant alone. Pass --vegas and/or --industry from this slate's pull.")
 
     vegas = {}
     if args.vegas:
@@ -76,8 +73,7 @@ def main() -> None:
             }
         )
     blended = blend_frame(rows)
-    counts = Counter(row["source"] for row in blended)
-    print("source mix:", dict(counts))
+    print("source mix:", dict(Counter(row["source"] for row in blended)))
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w", newline="") as handle:
