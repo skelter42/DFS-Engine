@@ -29,7 +29,7 @@ Industry and Vegas are **co-primary on the same player**. They do not take turns
 - **Vegas** answers what game they are in (player props when posted; otherwise implied team total + lineup slot + ML/win).
 - **Savant** is the prior, not the vote.
 
-Default weights when both layers exist:
+Historical starting weights when both layers exist (provisional; require paired out-of-sample calibration before treating as preferred):
 
 - Starting pitchers with K/IP/win markets + industry FD/DK: `0.40 industry + 0.40 Vegas + 0.20 Savant`
 - Posted 1–9 hitters with industry FPTS/components + team-total/slot: `0.40 industry + 0.32 Vegas-env + 0.28 Savant`

@@ -16,7 +16,7 @@ The output `Proj` is a **pure numeric composite**:
 
 1. **Public industry layer** — scrape every reachable numeric projection/component page for this exact slate.
 2. **Public Vegas layer** — board-first multi-book props + game markets; when hitter props are missing, implied team total + lineup slot is the Vegas layer. De-vig when possible.
-3. **Joint blend** — both layers plus Savant prior on the same name. Default when both exist: SP `0.40 / 0.40 / 0.20`, posted hitter `0.40 / 0.32 / 0.28`.
+3. **Joint blend** — both external layers are researched on the same name. The historical SP `0.40 / 0.40 / 0.20` and hitter `0.40 / 0.32 / 0.28` weights are provisional baselines, not established optimal weights. Where compatible components exist, reconcile them before DK scoring; use validated weights only after paired pre-lock evaluation under `core/PROJECTION_PIPELINE.md`.
 4. **Sim Savant** — fallback only when both public layers are thin for a positive-Proj player, or for Own-0 relievers with no save/K/outs market.
 
 No narrative in Proj. Own unchanged unless an ownership pass is requested.

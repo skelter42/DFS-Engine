@@ -13,7 +13,7 @@ Sim Savant remains responsible for simulation, lineup generation, 1% finish-rate
 - **2026-09-22:** Public scrape only. Do not stall for paid vendor CSVs.
 - **2026-09-23:** Industry and Vegas are **joint layers on the same player**. Headline coverage is the **active pool** (SP + posted/projected 1–9), not the raw positive-Proj file. Reliever fallback is allowed; starter fallback is not.
 
-Default joint weights when both layers exist: SP `0.40 industry / 0.40 Vegas / 0.20 Savant`. Posted hitter `0.40 industry / 0.32 Vegas-env / 0.28 Savant`. Vegas-env for hitters without props is implied team total × lineup-slot share.
+Historical joint-weight baselines were SP `0.40 industry / 0.40 Vegas / 0.20 Savant` and hitter `0.40 industry / 0.32 Vegas-env / 0.28 Savant`. They are provisional pending the paired scorecard in `core/PROJECTION_PIPELINE.md`. Team total and lineup slot constrain run environment and expected PA; multiplying them does not independently identify all hitter DK components.
 
 ## Easy trigger keywords
 

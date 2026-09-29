@@ -40,9 +40,9 @@ Do not build lineups. Do not rerun locked boards. Do not research finished games
 
 ## Grade honestly
 
-- **A+**: 10+ usable numeric industry sources **and** multi-book Vegas boards, reconciled.
+- **A+**: broad genuinely independent numeric sources, current multi-book boards, full component and role reconciliation, and an established paired scorecard for this sport/role. Ten sources alone do not prove accuracy.
 - **A**: several independent numeric sources + complete game boards for the positive-Proj starters. Typical Showdown.
-- **B or labeled fallback**: boards missing, or industry is a handful of stale/mixed-scoring pages.
+- **B or labeled fallback**: boards missing, or industry is a handful of stale/mixed-scoring pages. An honest lower-grade public pass may be delivered with gaps visible.
 
 Do not count a component-only cite (pass yards only) as a full DK projection source. It still feeds the Vegas/industry layers; it does not inflate the source count toward 10+.
 

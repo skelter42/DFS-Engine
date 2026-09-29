@@ -27,9 +27,9 @@ Industry numeric + Vegas prop work applies only to the **positive-Proj pool**. C
 
 This shrinks a large main-slate file down to the DFS-relevant universe without changing inactive/bench zeros.
 
-## Quality bar — A+ required
+## Quality bar — measured and auditable
 
-Every projection-only (or full Market Inputs) pass must aim for an **A or A+** on the composite.
+Every projection-only (or full Market Inputs) pass aims for the best available projection. A letter grade describes data completeness and validity for that slate; it is **not proof of out-of-sample accuracy**. Report a lower grade honestly and deliver the best audited file when public coverage is thin.
 
 An A+ pass means:
 - Industry: as many independent **numeric** projection sources as are realistically accessible for that sport/slate were pulled and blended (explicit target **10+** when the public ecosystem supports it; never stop at 1–2 sources).
@@ -38,8 +38,9 @@ An A+ pass means:
 - Coverage and provenance are reported honestly (Vegas-rich / Vegas-supported / Industry-blend / Fallback-heavy) **on the positive-Proj pool**.
 - No single source was treated as authoritative.
 - **No narrative, opinion, or qualitative judgment altered any projection value.**
+- An established paired pre-lock scorecard supports the conversion and blend for this sport/role. Source count by itself cannot earn an A+.
 
-Anything below A requires more research (more numeric sources / more prop lines) or an explicit user acceptance of the lower grade.
+Research material gaps before delivery; do not withhold a usable, clearly graded public-source pass solely to chase an arbitrary number of sources.
 
 ## Canonical hierarchy (mandatory)
 
@@ -60,7 +61,7 @@ Never begin from Savant and lightly adjust. Begin from the external composite �
 
 **Goal: A+ numeric read on what the industry is projecting.**
 
-- Target **at least 10 independent numeric projection sources** when the sport/slate publicly supports it.
+- Seek broad independent numeric coverage (10+ only when genuinely available). De-duplicate syndications and correlated derivative models before weighting; do not treat a count target as an accuracy metric.
 - Minimum acceptable for a non-fallback player on a mature slate: several independent numeric systems (do not stop after one or two).
 - **Only numeric projections count.** Rankings, articles, podcasts, and qualitative write-ups do not enter the blend unless they publish actual projected points or component stats.
 - Blend method: median, trimmed mean, or reliability-weighted consensus. Do not cherry-pick the highest or lowest.
@@ -182,7 +183,7 @@ Preserve for learning:
 - Vegas coverage tier
 - actual fantasy score and actual ownership when available
 
-If A+ composites do not outperform single-source priors over a meaningful sample, recalibrate weights — do not protect the assumption.
+Use paired out-of-sample pre-lock scorecards to compare the composite with single-source priors. If it does not improve, recalibrate weights, component distributions and role estimates — do not protect the assumption. See `core/PROJECTION_PIPELINE.md`.
 
 ## Sport modules
 
