@@ -23,34 +23,33 @@ The goal is repeatable decision quality: ingest slate inputs, cross-check them a
 
 ## Market Inputs (Savant import)
 
-When the user attaches a Sim Savant CSV and asks for market inputs / Savant prep, the job is **projection model v4**. Not lineups.
+When the user attaches a Sim Savant CSV and asks for market inputs / Savant prep, the job is **projection model v6**. Not lineups.
 
 Read in this order:
 
 1. `core/MARKET_INPUTS_RUN.md` — executable card
-2. `core/PROJECTION_MODEL.md` — v4 lock
-3. `src/dfs_engine/projections/` — the Python pull
-
-Do not follow a Vegas-only card. Do not follow a summarized page fetch. Those are retired.
+2. `core/PROJECTION_MODEL.md` — v6 lock
+3. `core/VEGAS_CONSENSUS.md` — price to site points
+4. `src/dfs_engine/projections/` — the Python scrape
 
 ```
-Python pull of industry sites + book props
-Both present   -> Proj = mean(industry median, de-vigged book consensus in site points)
-One present    -> Proj = that one
-Neither        -> Proj = Savant, unchanged
+Python scrape of a real sportsbook board
+Scoring markets posted  -> Proj = de-vigged book number, in site points
+Scoring markets missing -> Proj = Savant, unchanged
+Savant 0                -> 0
 ```
 
-The pull is Python. A full prop board is thousands of rows. Record the count. Under 100 prop rows is a failed pull.
+Books drive, every sport. Savant is the fallback, not a vote. A missing price is not filled. Industry is a check. No Odds API. A page summary is not a source.
 
-`Own` stays unchanged unless an ownership pass is requested. Savant zeros stay 0. Savant is the last priority, not a third equal vote.
+`Own` stays unchanged unless an ownership pass is requested. Savant zeros stay 0.
 
 ## Repository Map
 
-- `core/PROJECTION_MODEL.md` — production model v4
+- `core/PROJECTION_MODEL.md` — production model v6
 - `core/MARKET_INPUTS_RUN.md` — executable card
-- `core/VEGAS_CONSENSUS.md` — book-layer conversion
-- `src/dfs_engine/projections/` — Python pull and blend
+- `core/VEGAS_CONSENSUS.md` — book conversion
+- `src/dfs_engine/projections/` — Python scrape and blend
 - `core/SAVANT_PREP.md` — Savant import contract
-- `sports/mlb_market_inputs_projection_override.md` — MLB override, points at v4
+- `sports/mlb_market_inputs_projection_override.md` — MLB scoring, same v6 rule
 
 This repository is the canonical DFS Engine brain. New chats should read the run card and `core/PROJECTION_MODEL.md` before a Market Inputs run.
