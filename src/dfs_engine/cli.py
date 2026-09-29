@@ -11,6 +11,7 @@ from datetime import datetime
 
 from .market_nfl import InsufficientMarket, project_player
 from .market_sports import PROJECTORS
+from .central_projection import central_projection
 
 
 def build_import(source: Path, inputs: Path, output: Path, audit: Path) -> None:
@@ -48,7 +49,8 @@ def build_import(source: Path, inputs: Path, output: Path, audit: Path) -> None:
             record["status"] = "uncovered_source_preserved"
         else:
             try:
-                entry = dict(players[player_id], as_of_utc=data["as_of_utc"])
+                entry = dict(players[player_id], as_of_utc=data["as_of_utc"],
+                             slate=data["slate"])
                 if sport in {"MLB", "NHL"}:
                     if entry.get("game") not in data["games"]:
                         raise ValueError(f"Player {player_id} has an off-slate or missing game")
@@ -63,15 +65,17 @@ def build_import(source: Path, inputs: Path, output: Path, audit: Path) -> None:
                     kind = entry.get("kind")
                     if (sport, kind) not in PROJECTORS:
                         raise ValueError(f"Unsupported role for {sport}: {kind}")
-                    calc = PROJECTORS[sport, kind](entry)
+                    calc = (central_projection(entry, sport, kind)
+                            if entry.get("industry_fpts") else PROJECTORS[sport, kind](entry))
                 else:
                     calc = project_player(entry)
                 mult = 1.5 if row.get("Roster Position", "").upper() == "CPT" else 1.0
                 row["Proj"] = f'{calc["projection"] * mult:.4f}'
                 record.update(calc)
                 record["status"] = ("market_component_projection"
-                                    if any(v not in ("industry_component_prior",)
-                                           for v in calc["provenance"].values())
+                                    if (calc.get("component_deltas") or
+                                        any(v not in ("industry_component_prior",)
+                                            for v in calc["provenance"].values()))
                                     else "industry_component_projection")
                 record["captain_multiplier"] = mult
             except InsufficientMarket as exc:

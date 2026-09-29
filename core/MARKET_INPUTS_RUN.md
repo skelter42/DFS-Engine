@@ -2,6 +2,8 @@
 
 Executable NFL/MLB/NHL preview, odds normalization and paired post-slate evaluation: `core/PROJECTION_PIPELINE.md`. That prototype does not establish calibrated weights or guarantee complete coverage; report its fallback rows honestly.
 
+Scope boundary: return the most accurate defensible single pre-lock `Proj` per active player. Sim Savant handles simulation, stacks, exposures, field modeling and 1% finish rates. Do not run those stages during Market Inputs.
+
 This is the executable card. Methodology lives in `core/MARKET_PROJECTIONS.md`. Retrieval lives in `core/VEGAS_BOARD_SWEEP.md`. Default Savant contract lives in `core/SAVANT_PREP.md`.
 
 ## Goal

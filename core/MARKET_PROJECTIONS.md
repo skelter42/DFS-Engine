@@ -63,7 +63,7 @@ Never begin from Savant and lightly adjust. Begin from the external composite â€
 
 - Seek broad independent numeric coverage (10+ only when genuinely available). De-duplicate syndications and correlated derivative models before weighting; do not treat a count target as an accuracy metric.
 - Minimum acceptable for a non-fallback player on a mature slate: several independent numeric systems (do not stop after one or two).
-- **Only numeric projections count.** Rankings, articles, podcasts, and qualitative write-ups do not enter the blend unless they publish actual projected points or component stats.
+- **Only current numeric forecasts count.** Rankings, articles, podcasts, historical points per game, last-game fantasy points and salary/value displays do not enter the blend unless they publish actual pregame projected points or component stats for the exact slate. "DraftKings points" describes the scoring conversion, not DraftKings as a projection vendor.
 - Blend method: median, trimmed mean, or reliability-weighted consensus. Do not cherry-pick the highest or lowest.
 - Convert component stats to the target site scoring when needed instead of blindly averaging fantasy-point outputs from different scoring systems.
 

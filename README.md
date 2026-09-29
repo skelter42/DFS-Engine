@@ -23,7 +23,7 @@ The goal is repeatable decision quality: ingest slate inputs, cross-check them a
 
 ## Market Inputs (Savant import)
 
-The executable NFL/MLB/NHL component preview and frozen scorecard are described in `core/PROJECTION_PIPELINE.md`. NFL-specific input details: `schemas/NFL_MARKET_INPUTS.md`. The code converts paired prop prices to component expectations and DK mean points while retaining original projections for unsupported rows. Independent component priors and historical calibration remain required before a final full-slate grade.
+The executable NFL/MLB/NHL central projection preview and frozen scorecard are described in `core/PROJECTION_PIPELINE.md`. NFL-specific input details: `schemas/NFL_MARKET_INPUTS.md`. The preferred MLB/NHL path researches independent, current **industry pregame forecasts**, converts them to DraftKings scoring, and blends them with comparable sportsbook-derived stat expectations. DraftKings historical PPG is not a projection input. Market Inputs returns one `Proj`; Sim Savant does the simulations and lineup work. Independent component priors and historical calibration remain required before a final full-slate grade.
 
 When the user attaches a Sim Savant CSV and asks for market inputs / Savant prep, the job is **one objective composite projection**, not lineups.
 
