@@ -9,14 +9,15 @@ from __future__ import annotations
 
 from math import isfinite
 
-from .market_nfl import InsufficientMarket, _count_tail, estimate_stat, fair_over
+from .market_nfl import InsufficientMarket, estimate_stat, fair_over
 
 
 def _component(player: dict, name: str) -> tuple[float, str, object | None]:
     quotes = player.get("markets", {}).get(name)
     if quotes:
         try:
-            fit = estimate_stat(name, quotes, as_of_utc=player.get("as_of_utc"))
+            fit = estimate_stat(name, quotes, as_of_utc=player.get("as_of_utc"),
+                                dispersion_prior=player.get("dispersion_prior", {}).get(name))
             return fit.mean, fit.method, fit
         except InsufficientMarket:
             pass
@@ -68,7 +69,7 @@ def _probability(player: dict, name: str) -> tuple[float, str]:
 
 def _bonus(player: dict, key: str, estimate: object | None, threshold: int) -> tuple[float, str]:
     if estimate is not None:
-        return _count_tail(threshold, estimate.mean), "market_count_distribution"
+        return estimate.count_at_least(threshold), "market_count_distribution"
     if key not in player.get("bonus_priors", {}):
         raise InsufficientMarket(f"Missing bonus probability: {key}")
     value = float(player["bonus_priors"][key])
@@ -135,7 +136,8 @@ def project_nhl_skater(player: dict) -> dict:
     if player.get("markets", {}).get("points"):
         try:
             points_fit = estimate_stat("points", player["markets"]["points"],
-                                       as_of_utc=player.get("as_of_utc"))
+                                       as_of_utc=player.get("as_of_utc"),
+                                       dispersion_prior=player.get("dispersion_prior", {}).get("points"))
         except InsufficientMarket:
             pass
     if points_fit is not None and abs(points_fit.mean - (v["goals"] + v["assists"])) > max(

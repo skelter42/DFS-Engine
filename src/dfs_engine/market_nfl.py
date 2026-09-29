@@ -25,6 +25,7 @@ OTHER_COUNTS = {
     "shots", "blocks", "saves", "goals_against", "points",
     "shorthanded_points", "shootout_goals", "goalie_goals", "goalie_assists",
 }
+DISPERSION_REQUIRED = {"total_bases", "outs", "shots", "blocks", "saves"}
 
 
 class InsufficientMarket(ValueError):
@@ -66,12 +67,33 @@ def _count_tail(k: int, lam: float) -> float:
     return max(0.0, min(1.0, 1 - cdf))
 
 
+def _nb_tail(k: int, mean: float, shape: float) -> float:
+    if k <= 0:
+        return 1.0
+    if mean == 0:
+        return 0.0
+    p = shape / (shape + mean)
+    mass = p ** shape
+    cdf = mass
+    for j in range(1, k):
+        mass *= (j - 1 + shape) / j * (1 - p)
+        cdf += mass
+    return max(0.0, min(1.0, 1 - cdf))
+
+
 @dataclass(frozen=True)
 class StatEstimate:
     mean: float
     method: str
     sigma: float | None = None
     fit_error: float = 0.0
+    dispersion: float | None = None
+
+    def count_at_least(self, threshold: int) -> float:
+        if self.sigma is not None:
+            raise ValueError("Use yardage at_least for a continuous fit")
+        return (_count_tail(threshold, self.mean) if self.dispersion is None else
+                _nb_tail(threshold, self.mean, self.dispersion))
 
     def at_least(self, threshold: int) -> float:
         if self.sigma is None:
@@ -94,7 +116,8 @@ class YardEstimate(StatEstimate):
 
 
 def estimate_stat(kind: str, quotes: list[dict], sigma_prior: float | None = None,
-                  as_of_utc: str | None = None) -> StatEstimate:
+                  as_of_utc: str | None = None,
+                  dispersion_prior: float | None = None) -> StatEstimate:
     """Fit a censored normal (yards) or Poisson (counts) to paired quotes.
 
     Each quote is {threshold, over, under}; count thresholds mean >= k,
@@ -146,15 +169,23 @@ def estimate_stat(kind: str, quotes: list[dict], sigma_prior: float | None = Non
             raise InsufficientMarket("Yard quotes disagree beyond 10 probability points")
         z = mu / sigma
         mean = mu * _normal_cdf(z) + sigma * exp(-z * z / 2) / sqrt(2 * pi)
-        return YardEstimate(mean, method, sigma, fit_error, mu)
+        return YardEstimate(mean=mean, method=method, sigma=sigma,
+                            fit_error=fit_error, latent_mean=mu)
 
     for t, _ in points:
         if t < 1 or not t.is_integer():
             raise ValueError("Count thresholds must be integers >= 1")
-    # Market fit is a working Poisson model, not a claim of true Poisson
-    # scoring.  Preserve disagreement so it can be calibrated by role.
+    # These volume/stat markets cannot safely be fitted by a one-line
+    # Poisson guess. The shape is supplied by independent historical
+    # calibration and must later be checked out of sample.
+    if kind in DISPERSION_REQUIRED and dispersion_prior is None:
+        raise InsufficientMarket(f"{kind} requires calibrated dispersion_prior")
+    if dispersion_prior is not None and (not isfinite(dispersion_prior) or dispersion_prior <= 0):
+        raise ValueError("Negative-binomial shape must be positive")
+    tail = (lambda k, mean: _count_tail(k, mean) if dispersion_prior is None
+            else _nb_tail(k, mean, dispersion_prior))
     def loss(lam: float) -> float:
-        return sum((_count_tail(int(t), lam) - p) ** 2 for t, p in points)
+        return sum((tail(int(t), lam) - p) ** 2 for t, p in points)
     lo, hi = 0.0, 30.0
     for _ in range(100):
         left = lo + (hi - lo) / 3
@@ -164,10 +195,11 @@ def estimate_stat(kind: str, quotes: list[dict], sigma_prior: float | None = Non
         else:
             lo = left
     lam = (lo + hi) / 2
-    error = max(abs(_count_tail(int(t), lam) - p) for t, p in points)
+    error = max(abs(tail(int(t), lam) - p) for t, p in points)
     if error > 0.10:
         raise InsufficientMarket("Count quotes disagree beyond 10 probability points")
-    return StatEstimate(lam, "paired_count_poisson", fit_error=error)
+    method = "paired_count_poisson" if dispersion_prior is None else "paired_count_neg_binomial"
+    return StatEstimate(lam, method, fit_error=error, dispersion=dispersion_prior)
 
 
 def project_player(player: dict) -> dict:

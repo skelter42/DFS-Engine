@@ -5,6 +5,7 @@ import pytest
 
 from dfs_engine.cli import build_import
 from dfs_engine.market_nfl import InsufficientMarket
+from dfs_engine.market_nfl import estimate_stat
 from dfs_engine.market_sports import (project_mlb_hitter, project_mlb_pitcher,
                                       project_nhl_goalie, project_nhl_skater)
 
@@ -38,6 +39,15 @@ def test_nhl_shots_bonus_uses_distribution_not_threshold_line():
     del player["bonus_priors"]["five_shots"]
     with pytest.raises(InsufficientMarket):
         project_nhl_skater(player)
+
+
+def test_high_variance_count_market_requires_external_dispersion():
+    quote = [{"threshold": 3, "over": -110, "under": -110}]
+    with pytest.raises(InsufficientMarket, match="dispersion_prior"):
+        estimate_stat("shots", quote)
+    fit = estimate_stat("shots", quote, dispersion_prior=6)
+    assert fit.method == "paired_count_neg_binomial"
+    assert fit.count_at_least(3) == pytest.approx(0.5, abs=0.001)
 
 
 def test_nhl_goalie_shutout_can_coexist_with_shootout_loss():
