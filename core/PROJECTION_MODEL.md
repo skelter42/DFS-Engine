@@ -1,17 +1,17 @@
-# Projection Model v1
+# Projection Model v2
 
-Status: production. Closed 2026-09-29.
+Status: production. Closed 2026-09-29. Replaces v1.
 
-This is the finished Market Inputs model. A run executes it. A run does not redesign it.
+A run executes this. A run does not redesign it.
 
-Constants below are declared, not fitted. Changing one is a version bump in this file after the score in `core/PROJECTION_SCORE.md` says the change beats both layers alone. One slate cannot bump the version.
+Industry means other DFS projection sites. Vegas means the sportsbook prop for that player. The projection is a blend of those two, and only those two.
 
 ## Output
 
 One site-scoring number per positive-Savant-Proj player.
 
 ```
-Proj = consensus, pulled to the Vegas band if it sits outside
+Proj = 0.50 × DFS-site median + 0.50 × Vegas prop
 ```
 
 Own is unchanged. Savant 0 stays 0. Showdown CPT = 1.5 × the frozen FLEX number.
@@ -19,35 +19,40 @@ Own is unchanged. Savant 0 stays 0. Showdown CPT = 1.5 × the frozen FLEX number
 ## Inputs
 
 1. Other DFS projection sites. Numeric projections only. Not articles, rankings, podcasts, or betting write-ups.
-2. Vegas player props. Where the sportsbook has the player. De-vigged, one number per player, not one number per book.
+2. Vegas player props and game odds. Where the sportsbook has the player. De-vigged. One number per player, not one number per book.
 3. Role facts. Official inactive, posted order, starter versus bulk. Locked before the number.
 
-Savant is the import file. It is not an input vote.
+Savant is the import file. It is not in the blend.
 
 ## Formula
 
 1. Drop a site page that still allocates to a confirmed inactive, the wrong slate, the wrong site scoring with no conversion, or a timestamp older than the official role news.
-2. Convert every remaining number to the target site scoring.
+2. Convert every remaining DFS-site number and the Vegas prop to the target site scoring.
 3. Collapse a site and a page copying it to one vote.
-4. Tier A votes if three or more exist. Tier B does not vote in that case. Tier A is THE BAT / BAT X, RotoGrinders, Daily Fantasy Fuel, FantasyPros consensus, NumberFire, Stokastic / Awesemo, Sabersim, FantasyLabs, RotoWire, and LineStar, when they publish a number. Tier B is any other DFS site page.
-5. Consensus = median of the votes that remain. Odd count: central vote. Even count: mean of the two central votes. One vote: that vote. None: Savant fallback, labeled.
-6. Vegas number = de-vigged multi-book prop, converted once. Band = that number ± max(1.5 site points, 12% of the Vegas number).
-7. If consensus is inside the band, Proj = consensus. If outside, Proj = nearest edge. No converted prop: Proj = consensus, labeled INDUSTRY_ONLY. Do not invent a band.
-8. If player totals break the posted game total, drop the stale vote and recompute. Do not reweight.
+4. Tier A votes if three or more exist. Tier B does not vote in that case. Tier A is THE BAT / BAT X, RotoGrinders, Daily Fantasy Fuel, FantasyPros consensus, NumberFire, Stokastic / Awesemo, Sabersim, FantasyLabs, RotoWire, and LineStar, when they publish a number.
+5. DFS-site median = median of the votes that remain. Odd count: central vote. Even count: mean of the two central votes.
+6. Vegas number = de-vigged multi-book prop, converted once. Ten books are one number.
+7. Blend:
+   - Both exist: Proj = 0.50 × DFS-site median + 0.50 × Vegas number.
+   - DFS sites only: Proj = DFS-site median, labeled INDUSTRY_ONLY.
+   - Vegas only: Proj = Vegas number, labeled VEGAS_ONLY.
+   - Neither: Savant fallback, labeled.
+8. If player totals break the posted game total, drop the stale site vote and recompute. Do not invent a third weight.
 9. Round to 2 decimals.
 
-## What v1 does not do
+No converted prop means no Vegas half. Do not manufacture a prop from a team total.
+
+## What v2 does not do
 
 - No Savant weight.
-- No peer vote for Vegas.
+- No per-site weight inside the median.
 - No narrative adjustment.
-- No position-specific band. Width is the declared constant above.
-- No trimmed mean. The candidate is the median until a version bump.
+- No band. Vegas is half the blend when a prop exists, not a fence around the sites.
 
 ## Log
 
-Every researched player is a row in `history/YYYY-MM-DD-<SLATE>-projection-log.md` with the columns in `core/PROJECTION_SCORE.md`. Actuals are filled after the slate. They do not rewrite that slate's Proj.
+Every researched player is a row in `history/YYYY-MM-DD-<SLATE>-projection-log.md`: DFS-site median, Vegas number, Proj, and later the actual site points.
 
 ## Version bump
 
-Only after three logged slates, and only if the new rule beats both the consensus alone and the Vegas number alone on absolute error. Allowed bumps: band width by position, median to a 60% trimmed mean, a Tier A source moving to Tier B. Write the before/after error next to the bump.
+The 0.50 / 0.50 split is declared. Change it only after three logged slates, and only if a new split beats this one on absolute error against both layers alone. One slate cannot bump the version.
