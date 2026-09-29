@@ -1,58 +1,62 @@
-# Projection Model v2
+# Projection Model v3
 
-Status: production. Closed 2026-09-29. Replaces v1.
+Status: production. Closed 2026-09-29. Replaces v2.
 
 A run executes this. A run does not redesign it.
 
-Industry means other DFS projection sites. Vegas means the sportsbook prop for that player. The projection is a blend of those two, and only those two.
+v2 blended a DFS-site median 50/50 with a prop. That commit is retired. The user corrected it the same day: the projection is Vegas-driven. Industry is the fill. Savant is the last resort, unchanged.
 
 ## Output
 
 One site-scoring number per positive-Savant-Proj player.
 
 ```
-Proj = 0.50 × DFS-site median + 0.50 × Vegas prop
+Props exist     -> Proj = Vegas consensus, converted to site points
+No props        -> Proj = DFS-site median
+Neither         -> Proj = Savant, unchanged
 ```
 
 Own is unchanged. Savant 0 stays 0. Showdown CPT = 1.5 × the frozen FLEX number.
 
-## Inputs
+## Order
 
-1. Other DFS projection sites. Numeric projections only. Not articles, rankings, podcasts, or betting write-ups.
-2. Vegas player props and game odds. Where the sportsbook has the player. De-vigged. One number per player, not one number per book.
-3. Role facts. Official inactive, posted order, starter versus bulk. Locked before the number.
+1. Lock the role. Confirmed inactive stays 0. Opener versus bulk versus full start is locked before the number.
+2. Hit the prop board, not the name. Multi-book. Every book that posts the market.
+3. If a convertible prop exists, that consensus is the projection. Do not average it with a DFS site.
+4. If the board has nothing on that player, use the DFS-site median.
+5. If there is no site number either, leave Savant as it came in.
 
-Savant is the import file. It is not in the blend.
+## Vegas consensus
 
-## Formula
+One number per player, not one number per book.
 
-1. Drop a site page that still allocates to a confirmed inactive, the wrong slate, the wrong site scoring with no conversion, or a timestamp older than the official role news.
-2. Convert every remaining DFS-site number and the Vegas prop to the target site scoring.
-3. Collapse a site and a page copying it to one vote.
-4. Tier A votes if three or more exist. Tier B does not vote in that case. Tier A is THE BAT / BAT X, RotoGrinders, Daily Fantasy Fuel, FantasyPros consensus, NumberFire, Stokastic / Awesemo, Sabersim, FantasyLabs, RotoWire, and LineStar, when they publish a number.
-5. DFS-site median = median of the votes that remain. Odd count: central vote. Even count: mean of the two central votes.
-6. Vegas number = de-vigged multi-book prop, converted once. Ten books are one number.
-7. Blend:
-   - Both exist: Proj = 0.50 × DFS-site median + 0.50 × Vegas number.
-   - DFS sites only: Proj = DFS-site median, labeled INDUSTRY_ONLY.
-   - Vegas only: Proj = Vegas number, labeled VEGAS_ONLY.
-   - Neither: Savant fallback, labeled.
-8. If player totals break the posted game total, drop the stale site vote and recompute. Do not invent a third weight.
-9. Round to 2 decimals.
+1. American odds to implied probability. +150 is 40%. −150 is 60%.
+2. Remove the book edge. De-vig the two sides so they sum to 1. A one-sided price is not a consensus.
+3. Consensus is the median de-vigged probability across books, at the median line. Ten books are one number.
+4. Points come from that probability. A 0.5 over is the de-vigged chance the event happens, times the site points that event is worth. A counting line (strikeouts, outs, total bases) uses the de-vigged expectation, then the same site scoring.
+5. Add the components. Do not add a component that was not on the board.
 
-No converted prop means no Vegas half. Do not manufacture a prop from a team total.
+DraftKings MLB components, when posted: pitcher strikeouts, outs, earned runs, hits allowed, walks, win. Hitter hits, home runs, total bases, RBI, runs, walks, stolen bases.
 
-## What v2 does not do
+No prop means no Vegas number. Do not manufacture one from a team total.
 
-- No Savant weight.
-- No per-site weight inside the median.
+## Industry fill
+
+Only when the board has no convertible prop for that player.
+
+Numeric DFS projection sites only. Not articles, rankings, or betting write-ups. Collapse a site and a page copying it to one vote. Median of the votes. Tier A is THE BAT / BAT X, RotoGrinders, Daily Fantasy Fuel, FantasyPros consensus, NumberFire, Stokastic / Awesemo, Sabersim, FantasyLabs, RotoWire, and LineStar, when they publish a number.
+
+## What v3 does not do
+
+- No 50/50 blend. Vegas is the projection when a prop exists, not half of it.
+- No Savant weight inside a Vegas or industry number.
 - No narrative adjustment.
-- No band. Vegas is half the blend when a prop exists, not a fence around the sites.
+- No band.
 
 ## Log
 
-Every researched player is a row in `history/YYYY-MM-DD-<SLATE>-projection-log.md`: DFS-site median, Vegas number, Proj, and later the actual site points.
+Every researched player is a row in `history/YYYY-MM-DD-<SLATE>-projection-log.md`: books used, de-vigged consensus, site points, and the label VEGAS, INDUSTRY, or SAVANT.
 
 ## Version bump
 
-The 0.50 / 0.50 split is declared. Change it only after three logged slates, and only if a new split beats this one on absolute error against both layers alone. One slate cannot bump the version.
+v2 was retired by explicit user correction on 2026-09-29, not by the three-slate error test. Change v3 only the same way, or after three logged slates if a different estimator beats Vegas-alone on absolute error.
