@@ -1,22 +1,24 @@
 # Market Inputs — Run Card
 
-This is the executable card. The model is `core/PROJECTION_MODEL.md` v3. Score and log live in `core/PROJECTION_SCORE.md`. Retrieval lives in `core/VEGAS_BOARD_SWEEP.md`. Default Savant contract lives in `core/SAVANT_PREP.md`.
+This is the executable card. The model is `core/PROJECTION_MODEL.md` v3. The operating framework is `core/VEGAS_CONSENSUS.md`. Score and log live in `core/PROJECTION_SCORE.md`. Retrieval lives in `core/VEGAS_BOARD_SWEEP.md`. Default Savant contract lives in `core/SAVANT_PREP.md`.
 
 ## Goal
 
 Execute projection model v3. Do not redesign it on the slate.
 
-Vegas drives. A prop board is a set of odds. Convert the odds to probabilities, take the book edge out, consensus the books, and turn that probability into site points. That number is the projection.
+Look across prop boards. DraftKings, FanDuel, BetMGM, and the other books that post the market. Each price is a percentage. Strip the book edge. Consensus those percentages. Convert the consensus into site points. That expected point total is what gets uploaded to Savant.
+
+The blend is across sportsbooks. It is not a blend with a DFS site, and it is not a blend with Savant.
 
 ```
-Props exist  -> Proj = Vegas consensus
+Props exist  -> Proj = multi-book de-vigged consensus, in site points
 No props     -> Proj = DFS-site median
 Neither      -> Proj = Savant, unchanged
 Own          = unchanged
 Zeros        = stay 0
 ```
 
-No 50/50. Savant does not enter a Vegas number or an industry number.
+Savant is the last priority.
 
 ## Default invocation
 
@@ -31,17 +33,17 @@ Do not build lineups. Do not rerun locked boards. Do not research finished games
 2. Split the pool: positive Proj = research universe. Savant 0 stays 0.
 3. Lock roles before numbers. A confirmed inactive stays 0.
 4. Cache game markets once per game (spread / total / ML).
-5. Hit boards, not names. Multi-book. De-vig every two-sided price. Median across books. Convert once to site points.
-6. Where the board has a convertible prop, that consensus is Proj. Do not blend a DFS site on top of it.
-7. Where the board is empty, scrape DFS projection sites and take the median.
+5. Hit boards, not names. DraftKings, FanDuel, BetMGM at minimum, plus any other book on the board. De-vig inside each book. Median across books. Convert once to site points. Detail: `core/VEGAS_CONSENSUS.md`.
+6. Where the board has a two-sided prop, that consensus is Proj. Do not blend a DFS site on top of it.
+7. Where no book priced the player, scrape DFS projection sites and take the median.
 8. Where both are empty, leave Savant unchanged.
 9. Write the boards file and the projection log. Return the import CSV + coverage audit. Stop.
 
 ## Grade honestly
 
-- A+: multi-book two-sided props on the positive-Proj starters and the posted 1–9, converted, not blended.
-- A: multi-book props on the starters, industry fill only on names the board skipped.
-- B: props missing on starters, or the board is one book and one side.
+- A+: two-sided prices from DraftKings, FanDuel, and BetMGM on the starters and the posted order, converted, not blended with a site.
+- A: multi-book props on the starters. Industry only where the board skipped a name.
+- B: one book, or one side, or starters with no prop.
 
 ## What this card does not do
 
