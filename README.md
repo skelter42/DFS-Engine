@@ -23,27 +23,33 @@ The goal is repeatable decision quality: ingest slate inputs, cross-check them a
 
 ## Market Inputs (Savant import)
 
-When the user attaches a Sim Savant CSV and asks for market inputs / Savant prep, the job is **projection model v2**, not lineups.
+When the user attaches a Sim Savant CSV and asks for market inputs / Savant prep, the job is **projection model v3**. Not lineups. Not a 50/50 blend.
 
-Model: `core/PROJECTION_MODEL.md`  
-Executable card: `core/MARKET_INPUTS_RUN.md`  
-Score: `core/PROJECTION_SCORE.md`  
-Vegas retrieval: `core/VEGAS_BOARD_SWEEP.md`  
-Savant contract: `core/SAVANT_PREP.md`
+Read in this order:
 
-Industry means other DFS projection sites. Their median is one half. The de-vigged Vegas prop is the other half.  
-`Proj = 0.50 × DFS-site median + 0.50 × Vegas prop` when both exist.  
-`Own` stays unchanged unless an ownership pass is requested.  
-Savant zeros stay 0. Savant is not in the blend. Showdown CPT = 1.5 × FLEX. Persist boards and the projection log in `history/`, not the import CSV.
+1. `core/MARKET_INPUTS_RUN.md` — executable card
+2. `core/VEGAS_CONSENSUS.md` — how to build the number
+3. `core/PROJECTION_MODEL.md` — v3 lock
+
+Do not follow a 50/50 blend, an industry-median-plus-band, or a Savant weight. Those are retired.
+
+```
+Props exist  -> Proj = multi-book de-vigged consensus, in site points
+No props     -> Proj = DFS-site median
+Neither      -> Proj = Savant, unchanged
+```
+
+Books: DraftKings, FanDuel, BetMGM, plus any other book on the board. +150 is 40%. Strip the vig inside each book. Median the books. Convert that percentage into site points. That is the upload.
+
+`Own` stays unchanged unless an ownership pass is requested. Savant zeros stay 0. Savant is the last priority.
 
 ## Repository Map
 
-- `core/PROJECTION_MODEL.md` — production Market Inputs model v2
+- `core/VEGAS_CONSENSUS.md` — operating framework. Read this.
+- `core/PROJECTION_MODEL.md` — production model v3
 - `core/MARKET_INPUTS_RUN.md` — executable card
-- `core/PROJECTION_SCORE.md` — absolute-error score and required log
-- `core/VEGAS_BOARD_SWEEP.md` — board-first Vegas retrieval
+- `core/VEGAS_BOARD_SWEEP.md` — board-first retrieval
 - `core/SAVANT_PREP.md` — Savant import contract
-- `sports/mlb_market_inputs_projection_override.md` — MLB Proj override, points at model v2
-- `sports/nfl.md` — NFL board-to-DK conversion
+- `sports/mlb_market_inputs_projection_override.md` — MLB override, points at v3
 
-This repository is the canonical DFS Engine brain. New chats should read the model file before a Market Inputs run.
+This repository is the canonical DFS Engine brain. New chats should read the run card and `core/VEGAS_CONSENSUS.md` before a Market Inputs run.
