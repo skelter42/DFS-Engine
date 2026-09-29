@@ -16,8 +16,8 @@ The output `Proj` is a **pure numeric composite**:
 
 1. **Public industry layer** — scrape every reachable numeric projection/component page for this exact slate.
 2. **Public Vegas layer** — board-first multi-book props + game markets; when hitter props are missing, implied team total + lineup slot is the Vegas layer. De-vig when possible.
-3. **Joint blend** — both layers plus Savant prior on the same name. Default when both exist: SP `0.40 / 0.40 / 0.20`, posted hitter `0.40 / 0.32 / 0.28`.
-4. **Sim Savant** — fallback only when both public layers are thin for a positive-Proj player, or for Own-0 relievers with no save/K/outs market.
+3. **Median lock** — convert both layers to site scoring, collapse source families, `Proj` = median. Vegas is one vote plus the team-total check, not a 40% weight. Canonical rule: `core/MARKET_PROJECTIONS.md`.
+4. **Sim Savant** — does not vote when any usable external vote exists. Fallback only when both public layers are thin for a positive-Proj player, or for Own-0 relievers with no save/K/outs market.
 
 No narrative in Proj. Own unchanged unless an ownership pass is requested.
 
@@ -57,6 +57,6 @@ The full positive-Proj pool may still show a large fallback share because of rel
 
 ## Core philosophy
 
-**Scrape public industry projections + scrape sportsbook odds → blend both into one composite.**
-Industry is talent. Vegas is environment. Savant is the prior.
+**Scrape public industry projections + scrape sportsbook odds → median of site-converted votes.**
+Industry is talent. Vegas is one vote and the environment check. Savant is the fallback, not a vote.
 Trust Savant zeros. Do not stall for files the user will not attach.
