@@ -1,21 +1,19 @@
 # Market-Derived DFS Projections
 
-Status: superseded for the estimator. The production model is `core/PROJECTION_MODEL.md` v3. The operating steps are `core/VEGAS_CONSENSUS.md`. The executable card is `core/MARKET_INPUTS_RUN.md`.
-
-Do not use the industry-median-plus-Vegas-band lock in older revisions of this file. Do not use a 50/50 blend. Do not give Savant a weight.
-
-## The number
+Status: v4. Industry leaders and the book board are co-primary. The pull is Python.
 
 ```
-Props exist  -> Proj = multi-book de-vigged consensus, in site points
-No props     -> Proj = DFS-site median
-Neither      -> Proj = Savant, unchanged
+Both present   -> Proj = mean(industry median, de-vigged book consensus in site points)
+One present    -> Proj = that one
+Neither        -> Proj = Savant, unchanged
+Savant 0       -> 0
 ```
 
-The blend is across sportsbooks (DraftKings, FanDuel, BetMGM, and the other books on the board). It is not a blend with a DFS site.
+Do not use the Vegas-only card from earlier on 2026-09-29. Do not equal-weight Savant into a priced player. Do not rescale the book number onto the industry mean and spread.
 
 ## Still in force
 
+- Pull with `python -m dfs_engine.projections`. Record the raw row count.
 - Savant 0 stays 0. Do not research those rows.
 - Own stays unchanged unless the user asks for an ownership pass.
 - No narrative in Proj.

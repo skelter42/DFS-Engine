@@ -23,33 +23,34 @@ The goal is repeatable decision quality: ingest slate inputs, cross-check them a
 
 ## Market Inputs (Savant import)
 
-When the user attaches a Sim Savant CSV and asks for market inputs / Savant prep, the job is **projection model v3**. Not lineups. Not a 50/50 blend.
+When the user attaches a Sim Savant CSV and asks for market inputs / Savant prep, the job is **projection model v4**. Not lineups.
 
 Read in this order:
 
 1. `core/MARKET_INPUTS_RUN.md` — executable card
-2. `core/VEGAS_CONSENSUS.md` — how to build the number
-3. `core/PROJECTION_MODEL.md` — v3 lock
+2. `core/PROJECTION_MODEL.md` — v4 lock
+3. `src/dfs_engine/projections/` — the Python pull
 
-Do not follow a 50/50 blend, an industry-median-plus-band, or a Savant weight. Those are retired.
+Do not follow a Vegas-only card. Do not follow a summarized page fetch. Those are retired.
 
 ```
-Props exist  -> Proj = multi-book de-vigged consensus, in site points
-No props     -> Proj = DFS-site median
-Neither      -> Proj = Savant, unchanged
+Python pull of industry sites + book props
+Both present   -> Proj = mean(industry median, de-vigged book consensus in site points)
+One present    -> Proj = that one
+Neither        -> Proj = Savant, unchanged
 ```
 
-Books: DraftKings, FanDuel, BetMGM, plus any other book on the board. +150 is 40%. Strip the vig inside each book. Median the books. Convert that percentage into site points. That is the upload.
+The pull is Python. A full prop board is thousands of rows. Record the count. Under 100 prop rows is a failed pull.
 
-`Own` stays unchanged unless an ownership pass is requested. Savant zeros stay 0. Savant is the last priority.
+`Own` stays unchanged unless an ownership pass is requested. Savant zeros stay 0. Savant is the last priority, not a third equal vote.
 
 ## Repository Map
 
-- `core/VEGAS_CONSENSUS.md` — operating framework. Read this.
-- `core/PROJECTION_MODEL.md` — production model v3
+- `core/PROJECTION_MODEL.md` — production model v4
 - `core/MARKET_INPUTS_RUN.md` — executable card
-- `core/VEGAS_BOARD_SWEEP.md` — board-first retrieval
+- `core/VEGAS_CONSENSUS.md` — book-layer conversion
+- `src/dfs_engine/projections/` — Python pull and blend
 - `core/SAVANT_PREP.md` — Savant import contract
-- `sports/mlb_market_inputs_projection_override.md` — MLB override, points at v3
+- `sports/mlb_market_inputs_projection_override.md` — MLB override, points at v4
 
-This repository is the canonical DFS Engine brain. New chats should read the run card and `core/VEGAS_CONSENSUS.md` before a Market Inputs run.
+This repository is the canonical DFS Engine brain. New chats should read the run card and `core/PROJECTION_MODEL.md` before a Market Inputs run.

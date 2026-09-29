@@ -1,13 +1,12 @@
 # Market Inputs — Run Card
 
-Search Vegas odds and props. Convert them into projections. Write the file.
+Pull industry leaders and the sportsbook board in Python. Blend them. Write the file.
 
 1. Keep Name, DFS ID, row order, Own.
-2. Savant 0 stays 0.
-3. For each game, open the prop boards.
-4. Convert the prices into site points. That is Proj.
-5. No prop: DFS-site median. No site number: Savant, unchanged.
-6. Report how many were Vegas, how many were industry, how many were Savant. Zeros separate.
-7. Stop. Do not build lineups.
+2. Savant 0 stays 0. Do not research those rows.
+3. Run `python -m dfs_engine.projections --sport <sport> --pull`. Do not substitute a summarized page fetch. Write the raw rows and record the count. A full board is thousands of rows. Under 100 prop rows is a failed pull.
+4. Industry median and the de-vigged book consensus are co-primary. Both present: mean of the two, in site points. One present: that one. Neither: Savant, unchanged.
+5. Report both / vegas-only / industry-only / savant / zeros.
+6. Stop. Do not build lineups.
 
-Read `core/VEGAS_CONSENSUS.md` for the conversion. Do not add a rule that blocks a posted price.
+Read `core/PROJECTION_MODEL.md` and `core/VEGAS_CONSENSUS.md`. The pull lives in `src/dfs_engine/projections/`.

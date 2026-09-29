@@ -1,9 +1,19 @@
-# Projection Model v3
+# Projection Model v4
 
-Search Vegas odds and props. Convert them into site points. That is the projection source.
+One number. Industry leaders and sportsbook props, pulled in Python, then blended.
 
-No prop: DFS-site median. No site number: Savant, unchanged. Savant 0 stays 0. Own stays unchanged.
+```
+Python pull of industry sites + book props
+Both present   -> Proj = mean(industry median, de-vigged book consensus in site points)
+One present    -> Proj = that one
+Neither        -> Proj = Savant, unchanged
+Savant 0       -> 0
+```
 
-Plus price: `100 / (odds + 100)`. Minus price: `odds / (odds + 100)`. Do not flip a plus price.
+Do not use a summarized page fetch as the board. Run `python -m dfs_engine.projections`. A full prop pull is thousands of rows. Record the count.
 
-Details of the conversion are in `core/VEGAS_CONSENSUS.md`.
+Industry is numeric DFS projection sites. Articles are not industry. Books are DraftKings, FanDuel, BetMGM, plus any other book the pull returns. Strip the vig inside each book. Median the books.
+
+Own stays unchanged. Savant is the file skeleton, not a third equal vote.
+
+Conversion math is `core/VEGAS_CONSENSUS.md`. The executable card is `core/MARKET_INPUTS_RUN.md`.
