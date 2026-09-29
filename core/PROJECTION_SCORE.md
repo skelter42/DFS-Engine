@@ -1,42 +1,24 @@
 # Projection Score
 
-The production estimator is model v2 in `core/PROJECTION_MODEL.md`: 0.50 × DFS-site median + 0.50 × Vegas prop. This file says what "best" means and what every run must log.
+The production estimator is model v3 in `core/PROJECTION_MODEL.md`. Vegas consensus is the projection. Industry is the fill. Savant is the last resort.
 
-## The score
+The 0.50 / 0.50 split is retired. Do not score a slate by lineup finish.
 
-Primary score: absolute error against actual site points, by position, on the positive-Proj pool.
+## Required mix, every output
 
-`AbsError = |Proj - Actual|`
+On the positive-Proj pool only. Zeros are not in the denominator.
 
-Do not score a slate by lineup finish.
+- Vegas: a two-sided prop converted to site points.
+- Industry: no prop after the board sweep, DFS-site median used.
+- Savant: no prop and no site number, original left unchanged.
 
-## Required log
+Report counts and percentages. Example: 40 Vegas (51%), 28 industry (36%), 10 Savant (13%), 223 zeros left at 0.
 
-Every researched player is one row in `history/YYYY-MM-DD-<SLATE>-projection-log.md`. Zeros are not rows.
+## Log
 
-| Name | DFS ID | Pos | RoleConfirmed | SiteMedian | VegasNumber | Proj | Actual | AbsError |
-|---|---|---|---|---:|---:|---:|---:|---:|
+Every researched player is one row in `history/YYYY-MM-DD-<SLATE>-projection-log.md`.
 
-- `RoleConfirmed` is yes/no at the blend. No means the page was older than the official inactive or posted order.
-- No prop: `VegasNumber` is blank and Proj is the site median, labeled INDUSTRY_ONLY.
-- No sites: Proj is the Vegas number, labeled VEGAS_ONLY.
-- `Actual` and `AbsError` are filled after the slate. Do not backfill them into `Proj`.
+| Name | DFS ID | Source | Books | Proj | Actual | AbsError |
+|---|---|---|---|---:|---:|---:|
 
-## What a run must reject
-
-- A source older than the official inactive or posted-order timestamp does not vote.
-- A page still allocating to a confirmed inactive does not vote.
-- A no-prop player does not get a manufactured Vegas half. Team total is a slate check, not site points.
-
-## What the log may change
-
-Not before three slates. Not off one game. A change is allowed only if it beats both the site median alone and the Vegas number alone on absolute error.
-
-Allowed:
-- The 0.50 / 0.50 split.
-- A Tier A source that loses to the site median drops to Tier B.
-
-Not allowed:
-- A Savant weight.
-- A narrative bump.
-- A refit off one slate.
+`Source` is VEGAS, INDUSTRY, or SAVANT. `Actual` is filled after the slate. Do not write it back into `Proj`.
