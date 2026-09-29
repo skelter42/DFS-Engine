@@ -18,6 +18,13 @@ STATS = ("pass_yds", "pass_tds", "interceptions", "rush_yds",
          "receptions", "rec_yds", "offensive_tds", "fumbles_lost")
 YARDS = {"pass_yds", "rush_yds", "rec_yds"}
 COUNTS = set(STATS) - YARDS
+OTHER_COUNTS = {
+    "hits", "total_bases", "triples", "home_runs", "rbi", "runs", "walks",
+    "hbp", "stolen_bases", "strikeouts", "outs", "earned_runs",
+    "hits_allowed", "walks_allowed", "hbp_allowed", "goals", "assists",
+    "shots", "blocks", "saves", "goals_against", "points",
+    "shorthanded_points", "shootout_goals", "goalie_goals", "goalie_assists",
+}
 
 
 class InsufficientMarket(ValueError):
@@ -94,7 +101,7 @@ def estimate_stat(kind: str, quotes: list[dict], sigma_prior: float | None = Non
     yard thresholds mean > line. Independent books at one strike are combined
     by median fair probability. One-sided odds are intentionally rejected.
     """
-    if kind not in STATS:
+    if kind not in set(STATS) | OTHER_COUNTS:
         raise ValueError(f"Unknown stat: {kind}")
     grouped: dict[float, list[float]] = {}
     for q in quotes:

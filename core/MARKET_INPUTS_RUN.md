@@ -1,5 +1,7 @@
 # Market Inputs — Run Card
 
+Executable NFL/MLB/NHL preview, odds normalization and paired post-slate evaluation: `core/PROJECTION_PIPELINE.md`. That prototype does not establish calibrated weights or guarantee complete coverage; report its fallback rows honestly.
+
 This is the executable card. Methodology lives in `core/MARKET_PROJECTIONS.md`. Retrieval lives in `core/VEGAS_BOARD_SWEEP.md`. Default Savant contract lives in `core/SAVANT_PREP.md`.
 
 ## Goal

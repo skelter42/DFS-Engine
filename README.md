@@ -23,7 +23,7 @@ The goal is repeatable decision quality: ingest slate inputs, cross-check them a
 
 ## Market Inputs (Savant import)
 
-The first executable NFL component converter is in `src/dfs_engine/market_nfl.py`; input and audit schema: `schemas/NFL_MARKET_INPUTS.md`. It converts paired prop prices to component expectations and DK mean points, retaining original projections for unsupported rows. This is a preview workflow until market ingestion and historical calibration are added.
+The executable NFL/MLB/NHL component preview and frozen scorecard are described in `core/PROJECTION_PIPELINE.md`. NFL-specific input details: `schemas/NFL_MARKET_INPUTS.md`. The code converts paired prop prices to component expectations and DK mean points while retaining original projections for unsupported rows. Independent component priors and historical calibration remain required before a final full-slate grade.
 
 When the user attaches a Sim Savant CSV and asks for market inputs / Savant prep, the job is **one objective composite projection**, not lineups.
 
