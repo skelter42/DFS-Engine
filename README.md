@@ -23,7 +23,7 @@ The goal is repeatable decision quality: ingest slate inputs, cross-check them a
 
 ## Market Inputs (Savant import)
 
-When the user attaches a Sim Savant CSV and asks for market inputs / Savant prep, the job is **projection model v1**, not lineups.
+When the user attaches a Sim Savant CSV and asks for market inputs / Savant prep, the job is **projection model v2**, not lineups.
 
 Model: `core/PROJECTION_MODEL.md`  
 Executable card: `core/MARKET_INPUTS_RUN.md`  
@@ -31,44 +31,19 @@ Score: `core/PROJECTION_SCORE.md`
 Vegas retrieval: `core/VEGAS_BOARD_SWEEP.md`  
 Savant contract: `core/SAVANT_PREP.md`
 
-Industry means other DFS projection sites. Consensus is their median. Vegas is the prop band around that median.  
+Industry means other DFS projection sites. Their median is one half. The de-vigged Vegas prop is the other half.  
+`Proj = 0.50 × DFS-site median + 0.50 × Vegas prop` when both exist.  
 `Own` stays unchanged unless an ownership pass is requested.  
-Savant zeros stay 0. Showdown CPT = 1.5 × FLEX. Persist boards and the projection log in `history/`, not the import CSV.
+Savant zeros stay 0. Savant is not in the blend. Showdown CPT = 1.5 × FLEX. Persist boards and the projection log in `history/`, not the import CSV.
 
 ## Repository Map
 
-- `core/ENGINE.md` — master slate workflow and portfolio rules
-- `core/AGENTS.md` — agent responsibilities and handoffs
-- `core/PROJECTION_MODEL.md` — production Market Inputs model v1
+- `core/PROJECTION_MODEL.md` — production Market Inputs model v2
+- `core/MARKET_INPUTS_RUN.md` — executable card
 - `core/PROJECTION_SCORE.md` — absolute-error score and required log
-- `core/MARKET_INPUTS_RUN.md` — executable Market Inputs / Savant Prep card
-- `core/MARKET_INPUTS.md` — full Market Inputs workflow
-- `core/MARKET_PROJECTIONS.md` — composite projection notes (estimator owner is the model file)
 - `core/VEGAS_BOARD_SWEEP.md` — board-first Vegas retrieval
-- `core/SAVANT_PREP.md` — Savant import contract (Proj in, Own pass-through)
-- `core/SIMULATION.md` — cross-sport outcome-distribution and Monte Carlo framework
-- `core/PROCESS_GOVERNANCE.md` — process management, rule placement, promotion/deprecation, and end-to-end workflow governance
-- `core/LEARNING.md` — post-slate learning framework
-- `sports/mlb.md` — MLB-specific construction logic
-- `sports/ncaaf.md` — college football construction logic
-- `sports/tennis.md` — tennis construction logic
-- `sports/nba.md` — NBA construction logic
-- `sports/nhl.md` — NHL construction logic
-- `sports/nfl.md` — NFL construction logic and board-to-DK conversion
-- `schemas/` — durable input/output contracts
-- `history/` — locked Vegas boards, projection logs, and contest history
-- `learning/` — dated hypotheses and durable learnings awaiting or documenting promotion
+- `core/SAVANT_PREP.md` — Savant import contract
+- `sports/mlb_market_inputs_projection_override.md` — MLB Proj override, points at model v2
+- `sports/nfl.md` — NFL board-to-DK conversion
 
-## Standard Output Contract
-
-Every lineup build should include:
-
-- slate thesis and major game environments
-- key leverage points and fragility risks
-- final lineup portfolio
-- stack/correlation summary where applicable
-- source projected ownership vs DFS Engine exposure, side by side, with percentage-point difference
-- concise explanation of the largest exposure deviations
-- pre-lock/final status and unresolved uncertainty
-
-This repository is the canonical DFS Engine brain. New chats should read the relevant files before making slate-specific decisions, and durable improvements should be written back here. The process manager should decide whether new ideas belong in core logic, a sport module, the learning registry, or nowhere, and should actively prevent duplicate or overfit logic from accumulating.
+This repository is the canonical DFS Engine brain. New chats should read the model file before a Market Inputs run.
