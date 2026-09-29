@@ -7,11 +7,13 @@ This is the executable card. Methodology lives in `core/MARKET_PROJECTIONS.md`. 
 Produce **one objective composite projection** for each positive-Savant-Proj player.
 
 ```
-Proj  = numeric blend(industry scrape, Vegas scrape)
+Proj  = median of independent site-converted votes
 Own   = unchanged unless the user explicitly asks for an ownership pass
-CPT   = 1.5 × FLEX on Showdown (after the FLEX composite is frozen)
+CPT   = 1.5 × FLEX on Showdown (after the FLEX median is frozen)
 Zeros = stay 0
 ```
+
+Estimator lock: `core/MARKET_PROJECTIONS.md` → Median lock. Not a weighted mean. Savant does not vote when any usable external vote exists. Vegas is one vote plus a game-total check, not a fixed weight.
 
 No narrative, no leverage manufacturing, no “I like this matchup.”  
 Savant is the import vessel and the final fallback, not the source of truth.
@@ -33,7 +35,7 @@ Do not build lineups. Do not rerun locked boards. Do not research finished games
 6. Pull independent **numeric** industry sources in parallel (target 10+ on a mature main slate). Rankings and write-ups do not count.
 7. Reject stale industry pages (still allocating to a confirmed inactive, wrong slate, wrong site scoring with no conversion).
 8. Convert Vegas components to site scoring once. Haircut vigged ATTD. Reconcile TD/yard sums to the game total.
-9. Blend by evidence quality into **one FLEX number**. Showdown CPT = 1.5 × that number.
+9. Collapse source families to one vote each. Set the FLEX number to the median. Reconcile to the game total by dropping a bad vote, not by reweighting. Showdown CPT = 1.5 × that frozen median.
 10. Write `history/YYYY-MM-DD-<SLATE>-vegas-boards.md`. Return the import CSV + coverage audit. Stop.
 
 ## Grade honestly
