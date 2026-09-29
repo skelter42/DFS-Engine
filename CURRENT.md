@@ -9,7 +9,7 @@ Scoring markets missing -> Proj = Savant, unchanged
 Savant 0                -> 0
 ```
 
-Books drive. Savant is the fallback, not a vote. A missing price is not filled with a rate, a season average, or an industry number. Industry is a check. No Odds API. A page summary is not a source. Own stays unchanged. Stop after the import file. Do not build lineups unless asked.
+Books drive. Savant is the fallback, not a vote. A missing price is not filled with a rate, a season average, or an industry number. Industry is a check. No Odds API. A page summary is not a source. Own stays unchanged. Write the import CSV and a reconciliation showing the book number, original Savant projection, and exact posted prices used. Then stop. Do not build lineups unless asked.
 
 Read next:
 
