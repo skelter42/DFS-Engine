@@ -4,7 +4,7 @@ Status: validated process correction from the 2026-09-22 DraftKings Turbo Market
 
 - 2026-09-22: The user does not attach paid vendor CSVs. The assistant scrapes public industry numbers and public Vegas props and does its best.
 - 2026-09-23 FanDuel Main: **Industry and Vegas work together on the same player.** Coverage is measured on the active starter pool, not the raw positive-Proj file.
-- 2026-09-29: Proj is the median lock in `core/MARKET_PROJECTIONS.md`. The `0.40 / 0.40 / 0.20` and `0.40 / 0.32 / 0.28` weights are retired.
+- 2026-09-29: Proj is the industry median, pulled to the Vegas band if it sits outside. Canonical rule: `core/MARKET_PROJECTIONS.md`. Fixed weights stay retired.
 
 Do not stall a run waiting for THE BAT X / Stokastic / DFF / RG CSV uploads.
 
@@ -16,31 +16,31 @@ Do not stall a run waiting for THE BAT X / Stokastic / DFF / RG CSV uploads.
 2. Identify site + exact slate window + game list.
 3. Trust Savant zeros unless the user says `unlock posted starters`.
 4. Exhaust **public** industry numeric pages and **public** Vegas boards **in parallel**.
-5. Convert to site scoring. Set Proj with the median lock. Reconcile to game totals with data only.
+5. Convert to site scoring. Set Proj with the industry-median + Vegas-band lock. Reconcile to game totals with data only.
 6. Write `Name, DFS ID, Proj, Own`. Own unchanged unless requested.
 7. Grade honestly against the public-source ceiling. Deliver. Stop.
 
 Paid vendor grids are optional upside if they appear in public HTML. They are not a prerequisite.
 
-## Joint-blend doctrine (validated 2026-09-23)
+## Joint-blend doctrine (validated 2026-09-23, estimator replaced 2026-09-29)
 
-Industry and Vegas are **co-primary on the same player**. They do not take turns.
+Industry and Vegas are pulled on the same player. They do not take turns. They are not equal votes.
 
-- **Industry** answers who the player is (talent / component rates / site FPTS).
-- **Vegas** answers what game they are in (player props when posted; otherwise implied team total + lineup slot + ML/win).
+- **Industry** is the candidate (talent / component rates / site FPTS).
+- **Vegas** is the band (player props when posted). Game total is the slate check.
 - **Savant** is the vessel and the fallback. It is not a vote.
 
-Estimator when both layers exist: the median lock in `core/MARKET_PROJECTIONS.md`. Not a fixed weight.
+Estimator: the industry-median + Vegas-band lock in `core/MARKET_PROJECTIONS.md`.
 
 - Convert industry and Vegas to site scoring. Collapse source families to one vote.
-- Vegas contributes one vote. With no hitter prop, that vote is implied team total × lineup-slot share, converted to site scoring.
-- Savant does not vote when any usable external vote exists.
-- Only one external layer: that vote is `Proj`.
+- Three or more Tier A votes: median of Tier A. Otherwise median of the usable votes.
+- Vegas contributes one de-vigged number. Band = that number ± the larger of 1.5 site points or 12% of it.
+- Inside the band, keep the industry median. Outside, pull to the nearest edge.
+- No converted prop: the industry median stands. Team total × the locked slot share in the override is an environment check, not site points and not a band.
+- Savant does not vote when any usable industry vote exists.
 - Neither layer after the sweep: Savant fallback.
 
-Do not label a posted starter `VEGAS_SUPPORTED` just because a team total exists and then skip industry. Pull both. If public industry did not print that name, say so and keep the Vegas-env vote as Proj — that is still not fallback.
-
-Team-total + batting-order slot **is** the Vegas hitter layer when individual hits/TB/HR/R/RBI props are missing. It is not optional color. It is not a reason to drop industry.
+Do not label a posted starter `VEGAS_SUPPORTED` just because a team total exists and then skip industry. Pull both. If public industry did not print that name, say so and keep the industry gap labeled. A team total alone is not a player projection.
 
 ## Coverage denominator (validated 2026-09-23)
 
@@ -52,86 +52,38 @@ Report two denominators every run:
 
 1. **Active pool (the grade that matters)**  
    Starting pitchers (full start or bulk-behind-opener) + confirmed/projected batting-order 1–9.  
-   Target: **0% Savant fallback** on this pool. Joint or Vegas-supported on every name.
+   Target: **0% Savant fallback** on this pool.
 
 2. **Full positive-Proj pool (honesty row)**  
    Relievers with Own 0 and no save/K/outs market may stay Savant fallback. Say that explicitly. Do not let that percentage be the headline.
 
-An 80% fallback headline on the 459-row positive file is not acceptable reporting. If the active pool is covered, say the active pool first.
-
 ## Provenance labels
 
-- **JOINT** — industry numeric + Vegas (props and/or team-total/slot) both voted; median of those votes.
-- **VEGAS_DIRECT** — player props with juice did most of the Vegas work; industry still present.
-- **VEGAS_SUPPORTED** — game/team/slot environment vote; no public industry print for that name.
-- **INDUSTRY_BLEND** — public industry numeric votes; Vegas environment missing (should be rare on a posted 1–9).
-- **SAVANT_FALLBACK** — both public layers thin after the sweep. Allowed for Own-0 relievers. Not allowed as the default for posted starters.
+- **BAND_PULLED** — industry median sat outside the Vegas band and was moved to the nearest edge.
+- **INDUSTRY_MEDIAN** — industry median sat inside the band, or no converted prop existed.
+- **VEGAS_DIRECT** — a converted prop formed the band.
+- **SAVANT_FALLBACK** — no usable industry vote after the sweep. Allowed for Own-0 relievers. Not allowed as the default for posted starters.
 
 ## Public industry sources to hit every run
 
-Board / page first, same slate only:
-
-- RotoGrinders lineup pages and any public FPTS / projected-stats HTML for this slate
-- FantasyPros daily hitters and pitchers component tables
-- NumberFire public MLB projections if the page loads
-- Daily Fantasy Fuel public table **only if the slate selector matches** (Turbo vs Main vs Night)
-- FantasyTeamAdvisors / similar public game-by-game FD or component pages
-- THE BAT / BAT X numbers only when a public percentile or table is actually visible
-- Action Network / Dimers / PropCruncher model projections when they publish numeric K/IP/FP
-- Any other public numeric DK or convertible component table found in the sweep
+Board / page first, same slate only. Tier A if they render numbers: RotoGrinders, FantasyPros consensus, NumberFire, Daily Fantasy Fuel when the slate selector matches, THE BAT / BAT X when a table is visible, Action Network / Dimers / PropCruncher when they publish numeric K/IP/FP.
 
 Does not count: rankings, First Look adjectives, podcasts, paywalled grids that do not render.
 
 ## Public Vegas sources to hit every run
 
-Aggregator-first:
+Aggregator-first: PropCruncher, Covers, Action Network, PropPrizm, FanDuel Research, sportsbook ML / total / team total.
 
-- PropCruncher multi-book K / outs
-- Covers matchup prop sections
-- Action Network player props
-- PropPrizm
-- FanDuel Research game + player pages
-- Sportsbook game ML, total, team total
-
-Pitchers: K, outs/IP, ER, H, BB, win/ML.
-Hitters: hits, TB, HR, RBI, runs, BB, SB, H+R+RBI.
-When hitter props are missing: implied team total × slot share is the Vegas vote.
-Use juice and both sides when posted.
+Pitchers: K, outs/IP, ER, H, BB, win/ML. Those convert into the band.
+Hitters: hits, TB, HR, RBI, runs, BB, SB, H+R+RBI. A converted prop forms the band. A missing prop does not.
 
 ## Grade ceiling without vendor files
 
-Honest public-scrape ceiling is usually **A-** on a Main or Turbo slate:
-- SP industry + Vegas can be thick
-- hitter industry is often a partial grid
-- that is expected and allowed
-
-Do not hold the file hostage for an A+ that requires paywalled CSVs the user will not attach.
-Deliver the best public composite, report source counts, list posted-but-zero names, and stop.
-
-A / A+ is still the target **when public boards actually produce that coverage**. It is not a reason to refuse delivery.
-
-## Role / lineup allocation (facts only)
-
-- Confirmed 1–9: research public industry **and** Vegas. Do not cut to bench range. Do not leave on Savant.
-- Not in posted 1–9: reserve/PH only if a public industry source still projects him. Otherwise cut starter-sized Savant leftovers.
-- Opener vs bulk vs full start is a role fact. Bulk-behind-opener uses bulk workload.
-- Relievers with Own 0: Savant fallback unless a public save/K/outs market exists.
-- Unposted late lineups (west games): use projected 1–9 from last posted order / probable bats; keep the external vote if one exists. Do not add a Savant vote.
+Honest public-scrape ceiling is usually **A-** on a Main or Turbo slate. Deliver it. Do not hold the file for a paywalled grid.
 
 ## Savant-zero rule
 
-Default: source `Proj = 0` stays 0.
-Exception only on `unlock posted starters`.
-Always list posted-but-zero names in the audit.
-
-## Required delivery report
-
-- Projection grade (honest public-scrape grade)
-- Public industry sources actually used (names, not a hoped-for 10)
-- Vegas boards used
-- Provenance mix on the **active pool** first, then the full positive-Proj pool
-- Largest composite vs Savant deltas
-- Posted starters still at Savant 0
+Default: source `Proj = 0` stays 0. Exception only on `unlock posted starters`. Always list posted-but-zero names in the audit.
 
 ## What not to do
 
@@ -140,6 +92,5 @@ Always list posted-but-zero names in the audit.
 - Do not count a K-only model as a full DK/FD projection source.
 - Do not write narrative into Proj.
 - Do not build lineups.
-- Do not report 80% fallback because 200 relievers were left at Savant.
-- Do not let Vegas-env replace industry, or industry replace Vegas, when both exist.
+- Do not give Vegas a peer vote against the industry median.
 - Do not apply a fixed industry/Vegas/Savant weight.
