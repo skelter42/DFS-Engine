@@ -22,16 +22,13 @@
         "projection pull",
         "github market inputs"
       ],
-      "pipeline": ["load_brain", "ingest", "validate", "vegas_board_sweep", "devig_consensus", "industry_fill_if_unpriced", "savant_fallback_if_empty", "import_audit", "deliver"],
+      "pipeline": ["load_current", "ingest", "validate", "sportsbook_python_pull", "validate_raw_board", "devig_posted_prices", "convert_book_points", "savant_fallback_if_unpriced", "import_audit", "write_reconciliation", "deliver", "stop"],
       "brain": [
         "core/MARKET_INPUTS_RUN.md",
-        "core/VEGAS_CONSENSUS.md",
         "core/PROJECTION_MODEL.md",
-        "core/VEGAS_BOARD_SWEEP.md",
-        "core/SAVANT_PREP.md",
-        "sports/mlb_market_inputs_projection_override.md"
+        "core/VEGAS_CONSENSUS.md"
       ],
-      "notes": "Projection-only. Proj is the multi-book de-vigged prop consensus in site points. Industry median only if no book priced the player. Savant unchanged only if both are empty. Own unchanged. Zeros stay 0. Do not 50/50. Do not use the retired band."
+      "notes": "Projection-only v6. Proj is the de-vigged sportsbook number in site points when qualifying scoring prices are posted; otherwise preserve Savant. Industry is a check, never a fill or vote. Own unchanged. Zeros stay 0. Write the import CSV and price-level reconciliation, then stop. No Odds API and no page summaries."
     },
     {
       "intent": "exposure_report",
