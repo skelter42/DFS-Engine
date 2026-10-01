@@ -114,22 +114,19 @@ Material late news or market movement loops back to the affected upstream stage 
 
 ## Composite Projection Governance
 
-The Market Inputs / Savant Prep projection is **one composite number**.
+The Market Inputs / Savant Prep projection follows model v6 in `CURRENT.md`.
 
-Industry numeric projections and multi-book sportsbook markets are **co-primary**. Neither layer is a fallback for the other.
-
-- Scrape independent numeric industry sources and scrape multi-book props/game markets.
-- De-vig and aggregate markets rather than trusting one book.
-- Translate expected stat events into site scoring using sport-specific rules.
-- Blend by evidence quality into a single `Proj`.
-- Assign a coverage/provenance grade on the positive-Savant-Proj pool.
-- When both layers are thin, shrink to the Savant prior and label fallback.
+- Scrape a real sportsbook prop board in Python; do not use the Odds API or a page summary.
+- De-vig posted prices and convert only priced scoring markets into site points.
+- When the required scoring markets are posted, the book number is `Proj`.
+- When they are not posted, preserve the original Savant `Proj`; do not fill a missing market with an industry number or rate.
+- Industry projections are a check, not a fill, blend, or vote.
+- Preserve source zeros and ownership unchanged.
 - Never manufacture missing prop information.
-- Never average in stale industry pages that still roster a confirmed inactive or the wrong slate.
 - Keep source/vendor projections immutable for comparison and sensitivity testing.
-- Default Market Inputs / Savant Prep leaves `Own` unchanged. Ownership research is opt-in.
+- Write the import CSV and price-level reconciliation, then stop.
 
-Detailed methodology belongs only in `core/MARKET_PROJECTIONS.md` and sport modules. The executable card is `core/MARKET_INPUTS_RUN.md`.
+Detailed methodology belongs in `core/MARKET_INPUTS_RUN.md`, `core/PROJECTION_MODEL.md`, and `core/VEGAS_CONSENSUS.md`.
 
 Do not change blend weights because one player beat or missed a locked composite. That is calibration archive (`core/LEARNING.md`), not a new rule.
 
