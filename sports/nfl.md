@@ -35,8 +35,8 @@ Projection source priority:
 1. Sportsbook/player-prop **boards** across as many books as practical (DraftKings, FanDuel, BetMGM event pages; Covers / Action Network / PropCruncher matchup boards; Caesars, bet365, Fanatics and other credible books/odds aggregators).
 2. Convert the betting market directly into DraftKings fantasy expectation using the canonical sportsbook projection methodology. Use the fullest available prop bundle by role: passing yards/TDs/INTs and rushing for QBs; rushing attempts/yards, receptions, receiving yards and TD probability for RBs; receptions, receiving yards, rushing usage and TD probability for WR/TE; game spread/total and team scoring expectation for DST/kickers where appropriate.
 3. Use vig-free probabilities and consensus/median lines when multiple books are available. Line movement is actionable information and should influence the projection rather than being ignored.
-4. If a player has only partial Vegas coverage, anchor the covered components to Vegas and use industry/model information only to fill the missing components.
-5. Use broader industry projections only when sportsbook coverage is genuinely insufficient.
+4. If the required scoring-market bundle is incomplete, do not fill missing components with industry/model rates; preserve the original Savant projection.
+5. Use broader industry projections only as a reasonableness check, never as a Market Inputs fill or blend.
 6. Sim Savant is a fallback/benchmark, not the primary source.
 
 Never lower reported Vegas coverage merely because a player lacks one particular prop. A player with meaningful sportsbook markets should be classified as Vegas-driven or Vegas-anchored. Do not manufacture confidence for deep backups with no meaningful market; leave them on the best fallback source and label them accordingly.
