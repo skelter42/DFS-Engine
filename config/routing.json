@@ -67,6 +67,6 @@
     "persist_raw_chat": false,
     "persist_single_slate_noise": false,
     "market_input_docs_are_intent_scoped": true,
-    "market_inputs_estimator": "vegas_consensus_v3"
+    "market_inputs_estimator": "projection_model_v6_books_drive_savant_fallback"
   }
 }
