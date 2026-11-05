@@ -1,55 +1,58 @@
 # DFS Engine
 
-A persistent, versioned decision system for building and improving DFS lineups across sports.
+A persistent, versioned decision system for building and improving DFS decisions across sports.
 
 ## Mission
 
-The DFS Engine is not a single projection model. It is a portfolio-construction framework that combines projections, ownership, contest context, slate structure, game-script analysis, leverage, correlation, simulation, and post-slate learning.
+The DFS Engine separates projection quality from portfolio-construction quality. Its broader research framework covers ownership, contest context, slate structure, game scripts, leverage, correlation, simulation, and post-slate learning. Market Inputs is a distinct, projection-only workflow; it does not build lineups.
 
-The goal is repeatable decision quality: ingest slate inputs, cross-check them against broader market information, build diversified but intentional portfolios, compare final exposures to source projections, and learn from results without overfitting.
+The goal is repeatable decision quality: preserve source data, use current market evidence, cover plausible slate outcomes, and learn without overfitting to one slate.
 
 ## Operating Principles
 
-1. Never treat one projection source as authoritative.
+1. For Market Inputs, posted sportsbook scoring markets drive the projection when the required prices are available; Savant is the fallback, not a co-equal vote.
 2. Separate player projection quality from portfolio construction quality.
-3. Optimize for contest-specific expected value, not median lineup projection alone.
+3. Evaluate portfolio decisions in the context of contest type, payout structure, and slate uncertainty.
 4. Use correlation and game-script logic where the sport supports it.
-5. Respect uncertainty. Diversification should cover plausible slate outcomes, not randomize blindly.
+5. Diversify across plausible outcomes without randomizing blindly or imposing unsupported constraints.
 6. Use native outcome simulation as an evidence layer, not an automatic decision-maker.
-7. Always compare source projected ownership with DFS Engine final exposure.
+7. Compare source projected ownership with final portfolio exposure when an ownership/exposure audit is requested.
 8. Record durable lessons after slates; do not memorialize noise.
 9. Prefer explicit rules, schemas, and versioned logic over chat-only memory.
 10. Prefer fewer strong rules over many narrow rules; remove redundancy and avoid overfitting.
 
 ## Market Inputs (Savant import)
 
-When the user attaches a Sim Savant CSV and asks for market inputs / Savant prep, the job is **projection model v6**. Not lineups.
+When a Sim Savant CSV is attached and the user asks for Market Inputs / Savant prep, the job is **projection model v6**. It is not a lineup-building task.
 
-Read in this order:
+Read `CURRENT.md` first. Then read **only** these three operational files, in this order:
 
-1. `core/MARKET_INPUTS_RUN.md` — executable card
-2. `core/PROJECTION_MODEL.md` — v6 lock
-3. `core/VEGAS_CONSENSUS.md` — price to site points
-4. `src/dfs_engine/projections/` — the Python scrape
+1. `core/MARKET_INPUTS_RUN.md` — executable run card
+2. `core/PROJECTION_MODEL.md` — v6 projection contract
+3. `core/VEGAS_CONSENSUS.md` — price-to-site-points conversion
+
+`CURRENT.md` is authoritative if any other repository file disagrees.
 
 ```
 Python scrape of a real sportsbook board
-Scoring markets posted  -> Proj = de-vigged book number, in site points
-Scoring markets missing -> Proj = Savant, unchanged
-Savant 0                -> 0
+Qualifying scoring markets posted  -> Proj = de-vigged book number, in site points
+Required scoring markets missing   -> Proj = original Savant, unchanged
+Savant 0                            -> 0
 ```
 
-Books drive, every sport. Savant is the fallback, not a vote. A missing price is not filled. Industry is a check. No Odds API. A page summary is not a source.
+Books drive; Savant is the fallback. A missing price is not filled with a rate, season average, or industry projection. Industry is a reasonableness check only. Do not use the Odds API or summarized page fetches as price sources.
 
-`Own` stays unchanged unless an ownership pass is requested. Savant zeros stay 0.
+Preserve Name, DFS ID, row order, Own, and all other original columns. Change only Proj where the posted-market requirements qualify. Produce the import CSV and the row-by-row price reconciliation, then stop. Do not build lineups unless explicitly asked.
+
+Do not add other files to the Market Inputs read sequence unless `CURRENT.md` is deliberately revised.
 
 ## Repository Map
 
-- `core/PROJECTION_MODEL.md` — production model v6
-- `core/MARKET_INPUTS_RUN.md` — executable card
-- `core/VEGAS_CONSENSUS.md` — book conversion
-- `src/dfs_engine/projections/` — Python scrape and blend
-- `core/SAVANT_PREP.md` — Savant import contract
-- `sports/mlb_market_inputs_projection_override.md` — MLB scoring, same v6 rule
+- `CURRENT.md` — authoritative pointer and conflict-resolution rule for the active process
+- `core/MARKET_INPUTS_RUN.md` — Market Inputs run card
+- `core/PROJECTION_MODEL.md` — projection model v6
+- `core/VEGAS_CONSENSUS.md` — sportsbook price conversion
+- `src/dfs_engine/projections/` — supporting Python projection helpers; not a replacement for the documented operational workflow
+- `config/` — routing and engine configuration, which must remain consistent with the current process
 
-This repository is the canonical DFS Engine brain. New chats should read the run card and `core/PROJECTION_MODEL.md` before a Market Inputs run.
+Other sport, portfolio, learning, and reference documents may support separate tasks, but they are not part of the Market Inputs read sequence unless `CURRENT.md` is updated to include them.
