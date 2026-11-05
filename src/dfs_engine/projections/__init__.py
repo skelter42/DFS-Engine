@@ -1,5 +1,5 @@
-"""Industry + sportsbook projection pull and blend."""
+"""Sportsbook-driven projection pull with Savant fallback."""
 
-from dfs_engine.projections.blend import blend_frame, devig, american_to_implied
+from dfs_engine.projections.blend import blend_frame, blend_row
 
-__all__ = ["american_to_implied", "blend_frame", "devig"]
+__all__ = ["blend_frame", "blend_row"]

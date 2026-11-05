@@ -1,10 +1,13 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "site": "DraftKings",
-  "projection_blend": {
-    "primary_weight": 0.55,
-    "industry_weight": 0.3,
-    "market_context_weight": 0.15
+  "market_inputs_projection": {
+    "model": "v6_books_drive_savant_fallback",
+    "posted_scoring_markets": "de_vig_and_convert_to_site_points",
+    "missing_scoring_markets": "preserve_savant",
+    "industry": "check_only",
+    "preserve_source_zero": true,
+    "preserve_ownership": true
   },
   "score_weights": {
     "projection": 1,
