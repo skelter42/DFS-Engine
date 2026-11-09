@@ -22,111 +22,69 @@ Every serious MLB build should ask:
 
 ## MLB Market-Derived Projection Layer
 
-The cross-sport framework lives in `core/MARKET_PROJECTIONS.md`. For MLB, the preferred projection architecture is:
+MLB projection inputs follow the cross-sport process in `CURRENT.md`. There is no separate MLB Market Inputs override. For a Market Inputs run, read `CURRENT.md` first and then only the three operational files it names.
 
-**multi-book player props + game markets -> de-vigged fair probabilities -> expected MLB stat components -> DraftKings fantasy points -> confidence-weighted DFS Engine projection -> ownership/game theory/correlation -> GPT portfolio construction.**
+Books drive the projection when the required scoring-market prices for that player are posted and can be converted into DraftKings site points. If the required scoring markets are incomplete or unavailable, preserve the original Savant projection unchanged. Do not fill missing components with industry projections, rates, season averages, team totals, or narrative. Industry information is a reasonableness check only. Preserve source zeros and leave `Own` unchanged during the projection-only pass.
 
-Action Network is the preferred market aggregator when available because it centralizes multi-book player props, alternate markets, odds movement, game totals, and moneylines. It is a preferred source, not an authoritative source.
+The prop families below are a research inventory, not permission to combine overlapping markets, manufacture a missing side, or partially blend a player projection.
 
 ### Hitter Prop Families
 
-Collect as many of these as are available:
+Collect relevant posted markets when available:
 
-- hits
-- alternate hits
-- total bases
-- alternate total bases
+- hits and alternate hits
+- total bases and alternate total bases
 - home runs
 - runs scored
 - RBI
-- runs + RBI when useful for cross-checking
 - walks
 - HBP if directly available
 - stolen bases
-- alternate/ladders for relevant counting stats
-- team total and game total
-- moneyline / implied team scoring environment
+- team total and game total as context
 
-Do not double-count overlapping markets. Hits, total bases, home runs, and alternate ladders should be reconciled into a coherent hit-type distribution rather than added independently.
+Do not double-count overlapping markets. Hits, total bases, home runs, and alternate ladders must be reconciled into a coherent event distribution rather than added independently.
 
-Infer expected singles, doubles, triples, home runs, runs, RBI, BB+HBP, and stolen bases when the market supports those estimates.
-
-For DraftKings classic MLB hitters, market-derived expected fantasy points should use the applicable DK scoring rules from the current slate/site rules. The standard structure is:
+For DraftKings Classic hitters, use the current official scoring rules for the contest format. The standard base scoring structure is:
 
 `DK hitter points = 3*E(1B) + 5*E(2B) + 8*E(3B) + 10*E(HR) + 2*E(RBI) + 2*E(R) + 2*E(BB+HBP) + 5*E(SB)`
 
-Always verify scoring if DraftKings changes its rules or the contest uses a different format.
+Verify the current site rules before changing this conversion or applying it to another format.
 
 ### Pitcher Prop Families
 
-Collect as many of these as are available:
+Collect relevant posted markets when available:
 
-- strikeouts
-- alternate strikeouts
+- strikeouts and alternate strikeouts
 - outs recorded
-- innings pitched where outs are unavailable
 - hits allowed
 - walks allowed
 - earned runs / runs allowed
-- WHIP-related markets when useful as a fallback
 - moneyline / team win probability
-- opponent implied runs
-- pitcher-specific win-related context when available
+- opponent implied runs as context
 
-Infer expected strikeouts, outs, hits allowed, walks/HBP allowed, earned runs, and pitcher win probability when evidence supports it.
-
-For DraftKings classic MLB pitchers, use the current DK scoring rules. The base event structure is:
+For DraftKings Classic pitchers, use the current official scoring rules. The standard base event structure is:
 
 `DK pitcher points = 0.75*E(outs) + 2*E(K) - 0.6*E(H allowed + BB/HBP allowed) - 2*E(ER) + 4*P(win) + expected bonus contribution`
 
-Complete-game, complete-game shutout, and no-hitter bonuses should be included only when modeled with defensible probabilities. Do not manufacture bonus probability just to complete the formula.
+Complete-game, complete-game shutout, and no-hitter bonuses should be included only when modeled with defensible probabilities. Do not manufacture bonus probability.
 
 ### De-vigging and Multi-Book Consensus
 
-- Remove vig from paired/two-sided markets when feasible before converting odds to probabilities.
-- Prefer robust multi-book consensus, typically median or trimmed consensus, over one sportsbook.
-- Use alternate/ladder markets to estimate tail probabilities and expected counts when coverage is sufficient.
-- Flag stale or isolated lines rather than letting them dominate the projection.
-- Record market observation count and coverage quality where possible.
+- Convert only prices actually posted by the sportsbook.
+- Remove vig from paired sides when both are posted; follow `core/VEGAS_CONSENSUS.md` for one-sided and push-capable lines.
+- Aggregate comparable same-market prices across books using the canonical conversion process.
+- Do not treat alternate lines or overlapping prop families as independent scoring components.
+- Record source, line, side, odds, timestamp, and URL for each price used.
 
-### Coverage and Prior Blending
+### Coverage and Fallback
 
-Each player receives a market-coverage grade:
+A complete qualifying scoring-market bundle can produce the book-derived site-point projection. If a required scoring market is missing, preserve the original Savant projection unchanged for that player. Do not blend priced components with Savant or fill missing components from an industry projection, season rate, or team total.
 
-- High: several independent books and multiple relevant prop families; market projection may dominate the final Engine projection.
-- Medium: useful prop coverage but meaningful missing components; blend market projection with the prior.
-- Low: sparse/noisy props; shrink heavily toward the prior and use the market mainly for environment/context.
-
-The prior may use Sim Savant, broader industry projection consensus, confirmed batting order/role, matchup, park, and weather.
-
-Do not mechanically average market and vendor projections. Weighting should depend on market coverage, liquidity, internal consistency, freshness, and role certainty.
-
-### Team/Game Markets
-
-Game totals, team totals, and moneylines are essential context even when player props are available. Use them to:
-
-- cross-check whether the sum of player expectations is coherent with the team environment
-- inform runs/RBI opportunities
-- inform pitcher win and run-prevention expectations
-- detect stale or inconsistent individual props
-
-Do not simply multiply a player's vendor projection by an implied-team-total ratio when richer player props exist.
+Team totals, game totals, and moneylines are useful for checking the game environment and the plausibility of player markets. They are not substitutes for missing player scoring markets.
 
 ### Projection Output Contract
 
-For every relevant MLB player preserve:
-
-- source/vendor projection
-- market-derived DK projection
-- market coverage grade
-- major market inputs / observation count when available
-- final DFS Engine projection
-- projection difference vs source
-- source projected ownership
-- DFS Engine expected ownership
-- final DFS Engine exposure
-
-The market-derived projection is a projection input. Ownership and final exposure remain separate decisions.
+For Market Inputs, the import and reconciliation requirements are owned by `core/MARKET_INPUTS_RUN.md`. Preserve the original CSV columns, player identity, row order, and ownership; change only `Proj` where the book projection qualifies. Record the exact posted prices used and whether each row remained on Savant or stayed zero.
 
 ### Default GPP Priorities
 

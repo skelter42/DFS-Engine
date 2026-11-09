@@ -3,7 +3,7 @@
 ## Core Philosophy
 College football DFS is driven by role, play volume, scoring environment, ceiling, ownership, and correlation. Median projection is only the baseline. The Engine must explicitly model multiple game scripts because depth-chart uncertainty, quarterback rushing, concentrated usage, blowout risk, and pace can change fantasy outcomes dramatically.
 
-The objective is not to reproduce Sim Savant. Savant is the starting projection/ownership source. The Engine challenges it with current market data, independent industry projections/analysis, depth charts, injuries, role information, and game-theory context.
+The objective is not to reproduce Sim Savant. For player projections, follow the cross-sport v6 contract in `CURRENT.md`: posted sportsbook scoring markets drive `Proj` when the required market bundle is available; otherwise preserve the original Savant projection unchanged. Industry projections and DFS analysis are reasonableness checks, not co-primary votes or fills for missing scoring markets. Ownership and portfolio decisions remain separate from the projection.
 
 ## Required Inputs
 For every slate, ingest when available:
@@ -12,7 +12,7 @@ For every slate, ingest when available:
 - current spreads, totals, and implied team totals
 - depth charts and starter designations
 - injuries, suspensions, availability news, and beat-reporter updates
-- independent industry projections / DFS analysis from multiple credible sources
+- independent industry projections / DFS analysis from multiple credible sources (reasonableness checks only; never used to fill missing sportsbook scoring markets)
 - pace / plays per game / offensive style
 - target share and route participation
 - rushing share and designed QB rushing
@@ -20,7 +20,7 @@ For every slate, ingest when available:
 - salary and positional eligibility
 - contest type and number of entries
 
-No single projection source is authoritative.
+For Market Inputs, use the books-drive / Savant-fallback hierarchy in `CURRENT.md`; do not blend industry projections into missing sportsbook components. Compare independent sources for context and ownership/portfolio analysis without changing the projection-only contract.
 
 ## NCAAF Specialized Agent Team
 These passes are mandatory in addition to the DFS Engine core agents.
@@ -87,19 +87,20 @@ The portfolio should be concentrated where the Engine has an edge but diversifie
 ## Full NCAAF Handoff Chain
 Slate Intake -> Projection Audit -> Depth Chart & Role Certainty -> News & Role -> Market Environment -> QB Archetype -> Usage Concentration -> Blowout & Rotation -> Game Environment & Pace -> Ownership & Leverage -> CFB Correlation -> Script Portfolio -> Portfolio Builder -> Duplication & Construction -> CFB Portfolio Risk -> Exposure Auditor -> Post-Slate Learning.
 
-## Industry Comparison Protocol
-Before final lineup construction, compare Savant against multiple independent sources whenever available.
+## Industry Reasonableness Check
 
-For every meaningful player, record:
-- Savant projection
-- Savant projected ownership
-- independent projection/analysis signals
-- confirmed role
+Before final lineup construction, use independent sources to challenge assumptions and identify stale role or market information. This is a diagnostic step, not a projection blend.
+
+For every meaningful player, record when available:
+- final v6 projection source (books or Savant)
+- original Savant projection
+- independent industry projection/analysis signals
+- confirmed role and availability
 - market environment
-- Engine adjustment
-- confidence
+- any non-projection strategic adjustment
+- confidence and unresolved disagreement
 
-Industry disagreement is useful information. Do not average sources blindly. Determine why they disagree: role, rushing upside, target concentration, blowout assumptions, matchup, or stale depth-chart information.
+Do not average or blend industry projections into the Market Inputs result. If required sportsbook scoring markets are incomplete, keep the original Savant projection unchanged. Investigate disagreements for stale lines, role changes, or incorrect assumptions; do not silently replace the v6 projection.
 
 ## Game Script Portfolio Requirements
 For multi-entry builds, intentionally represent the slate's realistic paths. Common script families include:

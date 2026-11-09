@@ -1,11 +1,11 @@
 # Tennis DFS Engine
 
 ## Core Philosophy
-Tennis DFS should blend win probability, fantasy-point ceiling, match length expectations, surface/form context, and ownership. Do not rely on one projection source or one betting market alone.
+Tennis projection inputs follow the cross-sport v6 contract in `CURRENT.md`: posted sportsbook scoring markets drive `Proj` only when the required scoring-market bundle is available; otherwise preserve the original Savant projection unchanged. Industry projections are reasonableness checks, not fills or co-primary votes. A moneyline is useful match context but is not, by itself, a complete fantasy-scoring projection. Keep ownership separate from the projection.
 
 ## Required Cross-Checks
 - moneyline / implied win probability
-- broader industry projections where available
+- broader industry projections where available (reasonableness checks only; do not blend them into missing sportsbook scoring components)
 - surface and tournament context
 - opponent matchup
 - expected match length and scoring upside
