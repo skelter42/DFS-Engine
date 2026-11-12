@@ -4,19 +4,23 @@ This is the projection. Savant is the fallback when this layer is missing, not a
 
 ## Pull
 
-Python scrape of a real sportsbook. DraftKings, FanDuel, BetMGM, plus any other book the pull returns. One price from each book that posts the player. Median the books.
+Python scrape of a real sportsbook. DraftKings, FanDuel, BetMGM, plus any other book the pull returns. One price from each book that posts the player. Median comparable prices only; keep paired-side and one-sided treatments distinct.
 
 No Odds API. A summarized fetch is not a price. A season-long page is not a slate price.
 
 ## Price
 
-Plus price: `100 / (odds + 100)`. +200 is 33%.
+Plus price: 100 / (odds + 100). +200 is 33%.
 
-Minus price: `odds / (odds + 100)`. −150 is 60%.
+Minus price: odds / (odds + 100). −150 is 60%.
 
-Both sides: `p = p_over / (p_over + p_under)`. One side: use the posted side. Do not invent the other side.
+Both sides on a half-point line: remove vig with p_over = p_over_raw / (p_over_raw + p_under_raw). This is the paired-side de-vigged probability.
 
-A 0.5 line is a 1+ market. Expected count = `-ln(1 - p)`. A higher line is solved so the Poisson probability of clearing that line equals p.
+One side on a half-point line: American odds give the vig-included implied probability of the quoted side. If only Over is posted, use its implied probability as a one-sided p_over estimate. If only Under is posted, p_over = 1 - p_under_raw is a complemented one-sided proxy. Neither result is de-vigged or a fair probability. Do not treat an Under quote's implied probability as an Over probability, do not invent the missing price, and do not pool one-sided estimates indistinguishably with paired-side de-vigged prices.
+
+Whole-number lines can push. A one-sided quote on a push-capable line does not identify p_over; leave it unavailable unless both sides and a push-aware distribution solve are available. For two-sided whole-number lines, account for the push probability rather than treating Over and Under as complementary events.
+
+A 0.5 line is a 1+ market. Expected count = -ln(1 - p). A higher line is solved so the Poisson probability of clearing that line equals p. For one-sided quotes, retain the one-sided/vig-included label through the conversion; do not report the resulting estimate as fair or de-vigged.
 
 ## Site points
 
@@ -27,6 +31,10 @@ NHL skater, DraftKings: 8.5 per goal, 5 per assist, 1.5 per shot, 1.3 per block.
 NHL goalie, DraftKings: 6 times win probability, minus 3.5 times opponent implied goals, plus 0.7 per save. Win comes from the de-vigged moneyline. Goals against come from the opponent implied total. No saves price: do not write the number. It goes negative. Savant stays.
 
 Other sports use the same rule and that sport's scoring. A strikeout is 2 on DraftKings MLB. An out is 0.75. Do not borrow another sport's point value.
+
+### Known NHL scoring coverage limitation
+
+The conversion above currently includes the listed base events and the four listed skater thresholds. DraftKings' published NHL scoring references also list short-handed points (+2 per goal or assist), shootout goals (+1.5), goalie shutouts (+4), overtime losses (+2), and 35+ goalie saves (+3). These bonuses are not currently included in the formula above. Add one only when a posted market or a probability distribution defensibly derived from a posted scoring market supports it; otherwise leave it unmodeled and identify the coverage gap rather than silently treating it as a priced component or inventing a market.
 
 ## Confirmed
 
