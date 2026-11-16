@@ -121,7 +121,8 @@ Material late news or market movement loops back to the affected upstream stage 
 The Market Inputs / Savant Prep projection follows model v6 in `CURRENT.md`.
 
 - Scrape a real sportsbook prop board in Python; do not use the Odds API or a page summary.
-- De-vig posted prices and convert only priced scoring markets into site points.
+- De-vig only paired two-sided prices; retain and label one-sided vig-included estimates, and leave unresolved push-capable whole-number lines unavailable.
+- Convert only posted scoring markets into site points.
 - When the required scoring markets are posted, the book number is `Proj`.
 - When they are not posted, preserve the original Savant `Proj`; do not fill a missing market with an industry number or rate.
 - Industry projections are a check, not a fill, blend, or vote.
