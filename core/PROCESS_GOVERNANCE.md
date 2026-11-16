@@ -5,14 +5,18 @@
 This file governs how the DFS Engine evolves without becoming bloated, contradictory, stale, or overfit.
 
 Authoritative ownership:
-- `core/ENGINE.md` = canonical end-to-end operating contract
+- `CURRENT.md` = controlling Market Inputs version and precedence
+- `core/MARKET_INPUTS_RUN.md` = Market Inputs run card
+- `core/PROJECTION_MODEL.md` = v6 projection contract
+- `core/VEGAS_CONSENSUS.md` = posted-price conversion into site points
+- `core/ENGINE.md` = broader end-to-end lineup/portfolio operating contract
 - `core/AGENTS.md` = ownership of reasoning stages and handoffs
-- `core/MARKET_PROJECTIONS.md` = shared market-derived projection framework
-- `core/MARKET_INPUTS_RUN.md` = executable Market Inputs card
 - `core/SIMULATION.md` = shared simulation framework
 - `core/LEARNING.md` = post-slate learning and calibration rules
 - `sports/<sport>.md` = sport-specific mechanics only
 - `learning/` = hypotheses and not-yet-promoted findings
+
+`core/MARKET_PROJECTIONS.md` is retired and is not an authoritative source. For Market Inputs, `CURRENT.md` and the three files it names take precedence over older workflow documentation.
 
 No other file should independently redefine the full workflow.
 
