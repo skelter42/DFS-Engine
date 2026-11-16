@@ -28,7 +28,7 @@ If mathematical output and GPT/AI review disagree materially, resolve the disagr
 
 ## Mandatory Vegas-First Projection Layer
 
-The shared framework is defined in `core/MARKET_PROJECTIONS.md`.
+Market Inputs is governed by `CURRENT.md` and the three files it names. The older confidence-weighted shrinkage language in this broader engine document must not reblend, fill, or overwrite the v6 Market Inputs `Proj` result. This document governs the broader lineup/portfolio workflow after the projection-only import.
 
 For every sport where sufficiently liquid player props exist, derive fantasy projections from betting markets before final lineup construction. Preferred inputs include multi-book player props, alternate/ladder markets, game totals, team totals, moneylines, and relevant role/context information.
 
