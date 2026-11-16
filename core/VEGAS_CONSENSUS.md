@@ -10,9 +10,12 @@ No Odds API. A summarized fetch is not a price. A season-long page is not a slat
 
 ## Price
 
-Plus price: 100 / (odds + 100). +200 is 33%.
+For signed American odds:
 
-Minus price: odds / (odds + 100). −150 is 60%.
+- Positive odds: `p = 100 / (odds + 100)`. +200 is 33.33%.
+- Negative odds: `p = abs(odds) / (abs(odds) + 100)`. −150 is 60%.
+
+The negative-odds formula must use the absolute value. The prior expression `odds / (odds + 100)` produced 300% for −150 and was mathematically invalid.
 
 Both sides on a half-point line: remove vig with p_over = p_over_raw / (p_over_raw + p_under_raw). This is the paired-side de-vigged probability.
 
