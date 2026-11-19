@@ -3,7 +3,7 @@
   "site": "DraftKings",
   "market_inputs_projection": {
     "model": "v6_books_drive_savant_fallback",
-    "posted_scoring_markets": "de_vig_and_convert_to_site_points",
+    "posted_scoring_markets": "paired_side_de_vig_or_labeled_one_sided_implied_conversion",
     "missing_scoring_markets": "preserve_savant",
     "industry": "check_only",
     "preserve_source_zero": true,
