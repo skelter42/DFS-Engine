@@ -25,14 +25,14 @@ For every NFL `market inputs` pass, follow `CURRENT.md` and only the three opera
 ### Optional NFL market context for full-Engine builds
 When broader slate analysis needs it, a board-first sweep can collect spreads, totals, touchdown ladders, and yardage/volume markets. This is context for the full Engine workflow only; it does not define a separate Market Inputs read sequence or authorize filling missing scoring components.
 
-**For broader market context, retrieval can be board-first.** Required order per game:
+**A useful board-first sequence for that broader context is:**
 1. cache spread / total / implied team totals once,
-2. pull the full-game anytime-TD / first-TD / 2+ TD ladder,
-3. pull the full-game pass / rush / rec yards-and-volume table,
-4. convert the positive-Proj pool from those boards,
-5. named player searches only for missing components.
+2. pull the full-game anytime-TD / first-TD / 2+ TD ladder when available,
+3. pull the full-game pass / rush / rec yards-and-volume table when available,
+4. use those boards as context for role and game-environment analysis,
+5. use named player searches to investigate specific missing components when useful.
 
-Do not walk stars one prop at a time. A projection pass that cannot name a TD board and a yards board has not finished the Vegas layer.
+Prefer complete boards over star-by-star searches when practical. These examples are not an NFL required-market bundle or a pass/fail condition for the v6 import; the canonical per-sport completeness and quality-grade specifications remain unresolved.
 
 Projection source priority:
 1. Sportsbook/player-prop **boards** across as many books as practical (DraftKings, FanDuel, BetMGM event pages; Covers / Action Network / PropCruncher matchup boards; Caesars, bet365, Fanatics and other credible books/odds aggregators).
