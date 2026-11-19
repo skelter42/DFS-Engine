@@ -35,10 +35,13 @@ Read `CURRENT.md` first. Then read **only** these three operational files, in th
 
 ```
 Python scrape of a real sportsbook board
-Qualifying scoring markets posted  -> Proj = de-vigged book number, in site points
-Required scoring markets missing   -> Proj = original Savant, unchanged
-Savant 0                            -> 0
+Two-sided qualifying scoring markets  -> Proj = paired-side de-vigged book number, in site points
+One-sided qualifying scoring markets   -> Proj may use a labeled vig-included implied estimate
+Required scoring markets missing        -> Proj = original Savant, unchanged
+Savant 0                                -> 0
 ```
+
+De-vigging applies only when both sides of the same market are posted. A one-sided quote retains vig and must be labeled; an Under-only complement is a proxy, not a fair or de-vigged probability. Push-capable whole-number lines remain unavailable unless a push-aware solve is supported.
 
 Books drive; Savant is the fallback. A missing price is not filled with a rate, season average, or industry projection. Industry is a reasonableness check only. Do not use the Odds API or summarized page fetches as price sources.
 
