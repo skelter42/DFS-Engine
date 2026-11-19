@@ -5,14 +5,18 @@
 This file governs how the DFS Engine evolves without becoming bloated, contradictory, stale, or overfit.
 
 Authoritative ownership:
-- `core/ENGINE.md` = canonical end-to-end operating contract
+- `CURRENT.md` = controlling Market Inputs version and precedence
+- `core/MARKET_INPUTS_RUN.md` = Market Inputs run card
+- `core/PROJECTION_MODEL.md` = v6 projection contract
+- `core/VEGAS_CONSENSUS.md` = posted-price conversion into site points
+- `core/ENGINE.md` = broader end-to-end lineup/portfolio operating contract
 - `core/AGENTS.md` = ownership of reasoning stages and handoffs
-- `core/MARKET_PROJECTIONS.md` = shared market-derived projection framework
-- `core/MARKET_INPUTS_RUN.md` = executable Market Inputs card
 - `core/SIMULATION.md` = shared simulation framework
 - `core/LEARNING.md` = post-slate learning and calibration rules
 - `sports/<sport>.md` = sport-specific mechanics only
 - `learning/` = hypotheses and not-yet-promoted findings
+
+`core/MARKET_PROJECTIONS.md` is retired and is not an authoritative source. For Market Inputs, `CURRENT.md` and the three files it names take precedence over older workflow documentation.
 
 No other file should independently redefine the full workflow.
 
@@ -114,22 +118,20 @@ Material late news or market movement loops back to the affected upstream stage 
 
 ## Composite Projection Governance
 
-The Market Inputs / Savant Prep projection is **one composite number**.
+The Market Inputs / Savant Prep projection follows model v6 in `CURRENT.md`.
 
-Industry numeric projections and multi-book sportsbook markets are **co-primary**. Neither layer is a fallback for the other.
-
-- Scrape independent numeric industry sources and scrape multi-book props/game markets.
-- De-vig and aggregate markets rather than trusting one book.
-- Translate expected stat events into site scoring using sport-specific rules.
-- Blend by evidence quality into a single `Proj`.
-- Assign a coverage/provenance grade on the positive-Savant-Proj pool.
-- When both layers are thin, shrink to the Savant prior and label fallback.
+- Scrape a real sportsbook prop board in Python; do not use the Odds API or a page summary.
+- De-vig only paired two-sided prices; retain and label one-sided vig-included estimates, and leave unresolved push-capable whole-number lines unavailable.
+- Convert only posted scoring markets into site points.
+- When the required scoring markets are posted, the book number is `Proj`.
+- When they are not posted, preserve the original Savant `Proj`; do not fill a missing market with an industry number or rate.
+- Industry projections are a check, not a fill, blend, or vote.
+- Preserve source zeros and ownership unchanged.
 - Never manufacture missing prop information.
-- Never average in stale industry pages that still roster a confirmed inactive or the wrong slate.
 - Keep source/vendor projections immutable for comparison and sensitivity testing.
-- Default Market Inputs / Savant Prep leaves `Own` unchanged. Ownership research is opt-in.
+- Write the import CSV and price-level reconciliation, then stop.
 
-Detailed methodology belongs only in `core/MARKET_PROJECTIONS.md` and sport modules. The executable card is `core/MARKET_INPUTS_RUN.md`.
+Detailed methodology belongs in `core/MARKET_INPUTS_RUN.md`, `core/PROJECTION_MODEL.md`, and `core/VEGAS_CONSENSUS.md`.
 
 Do not change blend weights because one player beat or missed a locked composite. That is calibration archive (`core/LEARNING.md`), not a new rule.
 

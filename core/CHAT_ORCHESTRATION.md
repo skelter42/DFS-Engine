@@ -50,7 +50,7 @@ If usable player-level market data cannot be obtained, the assistant must explic
 
 The same principle applies to other mandatory stages owned by `core/ENGINE.md`: missing simulation capability must be labeled by the allowed simulation mode; missing market/industry data must be disclosed; and no skipped required stage may be implied to have run.
 
-This section is an execution guard only. Projection hierarchy and methodology remain owned by `core/ENGINE.md` and `core/MARKET_PROJECTIONS.md` and should not be redefined here.
+This section is an execution guard only. For Market Inputs, projection hierarchy and methodology are owned by `CURRENT.md` and the three files it names. `core/ENGINE.md` governs the broader lineup/portfolio workflow; the retired `core/MARKET_PROJECTIONS.md` must not be used for Market Inputs.
 
 ## GitHub Responsibilities
 

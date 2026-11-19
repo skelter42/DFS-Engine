@@ -4,14 +4,40 @@
   "routes": [
     {
       "intent": "run_engine",
-      "triggers": ["run the dfs engine", "run engine", "build lineups", "build the lineups"],
-      "pipeline": ["load_brain", "ingest", "validate", "cross_check", "sport_analysis", "contest_analysis", "portfolio_build", "exposure_audit", "deliver"],
+      "triggers": [
+        "run the dfs engine",
+        "run engine",
+        "build lineups",
+        "build the lineups"
+      ],
+      "pipeline": [
+        "load_brain",
+        "ingest",
+        "validate",
+        "cross_check",
+        "sport_analysis",
+        "contest_analysis",
+        "portfolio_build",
+        "exposure_audit",
+        "deliver"
+      ],
       "brain": []
     },
     {
       "intent": "industry_compare",
-      "triggers": ["full industry compare", "cross check industry", "compare across industry"],
-      "pipeline": ["load_brain", "cross_check", "projection_consensus", "ownership_consensus", "market_context", "thesis_update"]
+      "triggers": [
+        "full industry compare",
+        "cross check industry",
+        "compare across industry"
+      ],
+      "pipeline": [
+        "load_brain",
+        "cross_check",
+        "projection_consensus",
+        "ownership_consensus",
+        "market_context",
+        "thesis_update"
+      ]
     },
     {
       "intent": "market_inputs",
@@ -22,45 +48,126 @@
         "projection pull",
         "github market inputs"
       ],
-      "pipeline": ["load_brain", "ingest", "validate", "vegas_board_sweep", "devig_consensus", "industry_fill_if_unpriced", "savant_fallback_if_empty", "import_audit", "deliver"],
+      "pipeline": [
+        "load_current",
+        "ingest",
+        "validate",
+        "sportsbook_python_pull",
+        "validate_raw_board",
+        "convert_posted_prices",
+        "convert_book_points",
+        "savant_fallback_if_unpriced",
+        "import_audit",
+        "write_reconciliation",
+        "deliver",
+        "stop"
+      ],
       "brain": [
         "core/MARKET_INPUTS_RUN.md",
-        "core/VEGAS_CONSENSUS.md",
         "core/PROJECTION_MODEL.md",
-        "core/VEGAS_BOARD_SWEEP.md",
-        "core/SAVANT_PREP.md",
-        "sports/mlb_market_inputs_projection_override.md"
+        "core/VEGAS_CONSENSUS.md"
       ],
-      "notes": "Projection-only. Proj is the multi-book de-vigged prop consensus in site points. Industry median only if no book priced the player. Savant unchanged only if both are empty. Own unchanged. Zeros stay 0. Do not 50/50. Do not use the retired band."
+      "notes": "Projection-only v6. De-vig only when both sides of the same market are posted. One-sided quotes remain vig-included and labeled; an Under complement is only a proxy. Push-capable whole-number lines remain unavailable unless a push-aware solve is supported. Convert only posted scoring markets to site points; if the required scoring bundle is incomplete, preserve Savant unchanged. Industry is a check, never a fill or vote. Own unchanged; zeros stay 0; preserve every original column. Write the import CSV and price-level reconciliation, then stop. No Odds API or page summaries."
     },
     {
       "intent": "exposure_report",
-      "triggers": ["exposures side by side", "send exposures", "ownership vs exposure"],
-      "pipeline": ["exposure_audit", "exposure_delta_report"]
+      "triggers": [
+        "exposures side by side",
+        "send exposures",
+        "ownership vs exposure"
+      ],
+      "pipeline": [
+        "exposure_audit",
+        "exposure_delta_report"
+      ]
     },
     {
       "intent": "what_if",
-      "triggers": ["what if", "run a what-if", "rebuild assuming"],
-      "pipeline": ["snapshot_baseline", "apply_assumption", "rerun_affected_stages", "compare_outputs"]
+      "triggers": [
+        "what if",
+        "run a what-if",
+        "rebuild assuming"
+      ],
+      "pipeline": [
+        "snapshot_baseline",
+        "apply_assumption",
+        "rerun_affected_stages",
+        "compare_outputs"
+      ]
     },
     {
       "intent": "post_slate",
-      "triggers": ["what did we learn", "review results", "post slate", "analyze results"],
-      "pipeline": ["result_ingest", "diagnose", "classify_errors", "extract_durable_lessons", "persist_learning"]
+      "triggers": [
+        "what did we learn",
+        "review results",
+        "post slate",
+        "analyze results"
+      ],
+      "pipeline": [
+        "result_ingest",
+        "diagnose",
+        "classify_errors",
+        "extract_durable_lessons",
+        "persist_learning"
+      ]
     },
     {
       "intent": "update_engine",
-      "triggers": ["update the engine", "store this logic", "save this rule"],
-      "pipeline": ["validate_durability", "select_brain_target", "persist_versioned_change"]
+      "triggers": [
+        "update the engine",
+        "store this logic",
+        "save this rule"
+      ],
+      "pipeline": [
+        "validate_durability",
+        "select_brain_target",
+        "persist_versioned_change"
+      ]
     }
   ],
   "sport_routing": {
-    "mlb": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/mlb.md"],
-    "ncaaf": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/ncaaf.md"],
-    "nfl": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/nfl.md"],
-    "nba": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/nba.md"],
-    "nhl": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/nhl.md"],
-    "tennis": ["core/ENGINE.md", "core/AGENTS.md", "core/LEARNING.md", "core/CHAT_ORCHESTRATION.md", "sports/tennis.md"]
+    "mlb": [
+      "core/ENGINE.md",
+      "core/AGENTS.md",
+      "core/LEARNING.md",
+      "core/CHAT_ORCHESTRATION.md",
+      "sports/mlb.md"
+    ],
+    "ncaaf": [
+      "core/ENGINE.md",
+      "core/AGENTS.md",
+      "core/LEARNING.md",
+      "core/CHAT_ORCHESTRATION.md",
+      "sports/ncaaf.md"
+    ],
+    "nfl": [
+      "core/ENGINE.md",
+      "core/AGENTS.md",
+      "core/LEARNING.md",
+      "core/CHAT_ORCHESTRATION.md",
+      "sports/nfl.md"
+    ],
+    "nba": [
+      "core/ENGINE.md",
+      "core/AGENTS.md",
+      "core/LEARNING.md",
+      "core/CHAT_ORCHESTRATION.md",
+      "sports/nba.md"
+    ],
+    "nhl": [
+      "core/ENGINE.md",
+      "core/AGENTS.md",
+      "core/LEARNING.md",
+      "core/CHAT_ORCHESTRATION.md",
+      "sports/nhl.md"
+    ],
+    "tennis": [
+      "core/ENGINE.md",
+      "core/AGENTS.md",
+      "core/LEARNING.md",
+      "core/CHAT_ORCHESTRATION.md",
+      "sports/tennis.md"
+    ]
   },
   "rules": {
     "user_must_name_agents": false,
@@ -70,6 +177,6 @@
     "persist_raw_chat": false,
     "persist_single_slate_noise": false,
     "market_input_docs_are_intent_scoped": true,
-    "market_inputs_estimator": "vegas_consensus_v3"
+    "market_inputs_estimator": "projection_model_v6_books_drive_savant_fallback"
   }
 }

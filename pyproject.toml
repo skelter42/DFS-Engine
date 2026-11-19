@@ -5,16 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "dfs-engine"
 version = "0.1.0"
-description = "Versioned DFS portfolio construction and learning engine"
+description = "Sportsbook-driven DFS projection inputs for Sim Savant"
 requires-python = ">=3.11"
-dependencies = ["pulp>=2.8"]
+dependencies = ["requests>=2.31"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
-projections = ["requests>=2.31"]
-
-[project.scripts]
-dfs-engine = "dfs_engine.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

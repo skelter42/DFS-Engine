@@ -1,6 +1,6 @@
 # DFS Engine Agent Architecture
 
-Projection work reads `CURRENT.md` first. Books drive. Savant is the fallback. Do not follow the industry-conglomerate language later in this file. That section is retired.
+Projection work reads `CURRENT.md` first. Books drive. Savant is the fallback.
 
 The DFS Engine is a coordinated decision system. Agents are mandatory reasoning responsibilities, not necessarily separate autonomous processes. GitHub stores the durable brain; chat executes the workflow.
 

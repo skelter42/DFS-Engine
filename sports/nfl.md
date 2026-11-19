@@ -20,23 +20,26 @@ The engine should not depend on one third-party simulator or ownership source as
 - weather where material
 
 ## Vegas-First Market Inputs
-For every NFL `market inputs` pass, projection creation is Vegas-first. Do not use an industry fantasy projection as the primary replacement when sportsbook markets are available.
+For every NFL `market inputs` pass, follow `CURRENT.md` and only the three operational files it names. Do not load `core/VEGAS_BOARD_SWEEP.md`; that file is retired. Market Inputs remains projection-only: apply the v6 paired-side / one-sided price treatment, preserve Savant when required scoring markets are incomplete, and leave Own unchanged.
 
-**Retrieval method is board-first.** Follow `core/VEGAS_BOARD_SWEEP.md`. Required order per game:
+### Optional NFL market context for full-Engine builds
+When broader slate analysis needs it, a board-first sweep can collect spreads, totals, touchdown ladders, and yardage/volume markets. This is context for the full Engine workflow only; it does not define a separate Market Inputs read sequence or authorize filling missing scoring components.
+
+**A useful board-first sequence for that broader context is:**
 1. cache spread / total / implied team totals once,
-2. pull the full-game anytime-TD / first-TD / 2+ TD ladder,
-3. pull the full-game pass / rush / rec yards-and-volume table,
-4. convert the positive-Proj pool from those boards,
-5. named player searches only for missing components.
+2. pull the full-game anytime-TD / first-TD / 2+ TD ladder when available,
+3. pull the full-game pass / rush / rec yards-and-volume table when available,
+4. use those boards as context for role and game-environment analysis,
+5. use named player searches to investigate specific missing components when useful.
 
-Do not walk stars one prop at a time. A projection pass that cannot name a TD board and a yards board has not finished the Vegas layer.
+Prefer complete boards over star-by-star searches when practical. These examples are not an NFL required-market bundle or a pass/fail condition for the v6 import; the canonical per-sport completeness and quality-grade specifications remain unresolved.
 
 Projection source priority:
 1. Sportsbook/player-prop **boards** across as many books as practical (DraftKings, FanDuel, BetMGM event pages; Covers / Action Network / PropCruncher matchup boards; Caesars, bet365, Fanatics and other credible books/odds aggregators).
 2. Convert the betting market directly into DraftKings fantasy expectation using the canonical sportsbook projection methodology. Use the fullest available prop bundle by role: passing yards/TDs/INTs and rushing for QBs; rushing attempts/yards, receptions, receiving yards and TD probability for RBs; receptions, receiving yards, rushing usage and TD probability for WR/TE; game spread/total and team scoring expectation for DST/kickers where appropriate.
 3. Use vig-free probabilities and consensus/median lines when multiple books are available. Line movement is actionable information and should influence the projection rather than being ignored.
-4. If a player has only partial Vegas coverage, anchor the covered components to Vegas and use industry/model information only to fill the missing components.
-5. Use broader industry projections only when sportsbook coverage is genuinely insufficient.
+4. If the required scoring-market bundle is incomplete, do not fill missing components with industry/model rates; preserve the original Savant projection.
+5. Use broader industry projections only as a reasonableness check, never as a Market Inputs fill or blend.
 6. Sim Savant is a fallback/benchmark, not the primary source.
 
 Never lower reported Vegas coverage merely because a player lacks one particular prop. A player with meaningful sportsbook markets should be classified as Vegas-driven or Vegas-anchored. Do not manufacture confidence for deep backups with no meaningful market; leave them on the best fallback source and label them accordingly.
