@@ -20,9 +20,12 @@ The engine should not depend on one third-party simulator or ownership source as
 - weather where material
 
 ## Vegas-First Market Inputs
-For every NFL `market inputs` pass, projection creation is Vegas-first. Do not use an industry fantasy projection as the primary replacement when sportsbook markets are available.
+For every NFL `market inputs` pass, follow `CURRENT.md` and only the three operational files it names. Do not load `core/VEGAS_BOARD_SWEEP.md`; that file is retired. Market Inputs remains projection-only: apply the v6 paired-side / one-sided price treatment, preserve Savant when required scoring markets are incomplete, and leave Own unchanged.
 
-**Retrieval method is board-first.** Follow `core/VEGAS_BOARD_SWEEP.md`. Required order per game:
+### Optional NFL market context for full-Engine builds
+When broader slate analysis needs it, a board-first sweep can collect spreads, totals, touchdown ladders, and yardage/volume markets. This is context for the full Engine workflow only; it does not define a separate Market Inputs read sequence or authorize filling missing scoring components.
+
+**For broader market context, retrieval can be board-first.** Required order per game:
 1. cache spread / total / implied team totals once,
 2. pull the full-game anytime-TD / first-TD / 2+ TD ladder,
 3. pull the full-game pass / rush / rec yards-and-volume table,
